@@ -1,5 +1,4 @@
 # Piece class
-from board import Board
 from constants import PieceType, Color
 
 

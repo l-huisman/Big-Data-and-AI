@@ -1,4 +1,4 @@
-from piece import Piece
+from pieces import Piece
 from constants import PieceType, Color
 
 

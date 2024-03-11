@@ -61,6 +61,6 @@ class Board:
                 else:
                     color = (0, 0, 0)
                 pygame.draw.rect(screen, color, (i * 80, j * 80, 80, 80))
-                piece = self.board[i][j]
+                piece: Piece = self.board[i][j]
                 if piece != "":
                     piece.draw(screen, 80, j, i)

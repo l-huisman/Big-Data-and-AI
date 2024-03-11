@@ -4,7 +4,14 @@ from constants import PieceType, Color
 
 
 class Piece:
-    def __init__(self, board: Board, color: Color, piece_type: PieceType, x_position: int, y_position: int):
+    def __init__(
+        self,
+        board,
+        color: Color,
+        piece_type: PieceType,
+        x_position: int,
+        y_position: int,
+    ):
         self.moves = []
         self.board = board
         self.color = color

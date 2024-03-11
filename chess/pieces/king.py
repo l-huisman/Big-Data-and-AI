@@ -1,10 +1,9 @@
-from board import Board
 from piece import Piece
 from constants import PieceType, Color
 
 
 class King(Piece):
-    def __init__(self, board: Board, color: Color, x_position: int, y_position: int):
+    def __init__(self, board, color: Color, x_position: int, y_position: int):
         super().__init__(board, color, PieceType.KING, x_position, y_position)
         self.__legal_moves = [
             (1, 0),

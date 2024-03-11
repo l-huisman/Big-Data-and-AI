@@ -4,6 +4,8 @@ import numpy as np
 from constants import Color, PieceType
 from pieces import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 
+import pygame
+
 
 class Board:
 
@@ -50,3 +52,16 @@ class Board:
         self.board[x_position][y_position] = piece
         piece.x_position = x_position
         piece.y_position = y_position
+
+    def draw(self, screen):
+        for i in range(8):
+            for j in range(8):
+                if (i + j) % 2 == 0:
+                    color = (255, 255, 255)
+                else:
+                    color = (0, 0, 0)
+                pygame.draw.rect(screen, color, (i * 80, j * 80, 80, 80))
+                piece = self.get_piece_at_position(i, j)
+                if piece:
+                    pass
+                    # piece.draw(screen)

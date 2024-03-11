@@ -1,6 +1,8 @@
 # Piece class
 from constants import PieceType, Color
 
+import pygame
+
 
 class Piece:
     def __init__(
@@ -17,6 +19,9 @@ class Piece:
         self.piece_type = piece_type
         self.x_position = x_position
         self.y_position = y_position
+
+    def draw(self, screen, square_size: int, j: int, i: int):
+        pass
 
     def _calulate_horizontals(self, x_increment, y_increment):
         for i in range(1, 8):

@@ -10,7 +10,7 @@ import pygame
 class Board:
 
     def __init__(self):
-        self.board = np.array([["" for _ in range(8)] for _ in range(8)])
+        self.board = [["" for _ in range(8)] for _ in range(8)]
         self.__initialize_board()
 
     def __initialize_board(self):
@@ -61,7 +61,6 @@ class Board:
                 else:
                     color = (0, 0, 0)
                 pygame.draw.rect(screen, color, (i * 80, j * 80, 80, 80))
-                piece = self.get_piece_at_position(i, j)
-                if piece:
-                    pass
-                    # piece.draw(screen)
+                piece = self.board[i][j]
+                if piece != "":
+                    piece.draw(screen, 80, j, i)

@@ -21,7 +21,9 @@ class Piece:
         self.y_position = y_position
 
     def draw(self, screen, square_size: int, y: int, x: int) -> None:
-        image = pygame.image.load("img/" + self.piece_type.name + "_" + self.color.name + ".png")
+        image = pygame.image.load(
+            "img/" + self.piece_type.name + "_" + self.color.name + ".png"
+        )
         image = pygame.transform.scale(image, (square_size, square_size))
         screen.blit(image, (x * square_size, y * square_size))
 
@@ -54,3 +56,10 @@ class Piece:
                 break
             else:
                 break
+
+    def get_position(self) -> tuple:
+        return (self.x_position, self.y_position)
+
+    def set_position(self, x: int, y: int) -> None:
+        self.x_position = x
+        self.y_position = y

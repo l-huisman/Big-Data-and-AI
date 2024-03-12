@@ -10,7 +10,7 @@ import pygame
 class Board:
 
     def __init__(self):
-        self.board = [["" for _ in range(8)] for _ in range(8)]
+        self.board = [[None for _ in range(8)] for _ in range(8)]
         self.__initialize_board()
 
     def __initialize_board(self):
@@ -47,11 +47,11 @@ class Board:
     def get_piece_at_position(self, x_position: int, y_position: int) -> Piece:
         return self.board[x_position][y_position]
 
-    def move_piece(self, original_position: tuple, new_position: tuple):
+    def move_piece(self, original_position: tuple, new_position: tuple) -> None:
         x_original, y_original = original_position
         x_new, y_new = new_position
         self.board[x_new][y_new] = self.board[x_original][y_original]
-        self.board[x_original][y_original] = ""
+        self.board[x_original][y_original] = None
 
     def draw(self, screen):
         for i in range(8):

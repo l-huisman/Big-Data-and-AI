@@ -19,7 +19,7 @@ def main():
         [transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-    batch_size = 8
+    batch_size = 16
 
     trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
                                             download=True, transform=transform)
@@ -77,12 +77,12 @@ def main():
     net.to(device)
     
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(net.parameters(), lr=0.0001)
+    optimizer = optim.Adadelta(net.parameters(), lr=0.0001)
 
     loss_values = []  # create an empty list to store the loss values
     validation_loss = []  # create an empty list to store the accuracy values
 
-    for epoch in range(10):  # loop over the dataset multiple times
+    for epoch in range(100):  # loop over the dataset multiple times
 
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
@@ -137,7 +137,7 @@ def main():
     images, labels = next(dataiter)
 
     # print images
-    imshow(torchvision.utils.make_grid(images))
+
     print('GroundTruth: ', ' '.join(f'{classes[labels[j]]:5s}' for j in range(batch_size)))
     
     net = Net()

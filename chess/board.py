@@ -72,7 +72,7 @@ class Board:
             for j in range(8):
                 piece = self.board[i][j]
                 if piece != None and piece.piece_type == PieceType.KING:
-                    return (i, j)g
+                    return (i, j)
 
     def draw(self, screen):
         for i in range(8):

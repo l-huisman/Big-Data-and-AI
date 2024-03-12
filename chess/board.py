@@ -47,11 +47,12 @@ class Board:
     def get_piece_at_position(self, x_position: int, y_position: int) -> Piece:
         return self.board[x_position][y_position]
 
-    def move_piece(self, piece: Piece, x_position: int, y_position: int) -> None:
-        self.board[piece.x_position][piece.y_position] = ""
-        self.board[x_position][y_position] = piece
-        piece.x_position = x_position
-        piece.y_position = y_position
+    def move_piece(self, original_x_position: int, original_y_position: int, new_x_position: int, new_y_position: int):
+        piece = self.get_piece_at_position(original_x_position, original_y_position)
+        self.board[original_x_position][original_y_position] = ""
+        self.board[new_x_position][new_y_position] = piece
+        piece.x_position = new_x_position
+        piece.y_position = new_y_position
 
     def draw(self, screen):
         for i in range(8):

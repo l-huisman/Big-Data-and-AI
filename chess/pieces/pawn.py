@@ -16,25 +16,11 @@ class Pawn(Piece):
         return self.moves
 
     def __check_moves(self) -> None:
-        if (
-            self.board.get_piece_at_position(
-                self.x_position, self.y_position + (1 * self.color.value)
-            )
-            == False
-        ):
-            self.moves.append(
-                (self.x_position, self.y_position + (1 * self.color.value))
-            )
+        if (self.board.get_piece_at_position(self.x_position, self.y_position + (1 * self.color.value))== None):
+            self.moves.append((self.x_position, self.y_position + (1 * self.color.value)))
         if self.__in_starting_position:
-            if (
-                self.board.get_piece_at_position(
-                    self.x_position, self.y_position + (2 * self.color.value)
-                )
-                == False
-            ):
-                self.moves.append(
-                    (self.x_position, self.y_position + (2 * self.color.value))
-                )
+            if (self.board.get_piece_at_position(self.x_position, self.y_position + (2 * self.color.value))== None):
+                self.moves.append((self.x_position, self.y_position + (2 * self.color.value)))
 
     def __check_diagonals(self) -> None:
         for move in self.__legal_moves:

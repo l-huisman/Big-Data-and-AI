@@ -14,6 +14,14 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 # Create a chess board
 chess_board = Board()
 
+
+# Function to get the position of the mouse
+def get_mouse_position(mouse_pos: tuple) -> tuple:
+    x = mouse_pos[0] // 80
+    y = mouse_pos[1] // 80
+    return x, y
+
+
 # Game loop
 running = True
 while running:
@@ -24,9 +32,28 @@ while running:
         # Check for closing the window
         if event.type == pygame.QUIT:
             running = False
+        # Check for mouse click events
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            # Get the position of the mouse click
+            mouse_pos = pygame.mouse.get_pos()
+
+            x, y = get_mouse_position(mouse_pos)
+            clicked_piece = chess_board.get_piece_at_position(x, y)
+
+            if clicked_piece is not None:
+                chess_board.draw_possible_moves(screen, clicked_piece)
+                chess_board.set_selected_piece(clicked_piece)
+
 
     # Update the chess board
     chess_board.draw(screen)
+
+    selected_piece = chess_board.get_selected_piece()
+
+    print(selected_piece)
+
+    if selected_piece is not None:
+        chess_board.draw_possible_moves(screen, selected_piece)
 
     # Draw the chess board
     screen.fill((0, 0, 0))  # Fill the screen with black

@@ -11,6 +11,7 @@ class Board:
 
     def __init__(self):
         self.board = [[None for _ in range(8)] for _ in range(8)]
+        self.__selected_piece = None
         self.__initialize_board()
 
     def __initialize_board(self):
@@ -44,7 +45,7 @@ class Board:
         self.board[4][0] = King(self, Color.BLACK, 4, 0)
         self.board[4][7] = King(self, Color.WHITE, 4, 7)
 
-    def get_piece_at_position(self, x_position: int, y_position: int) -> Piece|None:
+    def get_piece_at_position(self, x_position: int, y_position: int) -> Piece | None:
         return self.board[x_position][y_position]
 
     def move_piece(self, original_position: tuple, new_position: tuple) -> None:
@@ -62,5 +63,18 @@ class Board:
                     color = (210, 139, 69)
                 pygame.draw.rect(screen, color, (i * 80, j * 80, 80, 80))
                 piece: Piece = self.board[i][j]
-                if piece is not None:
-                    piece.draw(screen, 80, j, i)
+                if piece != None:
+                    piece.draw(screen, 80, j, i, piece.piece_type.letter)
+
+    def draw_possible_moves(self, screen, clicked_piece: Piece):
+        possible_moves = clicked_piece.get_possible_moves()
+        for move in possible_moves:
+            # draw a circle at the possible move 20 pixels from the center of the square
+            x, y = move
+            pygame.draw.circle(screen, (0, 255, 0), (x * 80 + 40, y * 80 + 40), 20)
+
+    def get_selected_piece(self) -> Piece | None:
+        return self.__selected_piece
+
+    def set_selected_piece(self, piece: Piece) -> None:
+        self.__selected_piece = piece

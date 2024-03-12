@@ -13,5 +13,5 @@ class PieceType(Enum):
     PAWN = 5
 
 class Color(Enum):
-    WHITE = 1
-    BLACK = -1
+    WHITE = -1
+    BLACK = 1

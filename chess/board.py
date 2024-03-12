@@ -64,14 +64,15 @@ class Board:
                 pygame.draw.rect(screen, color, (i * 80, j * 80, 80, 80))
                 piece: Piece = self.board[i][j]
                 if piece != None:
-                    piece.draw(screen, 80, j, i, piece.piece_type.letter)
+                    piece.draw(screen, 80, j, i)
 
     def draw_possible_moves(self, screen, clicked_piece: Piece):
         possible_moves = clicked_piece.get_possible_moves()
         for move in possible_moves:
-            # draw a circle at the possible move 20 pixels from the center of the square
-            x, y = move
-            pygame.draw.circle(screen, (0, 255, 0), (x * 80 + 40, y * 80 + 40), 20)
+            print(move)
+            pygame.draw.circle(
+                screen, (76, 255, 127), (move[0] * 80 + 40, move[1] * 80 + 40), 20
+            )
 
     def get_selected_piece(self) -> Piece | None:
         return self.__selected_piece

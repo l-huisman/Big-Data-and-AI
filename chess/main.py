@@ -33,14 +33,16 @@ while running:
         # Check for closing the window
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
         # Check for mouse click events
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # Get the position of the mouse click
             mouse_pos = pygame.mouse.get_pos()
             x, y = get_mouse_position(mouse_pos)
-
             # Check if the clicked position is a valid move for the selected piece
-            selected_piece: Piece  = chess_board.get_selected_piece()
+            selected_piece: Piece = chess_board.get_selected_piece()
             clicked_piece: Piece = chess_board.get_piece_at_position(x, y)
 
             if selected_piece is not None:

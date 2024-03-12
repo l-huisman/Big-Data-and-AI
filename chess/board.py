@@ -44,7 +44,7 @@ class Board:
         self.board[4][0] = King(self, Color.WHITE, 4, 0)
         self.board[4][7] = King(self, Color.BLACK, 4, 7)
 
-    def get_piece_at_position(self, x_position: int, y_position: int) -> Piece:
+    def get_piece_at_position(self, x_position: int, y_position: int) -> Piece|None:
         return self.board[x_position][y_position]
 
     def move_piece(self, original_position: tuple, new_position: tuple) -> None:

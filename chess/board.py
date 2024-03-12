@@ -62,5 +62,5 @@ class Board:
                     color = (210, 139, 69)
                 pygame.draw.rect(screen, color, (i * 80, j * 80, 80, 80))
                 piece: Piece = self.board[i][j]
-                if piece != "":
+                if piece is not None:
                     piece.draw(screen, 80, j, i)

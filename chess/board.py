@@ -64,4 +64,4 @@ class Board:
                 pygame.draw.rect(screen, color, (i * 80, j * 80, 80, 80))
                 piece: Piece = self.board[i][j]
                 if piece != "":
-                    piece.draw(screen, 80, j, i, piece.piece_type.letter)
+                    piece.draw(screen, 80, j, i)

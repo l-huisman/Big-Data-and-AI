@@ -5,17 +5,12 @@ BOARD_SIZE = 8
 
 
 class PieceType(Enum):
-    KING = 0, 'K'
-    QUEEN = 1, 'q'
-    ROOK = 2, 'r'
-    BISHOP = 3, 'b'
-    KNIGHT = 4, 'k'
-    PAWN = 5, 'p'
-
-    def __init__(self, value, letter):
-        self._value_ = value
-        self.letter = letter
-
+    KING = 0
+    QUEEN = 1
+    ROOK = 2
+    BISHOP = 3
+    KNIGHT = 4
+    PAWN = 5
 
 class Color(Enum):
     WHITE = -1

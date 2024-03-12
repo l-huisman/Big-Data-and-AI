@@ -6,7 +6,7 @@ pygame.init()
 
 # Set up some constants
 WIDTH, HEIGHT = (640, 640)
-FPS = 60
+FPS = 12
 
 # Create the game window
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -36,24 +36,25 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # Get the position of the mouse click
             mouse_pos = pygame.mouse.get_pos()
-
             x, y = get_mouse_position(mouse_pos)
-            clicked_piece = chess_board.get_piece_at_position(x, y)
 
-            if clicked_piece is not None:
-                chess_board.draw_possible_moves(screen, clicked_piece)
-                chess_board.set_selected_piece(clicked_piece)
-
+            # Check if the clicked position is a valid move for the selected piece
+            if chess_board.get_selected_piece() is not None:
+                if (x, y) in chess_board.get_selected_piece().get_possible_moves():
+                    piece = chess_board.get_selected_piece()
+                    chess_board.move_piece(piece.get_position(), (x, y))
+                    chess_board.set_selected_piece(None)
+                    piece.set_position(x, y)
+            else:
+                clicked_piece = chess_board.get_piece_at_position(x, y)
+                if clicked_piece is not None:
+                    chess_board.draw_possible_moves(screen, clicked_piece)
+                    chess_board.set_selected_piece(clicked_piece)
+                else:
+                    chess_board.set_selected_piece(None)
 
     # Update the chess board
     chess_board.draw(screen)
-
-    selected_piece = chess_board.get_selected_piece()
-
-    print(selected_piece)
-
-    if selected_piece is not None:
-        chess_board.draw_possible_moves(screen, selected_piece)
 
     # Draw the chess board
     screen.fill((0, 0, 0))  # Fill the screen with black

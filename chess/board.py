@@ -53,6 +53,19 @@ class Board:
         x_new, y_new = new_position
         self.board[x_new][y_new] = self.board[x_original][y_original]
         self.board[x_original][y_original] = None
+        king_in_check = self.is_checked()
+        
+    def is_checked(self):
+        king_position = self.get_king_position()
+        print(king_position)
+        
+    
+    def get_king_position(self):
+        for i in range(8):
+            for j in range(8):
+                piece = self.board[i][j]
+                if piece != None and piece.piece_type == PieceType.KING:
+                    return (i, j)
 
     def draw(self, screen):
         for i in range(8):

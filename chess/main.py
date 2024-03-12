@@ -49,6 +49,7 @@ while running:
                 if (x, y) in selected_piece.get_possible_moves():
                     chess_board.move_piece(selected_piece.get_position(), (x, y))
                     selected_piece.set_position(x, y)
+                    selected_piece.set_has_moved()
                 chess_board.set_selected_piece(None)
             elif clicked_piece is not None:
                 chess_board.draw_possible_moves(screen, clicked_piece)

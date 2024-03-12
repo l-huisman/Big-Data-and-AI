@@ -19,6 +19,8 @@ class Piece:
         self.piece_type = piece_type
         self.x_position = x_position
         self.y_position = y_position
+        self._legal_moves = []
+        self.__has_moved = False
 
     def get_possible_moves(self) -> list:
         raise NotImplementedError
@@ -30,7 +32,19 @@ class Piece:
         image = pygame.transform.scale(image, (square_size, square_size))
         screen.blit(image, (x * square_size, y * square_size))
 
-    def _calulate_horizontals(self, x_increment, y_increment):
+    def _check_legal_moves(self) -> None:
+        for move in self.__legal_moves:
+            x = self.x_position + move[0]
+            y = self.y_position + move[1]
+            if x < 0 or x > 7 or y < 0 or y > 7:
+                continue
+            piece_at_position = self.board.get_piece_at_position(x, y)
+            if piece_at_position == None:
+                self.moves.append((x, y))
+            elif piece_at_position.color != self.color:
+                self.moves.append((x, y))
+
+    def _check_straights(self, x_increment, y_increment) -> None:
         for i in range(1, 8):
             x = self.x_position + i * x_increment
             y = self.y_position + i * y_increment
@@ -45,20 +59,11 @@ class Piece:
             else:
                 break
 
-    def _calculate_diagonals(self, x_direction: int, y_direction: int):
-        for i in range(1, 8):
-            x = self.x_position + i * x_direction
-            y = self.y_position + i * y_direction
-            if x < 0 or x > 7 or y < 0 or y > 7:
-                break
-            piece_at_position = self.board.get_piece_at_position(x, y)
-            if piece_at_position == None:
-                self.moves.append((x, y))
-            elif piece_at_position.color != self.color:
-                self.moves.append((x, y))
-                break
-            else:
-                break
+    def get_has_moved(self) -> bool:
+        return self.__has_moved
+
+    def set_has_moved(self) -> bool:
+        self.__has_moved = True
 
     def get_position(self) -> tuple:
         return (self.x_position, self.y_position)

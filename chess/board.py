@@ -57,10 +57,10 @@ class Board:
         for i in range(8):
             for j in range(8):
                 if (i + j) % 2 == 0:
-                    color = (255, 255, 255)
+                    color = (255, 207, 158)
                 else:
-                    color = (0, 0, 0)
+                    color = (210, 139, 69)
                 pygame.draw.rect(screen, color, (i * 80, j * 80, 80, 80))
                 piece: Piece = self.board[i][j]
                 if piece != "":
-                    piece.draw(screen, 80, j, i)
+                    piece.draw(screen, 80, j, i, piece.piece_type.letter)

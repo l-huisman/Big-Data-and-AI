@@ -20,8 +20,14 @@ class Piece:
         self.x_position = x_position
         self.y_position = y_position
 
-    def draw(self, screen, square_size: int, j: int, i: int):
-        pass
+    def draw(self, screen, square_size: int, y: int, x: int, piece_letter: str):
+        font = pygame.font.Font(None, 40)
+        if self.color == Color.WHITE:
+            text = font.render(piece_letter, 1, (255, 255, 255))
+        else:
+            text = font.render(piece_letter, 1, (0, 0, 0))
+        text_rect = text.get_rect(center=(x * square_size + square_size / 2, y * square_size + square_size / 2))
+        screen.blit(text, text_rect)
 
     def _calulate_horizontals(self, x_increment, y_increment):
         for i in range(1, 8):

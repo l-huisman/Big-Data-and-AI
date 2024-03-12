@@ -10,6 +10,7 @@ class Pawn(Piece):
         self.__legal_moves = [(-1, (1 * self.color.value)), (1, 1 * self.color.value)]
 
     def get_possible_moves(self) -> list:
+        self.moves = []
         self.__check_moves()
         self.__check_diagonals()
         return self.moves
@@ -18,7 +19,7 @@ class Pawn(Piece):
         if (self.board.get_piece_at_position(self.x_position, self.y_position + (1 * self.color.value))== None):
             self.moves.append((self.x_position, self.y_position + (1 * self.color.value)))
         if self.__in_starting_position:
-            if (self.board.get_piece_at_position(self.x_position, self.y_position + (2 * self.color.value))== None):
+            if (self.board.get_piece_at_position(self.x_position, self.y_position + (1 * self.color.value))== None and self.board.get_piece_at_position(self.x_position, self.y_position + (2 * self.color.value))== None):
                 self.moves.append((self.x_position, self.y_position + (2 * self.color.value)))
 
     def __check_diagonals(self) -> None:

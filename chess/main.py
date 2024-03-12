@@ -39,19 +39,17 @@ while running:
             x, y = get_mouse_position(mouse_pos)
 
             # Check if the clicked position is a valid move for the selected piece
-            if chess_board.get_selected_piece() is not None:
-                if (x, y) in chess_board.get_selected_piece().get_possible_moves():
-                    piece = chess_board.get_selected_piece()
-                    chess_board.move_piece(piece.get_position(), (x, y))
-                    chess_board.set_selected_piece(None)
-                    piece.set_position(x, y)
-            else:
-                clicked_piece = chess_board.get_piece_at_position(x, y)
-                if clicked_piece is not None:
-                    chess_board.draw_possible_moves(screen, clicked_piece)
-                    chess_board.set_selected_piece(clicked_piece)
-                else:
-                    chess_board.set_selected_piece(None)
+            selected_piece = chess_board.get_selected_piece()
+            clicked_piece = chess_board.get_piece_at_position(x, y)
+
+            if selected_piece is not None:
+                if (x, y) in selected_piece.get_possible_moves():
+                    chess_board.move_piece(selected_piece.get_position(), (x, y))
+                    selected_piece.set_position(x, y)
+                chess_board.set_selected_piece(None)
+            elif clicked_piece is not None:
+                chess_board.draw_possible_moves(screen, clicked_piece)
+                chess_board.set_selected_piece(clicked_piece)
 
     # Update the chess board
     chess_board.draw(screen)

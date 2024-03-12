@@ -1,5 +1,6 @@
-from .piece import Piece
 from constants import PieceType, Color
+
+from .piece import Piece
 
 
 class Bishop(Piece):
@@ -12,7 +13,7 @@ class Bishop(Piece):
         return self.moves
 
     def __check_diagonals(self):
-        self._calculate_diagonals(self, 1, 1)
-        self._calculate_diagonals(self, -1, 1)
-        self._calculate_diagonals(self, 1, -1)
-        self._calculate_diagonals(self, -1, -1)
+        self._calculate_diagonals(1, 1)
+        self._calculate_diagonals(-1, 1)
+        self._calculate_diagonals(1, -1)
+        self._calculate_diagonals(-1, -1)

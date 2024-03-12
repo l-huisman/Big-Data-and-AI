@@ -13,8 +13,12 @@ class Board:
         self.board = [[None for _ in range(8)] for _ in range(8)]
         self.__selected_piece = None
         self.__initialize_board()
+        self.round = 0
+        self.is_white_turn = True
 
     def __initialize_board(self):
+        self.round = 1
+        self.is_white_turn = True
         for i in range(8):
             self.board[i][1] = Pawn(self, Color.BLACK, i, 1)
             self.board[i][6] = Pawn(self, Color.WHITE, i, 6)
@@ -53,6 +57,9 @@ class Board:
         x_new, y_new = new_position
         self.board[x_new][y_new] = self.board[x_original][y_original]
         self.board[x_original][y_original] = None
+        self.is_white_turn = not self.is_white_turn
+        if self.is_white_turn:
+            self.round += 1
 
     def draw(self, screen):
         for i in range(8):
@@ -68,8 +75,21 @@ class Board:
 
                 if self.__selected_piece != None:
                     self.draw_possible_moves(screen, self.__selected_piece)
+        # Draw round
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Round: {self.round}", True, (255, 0, 0))
+        screen.blit(text, (10, 10))
+
+        # Draw whose turn it is
+        turn = "White" if self.is_white_turn else "Black"
+        text = font.render(f"Turn: {turn}", True, (255, 0, 0))
+        screen.blit(text, (10, 50))
 
     def draw_possible_moves(self, screen, clicked_piece: Piece):
+        if clicked_piece.color is Color.WHITE and self.is_white_turn is False:
+            return
+        if clicked_piece.color is Color.BLACK and self.is_white_turn is True:
+            return
         possible_moves = clicked_piece.get_possible_moves()
         for move in possible_moves:
             center = (move[0] * 80 + 40, move[1] * 80 + 40)

@@ -3,8 +3,6 @@ from constants import PieceType, Color
 
 
 class Pawn(Piece):
-    __in_starting_position = True
-
     def __init__(self, board, color: Color, x_position: int, y_position: int):
         super().__init__(board, color, PieceType.PAWN, x_position, y_position)
         self.__legal_moves = [(-1, (1 * self.color.value)), (1, 1 * self.color.value)]
@@ -15,10 +13,17 @@ class Pawn(Piece):
         self.__check_diagonals()
         return self.moves
 
+    def __in_starting_position(self) -> bool:
+        if self.color == Color.BLACK and self.y_position == 1:
+            return True
+        elif self.color == Color.WHITE and self.y_position == 6:
+            return True
+        return False
+
     def __check_moves(self) -> None:
         if (self.board.get_piece_at_position(self.x_position, self.y_position + (1 * self.color.value))== None):
             self.moves.append((self.x_position, self.y_position + (1 * self.color.value)))
-        if self.__in_starting_position:
+        if self.__in_starting_position():
             if (self.board.get_piece_at_position(self.x_position, self.y_position + (1 * self.color.value))== None and self.board.get_piece_at_position(self.x_position, self.y_position + (2 * self.color.value))== None):
                 self.moves.append((self.x_position, self.y_position + (2 * self.color.value)))
 

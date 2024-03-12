@@ -10,7 +10,6 @@ class Pawn(Piece):
         self.__legal_moves = [(-1, (1 * self.color.value)), (1, 1 * self.color.value)]
 
     def get_possible_moves(self) -> list:
-        self.moves = []
         self.__check_moves()
         self.__check_diagonals()
         return self.moves

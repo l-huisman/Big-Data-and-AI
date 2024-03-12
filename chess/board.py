@@ -60,6 +60,19 @@ class Board:
         self.is_white_turn = not self.is_white_turn
         if self.is_white_turn:
             self.round += 1
+        king_in_check = self.is_checked()
+        
+    def is_checked(self):
+        king_position = self.get_king_position()
+        print(king_position)
+        
+    
+    def get_king_position(self):
+        for i in range(8):
+            for j in range(8):
+                piece = self.board[i][j]
+                if piece != None and piece.piece_type == PieceType.KING:
+                    return (i, j)g
 
     def draw(self, screen):
         for i in range(8):

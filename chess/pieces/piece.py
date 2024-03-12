@@ -20,6 +20,9 @@ class Piece:
         self.x_position = x_position
         self.y_position = y_position
 
+    def get_possible_moves(self) -> list:
+        raise NotImplementedError
+
     def draw(self, screen, square_size: int, y: int, x: int) -> None:
         image = pygame.image.load(
             "img/" + self.piece_type.name + "_" + self.color.name + ".png"

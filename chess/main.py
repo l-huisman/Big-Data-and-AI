@@ -1,5 +1,6 @@
 import pygame
 from board import Board
+from pieces import Piece
 
 # Initialize Pygame
 pygame.init()
@@ -39,8 +40,8 @@ while running:
             x, y = get_mouse_position(mouse_pos)
 
             # Check if the clicked position is a valid move for the selected piece
-            selected_piece = chess_board.get_selected_piece()
-            clicked_piece = chess_board.get_piece_at_position(x, y)
+            selected_piece: Piece  = chess_board.get_selected_piece()
+            clicked_piece: Piece = chess_board.get_piece_at_position(x, y)
 
             if selected_piece is not None:
                 if (x, y) in selected_piece.get_possible_moves():

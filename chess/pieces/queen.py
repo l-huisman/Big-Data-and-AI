@@ -5,7 +5,7 @@ from constants import PieceType, Color
 class Queen(Piece):
     def __init__(self, board, color: Color, x_position: int, y_position: int):
         super().__init__(board, color, PieceType.QUEEN, x_position, y_position)
-        self.__legal_moves = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
+        self._legal_moves = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
 
     def get_possible_moves(self):
         self.moves = []

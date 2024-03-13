@@ -11,3 +11,7 @@ class Rook(Piece):
         self.moves = []
         self._check_legal_moves()
         return self.moves
+    
+    def _check_legal_moves(self) -> None:
+        for move in self._legal_moves:
+            self._check_straights(move[0], move[1])

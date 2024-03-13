@@ -33,7 +33,7 @@ class Piece:
         screen.blit(image, (x * square_size, y * square_size))
 
     def _check_legal_moves(self) -> None:
-        for move in self.__legal_moves:
+        for move in self._legal_moves:
             x = self.x_position + move[0]
             y = self.y_position + move[1]
             if x < 0 or x > 7 or y < 0 or y > 7:

@@ -55,6 +55,14 @@ class Board:
     def move_piece(self, original_position: tuple, new_position: tuple) -> None:
         x_original, y_original = original_position
         x_new, y_new = new_position
+        
+        # Check if the piece exists and matches the current turn
+        piece = self.board[x_original][y_original]
+        if piece is None or (piece.color is Color.WHITE and not self.is_white_turn) \
+            or (piece.color is Color.BLACK and self.is_white_turn):
+            return  # Invalid move, not the turn of this color
+        
+        # Move the piece
         self.board[x_new][y_new] = self.board[x_original][y_original]
         self.board[x_original][y_original] = None
         self.is_white_turn = not self.is_white_turn

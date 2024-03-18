@@ -1,7 +1,5 @@
-# Piece class
-from constants import PieceType, Color
-
 import pygame
+from constants import Color
 
 
 class Piece:
@@ -9,14 +7,12 @@ class Piece:
         self,
         board,
         color: Color,
-        piece_type: PieceType,
         x_position: int,
         y_position: int,
     ):
         self.moves = []
         self.board = board
         self.color = color
-        self.piece_type = piece_type
         self.x_position = x_position
         self.y_position = y_position
         self._legal_moves = []
@@ -27,7 +23,7 @@ class Piece:
 
     def draw(self, screen, square_size: int, y: int, x: int) -> None:
         image = pygame.image.load(
-            "img/" + self.piece_type.name + "_" + self.color.name + ".png"
+            "img/" + self.__class__.__name__ + "_" + self.color.name + ".png"
         )
         image = pygame.transform.scale(image, (square_size, square_size))
         screen.blit(image, (x * square_size, y * square_size))

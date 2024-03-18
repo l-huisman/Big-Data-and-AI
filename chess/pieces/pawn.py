@@ -1,10 +1,10 @@
 from .piece import Piece
-from constants import PieceType, Color
+from constants import Color
 
 
 class Pawn(Piece):
     def __init__(self, board, color: Color, x_position: int, y_position: int):
-        super().__init__(board, color, PieceType.PAWN, x_position, y_position)
+        super().__init__(board, color, x_position, y_position)
         self._legal_moves = [(-1, (1 * self.color.value)), (1, 1 * self.color.value)]
         # TODO: add 
 

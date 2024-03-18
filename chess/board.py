@@ -9,14 +9,14 @@ import pygame
 
 class Board:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.board = [[None for _ in range(8)] for _ in range(8)]
         self.__selected_piece = None
         self.__initialize_board()
         self.round = 0
         self.is_white_turn = True
 
-    def __initialize_board(self):
+    def __initialize_board(self) -> None:
         self.round = 1
         self.is_white_turn = True
         for i in range(8):
@@ -93,7 +93,7 @@ class Board:
         text = font.render(f"Turn: {turn}", True, (255, 0, 0))
         screen.blit(text, (10, 50))
 
-    def draw_possible_moves(self, screen, clicked_piece: Piece):
+    def draw_possible_moves(self, screen, clicked_piece: Piece) -> None:
         if clicked_piece.color is Color.WHITE and self.is_white_turn is False:
             return
         if clicked_piece.color is Color.BLACK and self.is_white_turn is True:

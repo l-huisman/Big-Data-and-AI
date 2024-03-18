@@ -1,7 +1,7 @@
 # Board class
 
 import numpy as np
-from constants import Color, PieceType
+from constants import Color
 from pieces import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 
 import pygame

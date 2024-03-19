@@ -1,18 +1,16 @@
 from constants import Color
 from pieces import Piece, Pawn, Rook, Knight, Bishop, Queen, King
-
 import pygame
 
-
 class Board:
-    def __init__(self) -> None:
+    def __init__(self):
         self.board = [[None for _ in range(8)] for _ in range(8)]
         self.__selected_piece = None
         self.__initialize_board()
         self.round = 0
         self.is_white_turn = True
 
-    def __initialize_board(self) -> None:
+    def __initialize_board(self):
         self.round = 1
         self.is_white_turn = True
         for i in range(8):
@@ -46,27 +44,79 @@ class Board:
         self.board[4][7] = King(self, Color.WHITE, 4, 7)
 
     def get_piece_at_position(self, x_position: int, y_position: int) -> Piece | None:
+        if x_position < 0 or x_position > 7 or y_position < 0 or y_position > 7:
+            return None
         return self.board[x_position][y_position]
 
     def move_piece(self, original_position: tuple, new_position: tuple) -> None:
         x_original, y_original = original_position
         x_new, y_new = new_position
 
-        # Check if the piece exists and matches the current turn
+        # Check if the piece exists
         piece = self.board[x_original][y_original]
-        if (
-            piece is None
-            or (piece.color is Color.WHITE and not self.is_white_turn)
-            or (piece.color is Color.BLACK and self.is_white_turn)
-        ):
+        if piece is None:
+            return  # Invalid move, no piece at original position
+
+        # Check if it's the turn of the piece's color
+        if (piece.color is Color.WHITE and not self.is_white_turn) or (piece.color is Color.BLACK and self.is_white_turn):
             return  # Invalid move, not the turn of this color
+
+        # Check if the move is legal
+        if new_position not in piece.get_possible_moves():
+            return  # Invalid move, not in the list of possible moves
 
         # Move the piece
         self.board[x_new][y_new] = self.board[x_original][y_original]
         self.board[x_original][y_original] = None
+
+        # Check for pawn promotion
+        if isinstance(self.board[x_new][y_new], Pawn):
+            if (self.board[x_new][y_new].color is Color.WHITE and y_new == 0) or (
+                self.board[x_new][y_new].color is Color.BLACK and y_new == 7
+            ):
+                self.promote_pawn(x_new, y_new)
+
         self.is_white_turn = not self.is_white_turn
         if self.is_white_turn:
             self.round += 1
+
+        # After moving, clear the selected piece
+        self.__selected_piece = None
+
+    def promote_pawn(self, x: int, y: int) -> None:
+        # Ask the player which piece to promote to
+        promotion_options = ["Queen", "Rook", "Bishop", "Knight"]
+        chosen_piece = None
+        while chosen_piece not in promotion_options:
+            print("Choose a piece to promote your pawn:")
+            print("1. Queen")
+            print("2. Rook")
+            print("3. Bishop")
+            print("4. Knight")
+            choice = input("Enter the number of your choice: ")
+            if choice == "1":
+                chosen_piece = "Queen"
+            elif choice == "2":
+                chosen_piece = "Rook"
+            elif choice == "3":
+                chosen_piece = "Bishop"
+            elif choice == "4":
+                chosen_piece = "Knight"
+            else:
+                print("Invalid choice. Please enter a number between 1 and 4.")
+
+        # Replace the pawn with the chosen piece
+        if chosen_piece == "Queen":
+            self.board[x][y] = Queen(self, self.board[x][y].color, x, y)
+        elif chosen_piece == "Rook":
+            self.board[x][y] = Rook(self, self.board[x][y].color, x, y)
+        elif chosen_piece == "Bishop":
+            self.board[x][y] = Bishop(self, self.board[x][y].color, x, y)
+        elif chosen_piece == "Knight":
+            self.board[x][y] = Knight(self, self.board[x][y].color, x, y)
+
+        # Update selected piece to the newly promoted piece
+        self.__selected_piece = self.board[x][y]
 
     def draw(self, screen):
         for i in range(8):
@@ -77,11 +127,17 @@ class Board:
                     color = (210, 139, 69)
                 pygame.draw.rect(screen, color, (i * 80, j * 80, 80, 80))
                 piece: Piece = self.board[i][j]
-                if piece != None:
+                if piece is not None:
                     piece.draw(screen, 80, j, i)
 
-                if self.__selected_piece != None:
-                    self.draw_possible_moves(screen, self.__selected_piece)
+                    # Check if the piece is selected and update selected piece
+                    if self.__selected_piece is not None and self.__selected_piece == piece:
+                        self.__selected_piece = piece
+
+        # Draw possible moves for selected piece only if it's the player's turn
+        if self.__selected_piece is not None and self.is_white_turn == (self.__selected_piece.color is Color.WHITE):
+            self.draw_possible_moves(screen, self.__selected_piece)
+
         # Draw round
         font = pygame.font.Font(None, 36)
         text = font.render(f"Round: {self.round}", True, (255, 0, 0))
@@ -92,18 +148,26 @@ class Board:
         text = font.render(f"Turn: {turn}", True, (255, 0, 0))
         screen.blit(text, (10, 50))
 
-    def draw_possible_moves(self, screen, clicked_piece: Piece) -> None:
-        if clicked_piece.color is Color.WHITE and self.is_white_turn is False:
+
+    def draw_possible_moves(self, screen, clicked_piece: Piece):
+        if clicked_piece is None:
             return
-        if clicked_piece.color is Color.BLACK and self.is_white_turn is True:
+
+        if clicked_piece.color is Color.WHITE and not self.is_white_turn:
             return
+        if clicked_piece.color is Color.BLACK and self.is_white_turn:
+            return
+
         possible_moves = clicked_piece.get_possible_moves()
+        if possible_moves is None:
+            return
+
         for move in possible_moves:
             center = (move[0] * 80 + 40, move[1] * 80 + 40)
             pygame.draw.circle(screen, (37, 12, 127), center, 10, 0)
 
-    def get_selected_piece(self) -> Piece | None:
+    def get_selected_piece(self):
         return self.__selected_piece
 
-    def set_selected_piece(self, piece: Piece) -> None:
+    def set_selected_piece(self, piece: Piece):
         self.__selected_piece = piece

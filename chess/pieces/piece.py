@@ -23,7 +23,7 @@ class Piece:
 
     def draw(self, screen, square_size: int, y: int, x: int) -> None:
         image = pygame.image.load(
-            "img/" + self.__class__.__name__ + "_" + self.color.name + ".png"
+            "chess/img/" + self.__class__.__name__ + "_" + self.color.name + ".png"
         )
         image = pygame.transform.scale(image, (square_size, square_size))
         screen.blit(image, (x * square_size, y * square_size))

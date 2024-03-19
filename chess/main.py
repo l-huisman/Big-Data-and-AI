@@ -1,6 +1,7 @@
 import pygame
 from board import Board
 from pieces import Piece
+from constants import Color
 
 # Initialize Pygame
 pygame.init()

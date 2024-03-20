@@ -42,17 +42,28 @@ while running:
             # Get the position of the mouse click
             mouse_pos = pygame.mouse.get_pos()
             x, y = get_mouse_position(mouse_pos)
-            # Check if the clicked position is a valid move for the selected piece
+            
+            # Get the selected piece and clicked piece
             selected_piece: Piece = chess_board.get_selected_piece()
             clicked_piece: Piece = chess_board.get_piece_at_position(x, y)
 
+            # Check if it's the turn of the color of the selected piece
+            if selected_piece is not None and selected_piece.color is not Color.WHITE and chess_board.is_white_turn:
+                continue  # Disallow move for non-white pieces on white's turn
+            elif selected_piece is not None and selected_piece.color is not Color.BLACK and not chess_board.is_white_turn:
+                continue  # Disallow move for non-black pieces on black's turn
+
+            # Handling logic when a piece is selected
             if selected_piece is not None:
                 if (x, y) in selected_piece.get_possible_moves():
                     chess_board.move_piece(selected_piece.get_position(), (x, y))
                     selected_piece.set_position(x, y)
                     selected_piece.set_has_moved()
                 chess_board.set_selected_piece(None)
-            elif clicked_piece is not None:
+            elif clicked_piece is not None and clicked_piece.color == Color.WHITE and chess_board.is_white_turn:
+                chess_board.draw_possible_moves(screen, clicked_piece)
+                chess_board.set_selected_piece(clicked_piece)
+            elif clicked_piece is not None and clicked_piece.color == Color.BLACK and not chess_board.is_white_turn:
                 chess_board.draw_possible_moves(screen, clicked_piece)
                 chess_board.set_selected_piece(clicked_piece)
 

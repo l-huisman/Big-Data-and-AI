@@ -3,14 +3,14 @@ from pieces import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 import pygame
 
 class Board:
-    def __init__(self):
+    def __init__(self) -> None:
         self.board = [[None for _ in range(8)] for _ in range(8)]
         self.__selected_piece = None
         self.__initialize_board()
         self.round = 0
         self.is_white_turn = True
 
-    def __initialize_board(self):
+    def __initialize_board(self) -> None:
         self.round = 1
         self.is_white_turn = True
         for i in range(8):
@@ -48,22 +48,10 @@ class Board:
             return None
         return self.board[x_position][y_position]
 
+
     def move_piece(self, original_position: tuple, new_position: tuple) -> None:
         x_original, y_original = original_position
         x_new, y_new = new_position
-
-        # Check if the piece exists
-        piece = self.board[x_original][y_original]
-        if piece is None:
-            return  # Invalid move, no piece at original position
-
-        # Check if it's the turn of the piece's color
-        if (piece.color is Color.WHITE and not self.is_white_turn) or (piece.color is Color.BLACK and self.is_white_turn):
-            return  # Invalid move, not the turn of this color
-
-        # Check if the move is legal
-        if new_position not in piece.get_possible_moves():
-            return  # Invalid move, not in the list of possible moves
 
         # Move the piece
         self.board[x_new][y_new] = self.board[x_original][y_original]
@@ -79,9 +67,6 @@ class Board:
         self.is_white_turn = not self.is_white_turn
         if self.is_white_turn:
             self.round += 1
-
-        # After moving, clear the selected piece
-        self.__selected_piece = None
 
     def promote_pawn(self, x: int, y: int) -> None:
         # Ask the player which piece to promote to
@@ -151,11 +136,6 @@ class Board:
 
     def draw_possible_moves(self, screen, clicked_piece: Piece):
         if clicked_piece is None:
-            return
-
-        if clicked_piece.color is Color.WHITE and not self.is_white_turn:
-            return
-        if clicked_piece.color is Color.BLACK and self.is_white_turn:
             return
 
         possible_moves = clicked_piece.get_possible_moves()

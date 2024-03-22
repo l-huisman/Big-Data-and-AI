@@ -52,6 +52,25 @@ class Board:
     def move_piece(self, original_position: tuple, new_position: tuple) -> None:
         x_original, y_original = original_position
         x_new, y_new = new_position
+        
+        # Check if the piece is a King and the move is a castling move
+        if isinstance(self.board[x_original][y_original], King) and abs(x_original - x_new) == 2:
+            # Check if it's a kingside castling
+            if x_new > x_original:
+                # Move the rook to the left of the king
+                self.board[x_new - 1][y_new] = self.board[7][y_new]
+                self.board[7][y_new] = None
+                # Update the rook's position
+                self.board[x_new - 1][y_new].x_position = x_new - 1
+                self.board[x_new - 1][y_new].y_position = y_new
+            # Check if it's a queenside castling
+            else:
+                # Move the rook to the right of the king
+                self.board[x_new + 1][y_new] = self.board[0][y_new]
+                self.board[0][y_new] = None
+                # Update the rook's position
+                self.board[x_new + 1][y_new].x_position = x_new + 1
+                self.board[x_new + 1][y_new].y_position = y_new
 
         # Move the piece
         self.board[x_new][y_new] = self.board[x_original][y_original]

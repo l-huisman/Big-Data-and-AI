@@ -19,7 +19,9 @@ def main():
         [transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-    batch_size = 16
+    batch_size = 50
+    learning_rate = 0.01
+    nr_of_epochs = 15
 
     trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
                                             download=True, transform=transform)
@@ -77,12 +79,12 @@ def main():
     net.to(device)
     
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adadelta(net.parameters(), lr=0.0001)
+    optimizer = optim.Adamax(net.parameters(), lr=learning_rate)
 
     loss_values = []  # create an empty list to store the loss values
     validation_loss = []  # create an empty list to store the accuracy values
 
-    for epoch in range(100):  # loop over the dataset multiple times
+    for epoch in range(nr_of_epochs):  # loop over the dataset multiple times
 
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
@@ -163,29 +165,7 @@ def main():
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    print(f'Accuracy of the network on the 10000 test images: {100 * correct // total} %')  
-    
-    # prepare to count predictions for each class
-    correct_pred = {classname: 0 for classname in classes}
-    total_pred = {classname: 0 for classname in classes}
-
-    # again no gradients needed
-    with torch.no_grad():
-        for data in testloader:
-            images, labels = data
-            outputs = net(images)
-            _, predictions = torch.max(outputs, 1)
-            # collect the correct predictions for each class
-            for label, prediction in zip(labels, predictions):
-                if label == prediction:
-                    correct_pred[classes[label]] += 1
-                total_pred[classes[label]] += 1
-
-
-    # print accuracy for each class
-    for classname, correct_count in correct_pred.items():
-        accuracy = 100 * float(correct_count) / total_pred[classname]
-        print(f'Accuracy for class: {classname:5s} is {accuracy:.1f} %')
+    print(f'Accuracy of the network on the 10000 validation images: {100 * correct // total} %')  
         
     correct = 0
     total = 0
@@ -200,30 +180,7 @@ def main():
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    print(f'Accuracy of the network on the 10000 test images: {100 * correct // total} %')  
-    
-    # prepare to count predictions for each class
-    correct_pred = {classname: 0 for classname in classes}
-    total_pred = {classname: 0 for classname in classes}
-
-
-    # again no gradients needed
-    with torch.no_grad():
-        for data in trainloader:
-            images, labels = data
-            outputs = net(images)
-            _, predictions = torch.max(outputs, 1)
-            # collect the correct predictions for each class
-            for label, prediction in zip(labels, predictions):
-                if label == prediction:
-                    correct_pred[classes[label]] += 1
-                total_pred[classes[label]] += 1
-
-
-    # print accuracy for each class
-    for classname, correct_count in correct_pred.items():
-        accuracy = 100 * float(correct_count) / total_pred[classname]
-        print(f'Accuracy for class: {classname:5s} is {accuracy:.1f} %')
+    print(f'Accuracy of the network on the 50000 train images: {100 * correct // total} %')  
         
         
     

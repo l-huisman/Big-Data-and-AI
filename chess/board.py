@@ -9,6 +9,9 @@ class Board:
         self.__initialize_board()
         self.round = 0
         self.is_white_turn = True
+        self.white_king = None
+        self.black_king = None
+        self.update_kings()
 
     def __initialize_board(self) -> None:
         self.round = 1
@@ -48,7 +51,6 @@ class Board:
             return None
         return self.board[x_position][y_position]
 
-
     def move_piece(self, original_position: tuple, new_position: tuple) -> None:
         x_original, y_original = original_position
         x_new, y_new = new_position
@@ -86,6 +88,9 @@ class Board:
         self.is_white_turn = not self.is_white_turn
         if self.is_white_turn:
             self.round += 1
+
+        # Update kings' positions
+        self.update_kings()
 
     def promote_pawn(self, x: int, y: int) -> None:
         # Ask the player which piece to promote to
@@ -152,7 +157,6 @@ class Board:
         text = font.render(f"Turn: {turn}", True, (255, 0, 0))
         screen.blit(text, (10, 50))
 
-
     def draw_possible_moves(self, screen, clicked_piece: Piece):
         if clicked_piece is None:
             return
@@ -170,3 +174,25 @@ class Board:
 
     def set_selected_piece(self, piece: Piece):
         self.__selected_piece = piece
+
+    def update_kings(self):
+        # Find and update the positions of white and black kings
+        for i in range(8):
+            for j in range(8):
+                if isinstance(self.board[i][j], King):
+                    if self.board[i][j].color is Color.WHITE:
+                        self.white_king = (i, j)
+                    else:
+                        self.black_king = (i, j)
+
+    def is_in_check(self, king_position: tuple) -> bool:
+        # Check if the king is under attack
+        king_x, king_y = king_position
+        for i in range(8):
+            for j in range(8):
+                piece = self.board[i][j]
+                if isinstance(piece, Piece) and piece.color != self.board[king_x][king_y].color:
+                    if king_position in piece.get_possible_moves():
+                        return True
+        return False
+

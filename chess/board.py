@@ -215,6 +215,9 @@ class Board:
 
 # make sure that when king is in check only the pieces can move that can save the king. Capture the piece that is attacking the king, or move the king to a safe place, or block the attack.
 
-
-    
-    
+    def reset_board(self):
+        self.board = [[None for _ in range(8)] for _ in range(8)]
+        self.__initialize_board()
+        self.round = 0
+        self.is_white_turn = True
+        self.update_kings()

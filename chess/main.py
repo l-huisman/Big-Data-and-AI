@@ -35,6 +35,9 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
+            elif event.key == pygame.K_r:
+                print("Resetting board")
+                chess_board.reset_board()
         # Check for mouse click events
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # Get the position of the mouse click

@@ -163,6 +163,13 @@ class Board:
         screen.blit(text, (10, 50))
 
     def draw_possible_moves(self, screen, clicked_piece: Piece):
+        moves = self.get_possible_moves(clicked_piece)
+        for move in moves:
+            x_new, y_new = move
+            center = (x_new * 80 + 40, y_new * 80 + 40)
+            pygame.draw.circle(screen, (37, 12, 127), center, 10, 0)
+
+    def get_possible_moves(self, clicked_piece: Piece):
         if clicked_piece is None:
             return
 
@@ -195,14 +202,7 @@ class Board:
             for move in valid_moves:
                 possible_moves.remove(move)
             valid_moves = possible_moves
-
-        for move in valid_moves:
-            x_new, y_new = move
-            center = (x_new * 80 + 40, y_new * 80 + 40)
-            pygame.draw.circle(screen, (37, 12, 127), center, 10, 0)
-
         return valid_moves
-
 
     def get_selected_piece(self):
         return self.__selected_piece

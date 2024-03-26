@@ -52,7 +52,7 @@ while running:
 
             # Handling logic when a piece is selected
             if selected_piece is not None:
-                if (x, y) in chess_board.draw_possible_moves(screen, selected_piece):
+                if (x, y) in chess_board.get_possible_moves(selected_piece):
                     chess_board.move_piece(selected_piece.get_position(), (x, y))
                     selected_piece.set_position(x, y)
                     selected_piece.set_has_moved()

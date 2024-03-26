@@ -16,11 +16,13 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 # Create a chess board
 chess_board = Board()
 
+
 # Function to get the position of the mouse
-def get_mouse_position(mouse_pos: tuple) -> tuple:
-    x = mouse_pos[0] // 80
-    y = mouse_pos[1] // 80
-    return x, y
+def get_mouse_position(mouse_position: tuple) -> tuple:
+    mouse_x = mouse_position[0] // 80
+    mouse_y = mouse_position[1] // 80
+    return mouse_x, mouse_y
+
 
 # Game loop
 running = True
@@ -43,7 +45,7 @@ while running:
             # Get the position of the mouse click
             mouse_pos = pygame.mouse.get_pos()
             x, y = get_mouse_position(mouse_pos)
-            
+
             # Get the selected piece and clicked piece
             selected_piece: Piece = chess_board.get_selected_piece()
             clicked_piece: Piece = chess_board.get_piece_at_position(x, y)
@@ -71,11 +73,14 @@ while running:
     # Update the chess board
     chess_board.draw(screen)
 
-    # Check for checkmate
-    if chess_board.is_in_check(chess_board.white_king):
-        print("White Check.")
-    elif chess_board.is_in_check(chess_board.black_king):
-        print("Black Check.")
+    # checkmate
+    chess_board.update_kings()
+    if chess_board.checkmate(Color.WHITE):
+        print("Black wins!")
+        running = False
+    elif chess_board.checkmate(Color.BLACK):
+        print("White wins!")
+        running = False
 
     # Draw the chess board
     screen.fill((0, 0, 0))  # Fill the screen with black

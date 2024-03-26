@@ -91,6 +91,11 @@ class Board:
 
         # Update kings' positions
         self.update_kings()
+        if self.checkmate(Color.WHITE):
+            print("White king is in checkmate")
+        if self.checkmate(Color.BLACK):
+            print("Black king is in checkmate")
+
 
     def promote_pawn(self, x: int, y: int) -> None:
         # Ask the player which piece to promote to
@@ -202,3 +207,54 @@ class Board:
         self.round = 0
         self.is_white_turn = True
         self.update_kings()
+
+
+    def checkmate(self, color: Color) -> bool:
+        # Determine the position of the king
+        king_position = self.white_king if color == Color.WHITE else self.black_king
+
+        # Check if the king is in check
+        if not self.is_in_check(king_position):
+            return False
+
+        # Check if the king can move to a safe position
+        king = self.board[king_position[0]][king_position[1]]
+        for move in king.get_possible_moves():
+            x_new, y_new = move
+            # Temporarily move the king
+            original_piece = self.board[x_new][y_new]
+            self.board[king_position[0]][king_position[1]] = None
+            self.board[x_new][y_new] = king
+            # Check if the new position is safe
+            if not self.is_in_check((x_new, y_new)):
+                # Move the king back
+                self.board[king_position[0]][king_position[1]] = king
+                self.board[x_new][y_new] = original_piece
+                return False
+            # Move the king back
+            self.board[king_position[0]][king_position[1]] = king
+            self.board[x_new][y_new] = original_piece
+
+        # Check if any other piece can block the check
+        for i in range(8):
+            for j in range(8):
+                piece = self.board[i][j]
+                if piece is not None and piece.color == color and piece != king:
+                    for move in piece.get_possible_moves():
+                        x_new, y_new = move
+                        # Temporarily move the piece
+                        original_piece = self.board[x_new][y_new]
+                        self.board[i][j] = None
+                        self.board[x_new][y_new] = piece
+                        # Check if the king is still in check
+                        if not self.is_in_check(king_position):
+                            # Move the piece back
+                            self.board[i][j] = piece
+                            self.board[x_new][y_new] = original_piece
+                            return False
+                        # Move the piece back
+                        self.board[i][j] = piece
+                        self.board[x_new][y_new] = original_piece
+
+        # If the king cannot move to a safe position and no piece can block the check, it's a checkmate
+        return True

@@ -182,7 +182,7 @@ class Board:
             self.board[clicked_piece.x_position][clicked_piece.y_position] = None
 
             # Check if own king is in check after the hypothetical move
-            if not self.is_in_check(own_king_position):
+            if not self.is_in_check(own_king_position, clicked_piece.color):
                 center = (x_new * 80 + 40, y_new * 80 + 40)
                 pygame.draw.circle(screen, (37, 12, 127), center, 10, 0)
 
@@ -207,18 +207,15 @@ class Board:
                     else:
                         self.black_king = (i, j)
 
-    def is_in_check(self, king_position: tuple) -> bool:
+    def is_in_check(self, king_position: tuple, king_color: Color) -> bool:
         # Check if the king is under attack
-        king_x, king_y = king_position
         for i in range(8):
             for j in range(8):
                 piece = self.board[i][j]
-                if isinstance(piece, Piece) and piece.color != self.board[king_x][king_y].color:
+                if isinstance(piece, Piece) and piece.color != king_color:
                     if king_position in piece.get_possible_moves():
                         return True
         return False
-
-# make sure that when king is in check only the pieces can move that can save the king. Capture the piece that is attacking the king, or move the king to a safe place, or block the attack.
 
     def reset_board(self):
         self.board = [[None for _ in range(8)] for _ in range(8)]
@@ -233,7 +230,7 @@ class Board:
         king_position = self.white_king if color == Color.WHITE else self.black_king
 
         # Check if the king is in check
-        if not self.is_in_check(king_position):
+        if not self.is_in_check(king_position, color):
             return False
 
         # Check if the king can move to a safe position
@@ -245,7 +242,7 @@ class Board:
             self.board[king_position[0]][king_position[1]] = None
             self.board[x_new][y_new] = king
             # Check if the new position is safe
-            if not self.is_in_check((x_new, y_new)):
+            if not self.is_in_check((x_new, y_new), color):
                 # Move the king back
                 self.board[king_position[0]][king_position[1]] = king
                 self.board[x_new][y_new] = original_piece
@@ -266,7 +263,7 @@ class Board:
                         self.board[i][j] = None
                         self.board[x_new][y_new] = piece
                         # Check if the king is still in check
-                        if not self.is_in_check(king_position):
+                        if not self.is_in_check(king_position, color):
                             # Move the piece back
                             self.board[i][j] = piece
                             self.board[x_new][y_new] = original_piece

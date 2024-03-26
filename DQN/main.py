@@ -1,7 +1,7 @@
-import gymnasium as gym
 import math
 import random
 import matplotlib
+import gymnasium as gym
 import matplotlib.pyplot as plt
 
 import torch
@@ -13,7 +13,7 @@ from dqn import DQN
 from itertools import count
 from replay_memory import ReplayMemory, Transition
 
-env = gym.make("CartPole-v1")
+env = gym.make("ALE/Breakout-v5", obs_type="rgb", render_mode="human")
 
 # set up matplotlib
 is_ipython = "inline" in matplotlib.get_backend()
@@ -44,18 +44,16 @@ LR = 1e-4
 n_actions = env.action_space.n
 # Get the number of state observations
 state, info = env.reset()
-n_observations = len(state)
+n_channels = state.shape[2]
 
-policy_net = DQN(n_observations, n_actions).to(device)
-target_net = DQN(n_observations, n_actions).to(device)
+policy_net = DQN(n_channels, n_actions).to(device)
+target_net = DQN(n_channels, n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 
 optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
 memory = ReplayMemory(10000)
 
-
 steps_done = 0
-
 
 def select_action(state):
     global steps_done
@@ -74,7 +72,6 @@ def select_action(state):
         return torch.tensor(
             [[env.action_space.sample()]], device=device, dtype=torch.long
         )
-
 
 episode_durations = []
 
@@ -152,6 +149,7 @@ def optimize_model():
     # In-place gradient clipping
     torch.nn.utils.clip_grad_value_(policy_net.parameters(), 100)
     optimizer.step()
+
 
 if torch.cuda.is_available():
     num_episodes = 600 * 12

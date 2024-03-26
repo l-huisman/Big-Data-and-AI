@@ -50,12 +50,6 @@ while running:
             selected_piece: Piece = chess_board.get_selected_piece()
             clicked_piece: Piece = chess_board.get_piece_at_position(x, y)
 
-            # Check if it's the turn of the color of the selected piece
-            if selected_piece is not None and selected_piece.color is not Color.WHITE and chess_board.is_white_turn:
-                continue  # Disallow move for non-white pieces on white's turn
-            elif selected_piece is not None and selected_piece.color is not Color.BLACK and not chess_board.is_white_turn:
-                continue  # Disallow move for non-black pieces on black's turn
-
             # Handling logic when a piece is selected
             if selected_piece is not None:
                 if (x, y) in chess_board.draw_possible_moves(screen, selected_piece):

@@ -170,9 +170,26 @@ class Board:
         if possible_moves is None:
             return
 
+        own_king_position = self.white_king if clicked_piece.color is Color.WHITE else self.black_king
+
         for move in possible_moves:
-            center = (move[0] * 80 + 40, move[1] * 80 + 40)
-            pygame.draw.circle(screen, (37, 12, 127), center, 10, 0)
+            x_new, y_new = move
+
+            # Check if the move puts own king in check
+            # Make a hypothetical move and check if the king is still in check
+            original_piece = self.board[x_new][y_new]
+            self.board[x_new][y_new] = clicked_piece
+            self.board[clicked_piece.x_position][clicked_piece.y_position] = None
+
+            # Check if own king is in check after the hypothetical move
+            if not self.is_in_check(own_king_position):
+                center = (x_new * 80 + 40, y_new * 80 + 40)
+                pygame.draw.circle(screen, (37, 12, 127), center, 10, 0)
+
+            # Revert the hypothetical move
+            self.board[x_new][y_new] = original_piece
+            self.board[clicked_piece.x_position][clicked_piece.y_position] = clicked_piece
+
 
     def get_selected_piece(self):
         return self.__selected_piece
@@ -200,6 +217,8 @@ class Board:
                     if king_position in piece.get_possible_moves():
                         return True
         return False
+
+# make sure that when king is in check only the pieces can move that can save the king. Capture the piece that is attacking the king, or move the king to a safe place, or block the attack.
 
     def reset_board(self):
         self.board = [[None for _ in range(8)] for _ in range(8)]

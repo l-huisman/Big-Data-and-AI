@@ -172,6 +172,7 @@ class Board:
 
         own_king_position = self.white_king if clicked_piece.color is Color.WHITE else self.black_king
 
+        valid_moves = []
         for move in possible_moves:
             x_new, y_new = move
 
@@ -185,11 +186,13 @@ class Board:
             if not self.is_in_check(own_king_position, clicked_piece.color):
                 center = (x_new * 80 + 40, y_new * 80 + 40)
                 pygame.draw.circle(screen, (37, 12, 127), center, 10, 0)
+                valid_moves.append(move)
 
             # Revert the hypothetical move
             self.board[x_new][y_new] = original_piece
             self.board[clicked_piece.x_position][clicked_piece.y_position] = clicked_piece
 
+        return valid_moves
 
     def get_selected_piece(self):
         return self.__selected_piece

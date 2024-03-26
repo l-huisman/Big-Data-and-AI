@@ -196,3 +196,9 @@ class Board:
                         return True
         return False
 
+    def reset_board(self):
+        self.board = [[None for _ in range(8)] for _ in range(8)]
+        self.__initialize_board()
+        self.round = 0
+        self.is_white_turn = True
+        self.update_kings()

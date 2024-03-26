@@ -184,15 +184,25 @@ class Board:
 
             # Check if own king is in check after the hypothetical move
             if not self.is_in_check(own_king_position, clicked_piece.color):
-                center = (x_new * 80 + 40, y_new * 80 + 40)
-                pygame.draw.circle(screen, (37, 12, 127), center, 10, 0)
                 valid_moves.append(move)
 
             # Revert the hypothetical move
             self.board[x_new][y_new] = original_piece
             self.board[clicked_piece.x_position][clicked_piece.y_position] = clicked_piece
 
+        # if piece is king en king is in check, from possible_moves remove all valid_moves
+        if isinstance(clicked_piece, King) and self.is_in_check(own_king_position, clicked_piece.color):
+            for move in valid_moves:
+                possible_moves.remove(move)
+            valid_moves = possible_moves
+
+        for move in valid_moves:
+            x_new, y_new = move
+            center = (x_new * 80 + 40, y_new * 80 + 40)
+            pygame.draw.circle(screen, (37, 12, 127), center, 10, 0)
+
         return valid_moves
+
 
     def get_selected_piece(self):
         return self.__selected_piece

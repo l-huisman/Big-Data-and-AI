@@ -720,6 +720,21 @@ class Chess(gym.Env):
                         if self.board[turn, row, col] == Pieces.KNIGHT:
                             self.board[turn, row, col] = Pieces.WINGED_KNIGHT
 
+        if self.steps == 1:
+            for turn in range(2):
+                for row in range(8):
+                    for col in range(8):
+                        print(self.board[turn, row, col])
+
+        # if step 10 has been reached, destroy a random row of pieces between 2 and 6 row of pieces
+        if self.steps == 10:
+            random_row_turn_1 = np.random.randint(2, 6)
+            print(random_row_turn_1)
+            random_row_turn_2 = 7 - random_row_turn_1
+            for turn in range(2):
+                for col in range(8):
+                    self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] = Pieces.EMPTY
+
         source_pos, possibles, actions_mask = self.get_all_actions(self.turn)
         assert actions_mask[action], f"Cannot Take This Action = {action}"
         rewards, infos = self.move_piece(

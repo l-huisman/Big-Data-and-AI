@@ -22,7 +22,7 @@ if __name__ == "__main__":
     agent = DoubleAgentsChess(
         env=chess,
         learner=ppo,
-        episodes=2000,
+        episodes=100,
         train_on=buffer_size,
         result_folder="results/DoubleAgents",
     )

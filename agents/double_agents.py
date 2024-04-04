@@ -3,6 +3,7 @@ from chess import Chess
 from .base import BaseAgent
 from buffer.episode import Episode
 from learnings.base import Learning
+import torch
 
 
 class DoubleAgentsChess(BaseAgent):
@@ -29,4 +30,6 @@ class DoubleAgentsChess(BaseAgent):
     def save_learners(self):
         self.white_agent.save(self.result_folder, "white_ppo")
         self.black_agent.save(self.result_folder, "black_ppo")
+        torch.save(self.white_agent.state_dict(), f"{self.result_folder}/white_ppo_dict.pt")
+        torch.save(self.black_agent.state_dict(), f"{self.result_folder}/black_ppo_dict.pt")
         

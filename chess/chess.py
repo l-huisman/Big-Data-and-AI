@@ -424,21 +424,21 @@ class Chess(gym.Env):
             possibles[i] = next_pos
             actions_mask[i] = 1
 
-            # Castling
-            if self.can_castle(turn):
-                try:
-                    # King-side castling
-                    if self.is_empty((row, col + 1), turn) and self.is_empty((row, col + 2), turn):
-                        possibles[-2] = (row, col + 2)
-                        actions_mask[-2] = 1
-
-                    # Queen-side castling
-                    if self.is_empty((row, col - 1), turn) and self.is_empty((row, col - 2), turn) and self.is_empty(
-                            (row, col - 3), turn):
-                        possibles[-1] = (row, col - 2)
-                        actions_mask[-1] = 1
-                except IndexError:
-                    return possibles, actions_mask
+            # # Castling
+            # if self.can_castle(turn):
+            #     try:
+            #         # King-side castling
+            #         if self.is_empty((row, col + 1), turn) and self.is_empty((row, col + 2), turn):
+            #             possibles[-2] = (row, col + 2)
+            #             actions_mask[-2] = 1
+            #
+            #         # Queen-side castling
+            #         if self.is_empty((row, col - 1), turn) and self.is_empty((row, col - 2), turn) and self.is_empty(
+            #                 (row, col - 3), turn):
+            #             possibles[-1] = (row, col - 2)
+            #             actions_mask[-1] = 1
+            #     except IndexError:
+            #         return possibles, actions_mask
         return possibles, actions_mask
 
     def get_source_pos(self, name: str, turn: int):
@@ -520,9 +520,8 @@ class Chess(gym.Env):
             all_possibles.append(possibles)
             all_actions_mask.append(actions_mask)
             length += len(actions_mask)
-        
-        all_actions_mask.append(np.zeros(4096 - length, dtype=bool))
 
+        all_actions_mask.append(np.zeros(4096 - length, dtype=bool))
         return (
             np.concatenate(all_source_pos),
             np.concatenate(all_possibles),
@@ -706,34 +705,32 @@ class Chess(gym.Env):
         if self.board[turn, row, col] == Pieces.PAWN and row == 7:
             self.board[turn, row, col] = Pieces.QUEEN
 
-
-
-    def step(self, action: int):        
+    def step(self, action: int):
         assert not self.is_game_done(), "the game is finished reset"
         assert action < 4096, "action number must be less than 4096"
-        
+
         source_pos, possibles, actions_mask = self.get_all_actions(self.turn)
         assert actions_mask[action], f"Cannot Take This Action = {action}"
         rewards, infos = self.move_piece(
             source_pos[action], possibles[action], self.turn
         )
-                            
+
         rewards, infos = self.update_checks(rewards, infos)
         rewards, infos = self.update_check_mates(rewards, infos)
-        
+
         self.turn = 1 - self.turn
         self.steps += 1
-        
-        #hoplites on turn 3
-        if self.steps == 2:
+
+        # hoplites on turn 3
+        if self.steps == 6:
             for turn in range(2):
                 for pawn_num in range(1, 9):  # Assuming pawns are named pawn_1, pawn_2, ..., pawn_8
                     pawn_key = f"pawn_{pawn_num}"
                     hoplite_key = f"hoplite_{pawn_num}"
-                    
+
                     if pawn_key in self.pieces[turn]:
                         self.pieces[turn][hoplite_key] = self.pieces[turn].pop(pawn_key)
-                        
+
                     if pawn_key in self.pieces_names:
                         self.pieces_names.append(hoplite_key)
                         self.pieces_names.remove(pawn_key)
@@ -742,14 +739,15 @@ class Chess(gym.Env):
                         if self.board[turn, row, col] == Pieces.PAWN:
                             self.board[turn, row, col] = Pieces.HOPLITE
 
-        # dutch waterline: if step 10 has been reached, destroy a random row of pieces between 2 and 6 row of pieces on turn 5
+        # Dutch waterline: if step 10 has been reached, destroy a random row of pieces between 2 and 6 row of pieces
+        # on turn 5
         if self.steps == 10:
             random_row_turn_1 = np.random.randint(2, 6)
             random_row_turn_2 = 7 - random_row_turn_1
             for turn in range(2):
                 for col in range(8):
                     self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] = Pieces.EMPTY
-                
+
         # if step 14 has been reached, turn all knights into winged knights on turn 7
         if self.steps == 14:
             for turn in range(2):
@@ -766,8 +764,7 @@ class Chess(gym.Env):
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.KNIGHT:
-                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT     
-
+                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT
         return rewards, self.is_game_done(), infos
 
     def can_castle(self, turn):

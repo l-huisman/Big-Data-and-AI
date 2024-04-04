@@ -31,7 +31,7 @@ while running:
             t1 = int(action_str[3]) - 1
             t2 = ord(action_str[2]) - ord('a')
             to_pos = np.array([t1, t2])
-            
+
             src, dst, mask = env.get_all_actions(turn)
             action = np.where((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
 
@@ -44,7 +44,7 @@ while running:
         except:
             print("Invalid action")
             continue
-        
+
         env.render()
         action_str = ''
     else:

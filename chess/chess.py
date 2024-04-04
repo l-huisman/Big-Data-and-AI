@@ -96,10 +96,10 @@ class Chess(gym.Env):
                 
     def draw_axis(self):
         font = pygame.font.Font(None, 36)
-        for i, label in enumerate("12345678"):
+        for i, label in enumerate("abcdefgh"):
             text = font.render(label, True, Colors.GREEN)
             self.screen.blit(text, (i * self.cell_size + self.cell_size // 2 - 10, self.window_size - 20))
-        for i, label in enumerate("abcdefgh"):
+        for i, label in enumerate("12345678"):
             text = font.render(label, True, Colors.GREEN)
             self.screen.blit(text, (self.window_size - 20, i * self.cell_size + self.cell_size // 2 - 10))
 

@@ -699,6 +699,13 @@ class Chess(gym.Env):
         assert not self.is_game_done(), "the game is finished reset"
         assert action < 640, "action number must be less than 640"
 
+        if self.steps == 5:
+            for turn in range(2):
+                for row in range(8):
+                    for col in range(8):
+                        if self.board[turn, row, col] == Pieces.PAWN:
+                            self.board[turn, row, col] = Pieces.HOPLITE
+
         # if step 5 has been reached, turn all knights into winged knights
         if self.steps == 15:
             for turn in range(2):

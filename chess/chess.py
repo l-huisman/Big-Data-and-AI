@@ -93,7 +93,7 @@ class Chess(gym.Env):
         for y in range(8):
             for x in range(8):
                 self.draw_piece(x, y)
-                
+
     def draw_axis(self):
         font = pygame.font.Font(None, 36)
         for i, label in enumerate("abcdefgh"):
@@ -243,7 +243,6 @@ class Chess(gym.Env):
             not self.is_path_empty(current_pos, next_pos, turn)
         ):
             return False
-
         return True
 
     def is_valid_move(
@@ -359,43 +358,52 @@ class Chess(gym.Env):
             actions_mask[i] = 1
 
         return possibles, actions_mask
-    
-    def get_actions_for_hoplite(
-        self, pos: Cell, turn: int, deny_enemy_king: bool = False
-    ):
+
+    def get_actions_for_hoplite(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
         possibles, actions_mask = self.get_empty_actions("hoplite")
-        
         if pos is None:
             return possibles, actions_mask
-        
+    
         row, col = pos
-        for i, (r, c) in enumerate(Moves.HOPLITE):
+        if self.board[turn, row, col] == Pieces.QUEEN:
+            return self.get_action_for_queen(pos, turn)
+    
+        for i, (r, c) in enumerate(Moves.HOPLITE[:4]):
             next_pos = (row + r, col + c)
+    
             if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
                 continue
-            
-            possibles[i] = next_pos
-            actions_mask[i] = 1
-
+    
+            can_moves = (
+                (r == 1 and c == 0 and (self.both_side_empty(next_pos, turn) or self.check_for_enemy(next_pos, turn))),
+                (r == 2 and row == 1 and self.both_side_empty(next_pos, turn)),
+                (r == 1 and abs(c) == 1 and self.check_for_enemy(next_pos, turn)),
+                # TODO: EN PASSANT
+            )
+    
+            if True in can_moves:
+                possibles[i] = next_pos
+                actions_mask[i] = 1
+    
         return possibles, actions_mask
 
     def get_actions_for_winged_knight(
         self, pos: Cell, turn: int, deny_enemy_king: bool = False
     ):
         possibles, actions_mask = self.get_empty_actions("wingedknight")
-        
+
         if pos is None:
             return possibles, actions_mask
-        
+
         row, col = pos
         for i, (r, c) in enumerate(Moves.WINGED_KNIGHT):
             next_pos = (row + r, col + c)
             if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
                 continue
-            
+
             possibles[i] = next_pos
             actions_mask[i] = 1
-        
+
         return possibles, actions_mask
 
     def get_actions_for_king(self, pos: Cell, turn: int):
@@ -463,7 +471,7 @@ class Chess(gym.Env):
                 src_poses,
                 *self.get_actions_for_knight(piece_pos, turn, deny_enemy_king),
             )
-            
+
         if piece_cat == "wingedknight":
             return (
                 src_poses,
@@ -510,8 +518,6 @@ class Chess(gym.Env):
             all_possibles.append(possibles)
             all_actions_mask.append(actions_mask)
 
-
-
         return (
             np.concatenate(all_source_pos),
             np.concatenate(all_possibles),
@@ -547,7 +553,7 @@ class Chess(gym.Env):
 
     def is_check(self, king_pos: Cell, turn: int) -> bool:
         rk, ck = king_pos
-        
+
         # GO TO UP ROW
         for r in range(rk + 1, 8):
             if not self.is_empty((r, ck), turn):
@@ -555,7 +561,7 @@ class Chess(gym.Env):
             p = self.board[1 - turn, 7 - r, ck]
             if p == Pieces.ROOK or p == Pieces.QUEEN:
                 return True
-        
+
         # GO TO DOWN ROW
         for r in range(rk - 1, -1, -1):
             if not self.is_empty((r, ck), turn):
@@ -563,7 +569,7 @@ class Chess(gym.Env):
             p = self.board[1 - turn, 7 - r, ck]
             if p == Pieces.ROOK or p == Pieces.QUEEN:
                 return True
-        
+
         # GO TO RIGHT COL
         for c in range(ck + 1, 8):
             if not self.is_empty((rk, c), turn):
@@ -594,7 +600,7 @@ class Chess(gym.Env):
                 p = self.board[1 - turn, 7 - r, c]
                 if p == Pieces.BISHOP or p == Pieces.QUEEN:
                     return True
-                
+
                 if d == 1 and p == Pieces.PAWN:
                     return True
 
@@ -612,7 +618,6 @@ class Chess(gym.Env):
                 if p == Pieces.BISHOP or p == Pieces.QUEEN:
                     return True
 
-
         # KNIGHTS
         for r, c in Moves.KNIGHT:
             nr, nc = rk + r, ck + c
@@ -620,7 +625,7 @@ class Chess(gym.Env):
                 continue
             if self.board[1 - turn, 7 - nr, nc] == Pieces.KNIGHT:
                 return True
-            
+
         # WINGED KNIGHTS
         for r, c in Moves.WINGED_KNIGHT:
             nr, nc = rk + r, ck + c
@@ -628,7 +633,6 @@ class Chess(gym.Env):
                 continue
             if self.board[1 - turn, 7 - nr, nc] == Pieces.WINGED_KNIGHT:
                 return True
-
         return False
 
     def update_checks(self, rewards: list[int] = None, infos: list[set] = None):

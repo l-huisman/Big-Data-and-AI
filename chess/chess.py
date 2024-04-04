@@ -628,14 +628,6 @@ class Chess(gym.Env):
                 continue
             if self.board[1 - turn, 7 - nr, nc] == Pieces.WINGED_KNIGHT:
                 return True
-            
-        # HOPLITES
-        for r, c in Moves.HOPLITE:
-            nr, nc = rk + r, ck + c
-            if not self.is_in_range((nr, nc)):
-                continue
-            if self.board[1 - turn, 7 - nr, nc] == Pieces.HOPLITE:
-                return True
 
         return False
 

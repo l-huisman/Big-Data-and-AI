@@ -5,7 +5,7 @@ POSSIBLE_MOVES = {
     "bishop": 7 * 4,
     "queen": 7 * 4 * 2,
     "pawn": 7 * 4 * 2,
-    "winged_knight": 12,
+    "wingedknight": 12,
     "hoplite": 7 * 4 * 2,
 }
 

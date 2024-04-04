@@ -27,7 +27,7 @@ class Chess(gym.Env):
         render_mode: str = "human",
         window_size: int = 800,
     ) -> None:
-        self.action_space = spaces.Discrete(640)
+        self.action_space = spaces.Discrete(644)
         self.observation_space = spaces.Box(0, 7, (128,), dtype=np.int32)
 
         self.board: np.ndarray = self.init_board()
@@ -68,7 +68,7 @@ class Chess(gym.Env):
             "pawn_8": (1, 7),
             "rook_1": (0, 0),
             "rook_2": (0, 7),
-            "knight_1": (0, 1),
+            "wingedknight_1": (0, 1),
             "knight_2": (0, 6),
             "bishop_1": (0, 2),
             "bishop_2": (0, 5),
@@ -382,7 +382,7 @@ class Chess(gym.Env):
     def get_actions_for_winged_knight(
         self, pos: Cell, turn: int, deny_enemy_king: bool = False
     ):
-        possibles, actions_mask = self.get_empty_actions("winged_knight")
+        possibles, actions_mask = self.get_empty_actions("wingedknight")
         
         if pos is None:
             return possibles, actions_mask
@@ -464,7 +464,7 @@ class Chess(gym.Env):
                 *self.get_actions_for_knight(piece_pos, turn, deny_enemy_king),
             )
             
-        if piece_cat == "winged_knight":
+        if piece_cat == "wingedknight":
             return (
                 src_poses,
                 *self.get_actions_for_winged_knight(piece_pos, turn, deny_enemy_king),
@@ -707,7 +707,7 @@ class Chess(gym.Env):
 
     def step(self, action: int):
         assert not self.is_game_done(), "the game is finished reset"
-        assert action < 640, "action number must be less than 640"
+        assert action < 644, "action number must be less than 644"
 
         if self.steps == 5:
             for turn in range(2):

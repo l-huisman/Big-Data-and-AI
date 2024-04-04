@@ -29,6 +29,7 @@ while running:
     print(f"Infos = {infos}")
     print("-" * 64)
     env.render()
+    sleep(1)
     if done:
         env.reset()
         print("RESET")

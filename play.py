@@ -25,11 +25,28 @@ while running:
     
         # Convert human-readable action to chess move object
         try:
-            action = Chess.Move.from_uci(action_str)
-        except ValueError:
-            print("Invalid action! Please choose a valid action in algebraic notation (e.g., 'e2e4').")
-            continue  # Continue to prompt for action
+            f1 = int(action_str[1]) - 1
+            f2 = ord(action_str[0]) - ord('a')
+            from_pos = np.array([f1, f2])
+            t1 = int(action_str[3]) - 1
+            t2 = ord(action_str[2]) - ord('a')
+            to_pos = np.array([t1, t2])
+            
+            src, dst, mask = env.get_all_actions(turn)
+            action = np.where((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
+
+            print(f"Action = {action}", src[action], dst[action])
+            action = action[0]
+            rewards, done, infos = env.step(action)
+            print(f"Rewards = {rewards}")
+            print(f"Infos = {infos}")
+            print("-" * 64)
+        except:
+            print("Invalid action")
+            continue
+        
         env.render()
+        action_str = ''
     else:
         print("White" if turn else "Black")
         src, dst, mask = env.get_all_actions(turn)

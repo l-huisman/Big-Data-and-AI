@@ -98,7 +98,8 @@ WINGED_KNIGHT = (
 
 QUEEN = BISHOP + ROOK
 
-PAWN = ((1, 0), (2, 0), (1, 1), (1, -1)) + ROOK[2:] + BISHOP[1:]
+PAWN = ((1, 0), (2, 0), (1, 1), (1, -1)) # + ROOK [2:] + BISHOP [1:]?????
+HOPLITE = ((1, 0), (2, 0), (1, 1), (1, -1), (0, 1))
 
 PIECE_MOVE = [
     None,
@@ -109,4 +110,5 @@ PIECE_MOVE = [
     QUEEN,
     KING,
     WINGED_KNIGHT,
+    HOPLITE,
 ]

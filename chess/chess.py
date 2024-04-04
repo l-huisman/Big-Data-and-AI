@@ -386,6 +386,21 @@ class Chess(gym.Env):
             possibles[i] = next_pos
             actions_mask[i] = 1
 
+            # Castling
+            if self.can_castle(turn):
+                try:
+                    # King-side castling
+                    if self.is_empty((row, col + 1), turn) and self.is_empty((row, col + 2), turn):
+                        possibles[-2] = (row, col + 2)
+                        actions_mask[-2] = 1
+
+                    # Queen-side castling
+                    if self.is_empty((row, col - 1), turn) and self.is_empty((row, col - 2), turn) and self.is_empty(
+                            (row, col - 3), turn):
+                        possibles[-1] = (row, col - 2)
+                        actions_mask[-1] = 1
+                except IndexError:
+                    return possibles, actions_mask
         return possibles, actions_mask
 
     def get_source_pos(self, name: str, turn: int):
@@ -670,3 +685,38 @@ class Chess(gym.Env):
         self.turn = 1 - self.turn
         self.steps += 1
         return rewards, self.is_game_done(), infos
+
+    def can_castle(self, turn):
+        # Check if the king is in check
+        if self.is_check(self.get_pos_king(turn), turn):
+            return False
+
+        # Check if the king and rooks have not moved
+        if self.has_moved('king', turn) or self.has_moved('rook_1', turn) or self.has_moved('rook_2', turn):
+            return False
+
+        # Check if the path between the king and the rooks is empty
+        king_pos = self.get_pos_king(turn)
+        rook_1_pos = self.pieces[turn]['rook_1']
+        rook_2_pos = self.pieces[turn]['rook_2']
+
+        # check values for Nonetype
+        if king_pos is None or rook_1_pos is None or rook_2_pos is None:
+            return False
+
+        if not self.is_path_empty(king_pos, rook_1_pos, turn) or not self.is_path_empty(king_pos, rook_2_pos, turn):
+            return False
+
+        # If all conditions are met, return True
+        return True
+
+    def has_moved(self, param, turn):
+        def has_moved(self, param: str, turn: int) -> bool:
+            # Get the current position of the piece
+            current_pos = self.pieces[turn][param]
+
+            # Get the initial position of the piece
+            initial_pos = self.init_pieces()[turn][param]
+
+            # Check if the current position is different from the initial position
+            return current_pos != initial_pos

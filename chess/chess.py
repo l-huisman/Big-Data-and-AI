@@ -350,6 +350,25 @@ class Chess(gym.Env):
 
         return possibles, actions_mask
     
+    def get_actions_for_hoplite(
+        self, pos: Cell, turn: int, deny_enemy_king: bool = False
+    ):
+        possibles, actions_mask = self.get_empty_actions("hoplite")
+        
+        if pos is None:
+            return possibles, actions_mask
+        
+        row, col = pos
+        for i, (r, c) in enumerate(Moves.HOPLITE):
+            next_pos = (row + r, col + c)
+            if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
+                continue
+            
+            possibles[i] = next_pos
+            actions_mask[i] = 1
+
+        return possibles, actions_mask
+
     def get_actions_for_winged_knight(
         self, pos: Cell, turn: int, deny_enemy_king: bool = False
     ):
@@ -421,6 +440,12 @@ class Chess(gym.Env):
             return (
                 src_poses,
                 *self.get_actions_for_pawn(piece_pos, turn, deny_enemy_king),
+            )
+
+        if piece_cat == "hoplite":
+            return (
+                src_poses,
+                *self.get_actions_for_hoplite(piece_pos, turn, deny_enemy_king),
             )
 
         if piece_cat == "knight":
@@ -593,6 +618,14 @@ class Chess(gym.Env):
                 continue
             if self.board[1 - turn, 7 - nr, nc] == Pieces.WINGED_KNIGHT:
                 return True
+            
+        # HOPLITES
+        for r, c in Moves.HOPLITE:
+            nr, nc = rk + r, ck + c
+            if not self.is_in_range((nr, nc)):
+                continue
+            if self.board[1 - turn, 7 - nr, nc] == Pieces.HOPLITE:
+                return True
 
         return False
 
@@ -710,13 +743,12 @@ class Chess(gym.Env):
         # If all conditions are met, return True
         return True
 
-    def has_moved(self, param, turn):
-        def has_moved(self, param: str, turn: int) -> bool:
-            # Get the current position of the piece
-            current_pos = self.pieces[turn][param]
+    def has_moved(self, param: str, turn: int) -> bool:
+        # Get the current position of the piece
+        current_pos = self.pieces[turn][param]
 
-            # Get the initial position of the piece
-            initial_pos = self.init_pieces()[turn][param]
+        # Get the initial position of the piece
+        initial_pos = self.init_pieces()[turn][param]
 
-            # Check if the current position is different from the initial position
-            return current_pos != initial_pos
+        # Check if the current position is different from the initial position
+        return current_pos != initial_pos

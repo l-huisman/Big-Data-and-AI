@@ -5,6 +5,8 @@ POSSIBLE_MOVES = {
     "bishop": 7 * 4,
     "queen": 7 * 4 * 2,
     "pawn": 7 * 4 * 2,
+    "winged_knight": 8,
+    "hoplite": 10,
 }
 
 KING = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
@@ -98,8 +100,8 @@ WINGED_KNIGHT = (
 
 QUEEN = BISHOP + ROOK
 
-PAWN = ((1, 0), (2, 0), (1, 1), (1, -1)) # + ROOK [2:] + BISHOP [1:]?????
-HOPLITE = ((1, 0), (2, 0), (1, 1), (1, -1), (0, 1))
+PAWN = ((1, 0), (2, 0), (1, 1), (1, -1))  # + ROOK [2:] + BISHOP [1:]?????
+HOPLITE = PAWN + ((1, 0), (2, 0))
 
 PIECE_MOVE = [
     None,

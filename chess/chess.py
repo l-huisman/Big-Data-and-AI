@@ -460,6 +460,8 @@ class Chess(gym.Env):
             all_possibles.append(possibles)
             all_actions_mask.append(actions_mask)
 
+
+
         return (
             np.concatenate(all_source_pos),
             np.concatenate(all_possibles),
@@ -648,6 +650,14 @@ class Chess(gym.Env):
     def step(self, action: int):
         assert not self.is_game_done(), "the game is finished reset"
         assert action < 640, "action number must be less than 640"
+
+        # if step 5 has been reached, turn all knights into winged knights
+        if self.steps == 15:
+            for turn in range(2):
+                for row in range(8):
+                    for col in range(8):
+                        if self.board[turn, row, col] == Pieces.KNIGHT:
+                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT
 
         source_pos, possibles, actions_mask = self.get_all_actions(self.turn)
         assert actions_mask[action], f"Cannot Take This Action = {action}"

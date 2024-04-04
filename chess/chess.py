@@ -93,12 +93,22 @@ class Chess(gym.Env):
         for y in range(8):
             for x in range(8):
                 self.draw_piece(x, y)
+                
+    def draw_axis(self):
+        font = pygame.font.Font(None, 36)
+        for i, label in enumerate("12345678"):
+            text = font.render(label, True, Colors.GREEN)
+            self.screen.blit(text, (i * self.cell_size + self.cell_size // 2 - 10, self.window_size - 20))
+        for i, label in enumerate("abcdefgh"):
+            text = font.render(label, True, Colors.GREEN)
+            self.screen.blit(text, (self.window_size - 20, i * self.cell_size + self.cell_size // 2 - 10))
 
     def render(self) -> Union[None, np.ndarray]:
         self.init_pygame()
         self.screen.fill(Colors.BLACK)
         self.draw_cells()
         self.draw_pieces()
+        self.draw_axis()
 
         if self.render_mode == "human":
             pygame.display.flip()

@@ -220,9 +220,19 @@ class Chess(gym.Env):
         return True
 
     def piece_can_jump(self, pos: Cell, turn: int) -> bool:
-        jumps = {Pieces.KNIGHT, Pieces.KING, Pieces.WINGED_KNIGHT}
+        jumps = {Pieces.KNIGHT, Pieces.KING, Pieces.WINGED_KNIGHT, Pieces.WARELEFANT}
         piece = self.board[turn, pos[0], pos[1]]
+
+
         return piece in jumps
+    
+    def get_warelefant_target(self, row, col, turn):
+        # Example logic, adjust as needed based on your rules
+        # For simplicity, just returning one square diagonally forward
+        if turn == 0:  # Player 1, moving down the board
+            return row + 1, col + 1
+        else:  # Player 2, moving up the board
+            return row - 1, col + 1
 
     def general_validation(
         self,
@@ -300,6 +310,30 @@ class Chess(gym.Env):
             actions_mask[i] = 1
 
         return possibles, actions_mask
+    
+    def get_actions_for_war_elefant(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
+        possibles, actions_mask = self.get_empty_actions("warelefant")
+        if pos is None:
+            return possibles, actions_mask
+
+        row, col = pos
+        for i, (r, c) in enumerate(Moves.WARELEFANT):
+            next_pos = (row + r, col + c)
+
+            if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
+                continue
+
+            possibles[i] = next_pos
+            actions_mask[i] = 1
+
+            # Check for pawns in the way, if it's a pawn, continue the same direction until an empty spot or capture
+            
+            
+            print(possibles[i])
+        return possibles, actions_mask
+
+
+
 
     def get_action_for_queen(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
         possibles_rook, actions_mask_rook = self.get_actions_for_rook(
@@ -425,20 +459,20 @@ class Chess(gym.Env):
             actions_mask[i] = 1
 
             # Castling
-            if self.can_castle(turn):
-                try:
-                    # King-side castling
-                    if self.is_empty((row, col + 1), turn) and self.is_empty((row, col + 2), turn):
-                        possibles[-2] = (row, col + 2)
-                        actions_mask[-2] = 1
+            # if self.can_castle(turn):
+            #     try:
+            #         # King-side castling
+            #         if self.is_empty((row, col + 1), turn) and self.is_empty((row, col + 2), turn):
+            #             possibles[-2] = (row, col + 2)
+            #             actions_mask[-2] = 1
 
-                    # Queen-side castling
-                    if self.is_empty((row, col - 1), turn) and self.is_empty((row, col - 2), turn) and self.is_empty(
-                            (row, col - 3), turn):
-                        possibles[-1] = (row, col - 2)
-                        actions_mask[-1] = 1
-                except IndexError:
-                    return possibles, actions_mask
+            #         # Queen-side castling
+            #         if self.is_empty((row, col - 1), turn) and self.is_empty((row, col - 2), turn) and self.is_empty(
+            #                 (row, col - 3), turn):
+            #             possibles[-1] = (row, col - 2)
+            #             actions_mask[-1] = 1
+            #     except IndexError:
+            #         return possibles, actions_mask
         return possibles, actions_mask
 
     def get_source_pos(self, name: str, turn: int):
@@ -483,6 +517,12 @@ class Chess(gym.Env):
             return (
                 src_poses,
                 *self.get_actions_for_rook(piece_pos, turn, deny_enemy_king),
+            )
+        
+        if piece_cat == "warelefant":
+            return (
+                src_poses,
+                *self.get_actions_for_war_elefant(piece_pos, turn, deny_enemy_king),
             )
 
         if piece_cat == "bishop":
@@ -564,7 +604,7 @@ class Chess(gym.Env):
             if not self.is_empty((r, ck), turn):
                 break
             p = self.board[1 - turn, 7 - r, ck]
-            if p == Pieces.ROOK or p == Pieces.QUEEN:
+            if p == Pieces.ROOK or p == Pieces.QUEEN or p == Pieces.WARELEFANT:
                 return True
 
         # GO TO DOWN ROW
@@ -572,7 +612,7 @@ class Chess(gym.Env):
             if not self.is_empty((r, ck), turn):
                 break
             p = self.board[1 - turn, 7 - r, ck]
-            if p == Pieces.ROOK or p == Pieces.QUEEN:
+            if p == Pieces.ROOK or p == Pieces.QUEEN or p == Pieces.WARELEFANT:
                 return True
 
         # GO TO RIGHT COL
@@ -580,7 +620,7 @@ class Chess(gym.Env):
             if not self.is_empty((rk, c), turn):
                 break
             p = self.board[1 - turn, 7 - rk, c]
-            if p == Pieces.ROOK or p == Pieces.QUEEN:
+            if p == Pieces.ROOK or p == Pieces.QUEEN or p == Pieces.WARELEFANT:
                 return True
 
         # GOT TO LEFT COL
@@ -588,7 +628,7 @@ class Chess(gym.Env):
             if not self.is_empty((rk, c), turn):
                 break
             p = self.board[1 - turn, 7 - rk, c]
-            if p == Pieces.ROOK or p == Pieces.QUEEN:
+            if p == Pieces.ROOK or p == Pieces.QUEEN or p == Pieces.WARELEFANT:
                 return True
 
         # CROSS DOWN
@@ -725,7 +765,7 @@ class Chess(gym.Env):
         self.steps += 1
         
         #hoplites on turn 3
-        if self.steps == 2:
+        if self.steps == 6:
             for turn in range(2):
                 for pawn_num in range(1, 9):  # Assuming pawns are named pawn_1, pawn_2, ..., pawn_8
                     pawn_key = f"pawn_{pawn_num}"
@@ -766,7 +806,25 @@ class Chess(gym.Env):
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.KNIGHT:
-                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT     
+                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT    
+
+        # if step 20 has been reached, turn all rooks into war elefants on turn 10
+        if self.steps == 2:
+            for turn in range(2):
+                if 'rook_1' in self.pieces[turn]:
+                    self.pieces[turn]["warelefant_1"] = self.pieces[turn].pop('rook_1')
+                if 'rook_2' in self.pieces[turn]:
+                    self.pieces[turn]["warelefant_2"] = self.pieces[turn].pop('rook_2')
+                if 'rook_1' in self.pieces_names:
+                    self.pieces_names.append('warelefant_1')
+                    self.pieces_names.pop(self.pieces_names.index('rook_1'))
+                if 'rook_2' in self.pieces_names:
+                    self.pieces_names.append('warelefant_2')
+                    self.pieces_names.pop(self.pieces_names.index('rook_2'))
+                for row in range(8):
+                    for col in range(8):
+                        if self.board[turn, row, col] == Pieces.ROOK:
+                            self.board[turn, row, col] = Pieces.WARELEFANT     
 
         return rewards, self.is_game_done(), infos
 

@@ -7,6 +7,7 @@ POSSIBLE_MOVES = {
     "pawn": 7 * 4 * 2,
     "wingedknight": 12,
     "hoplite": 7 * 4 * 2,
+    "warelefant": 7 * 4,
 }
 
 KING = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
@@ -41,6 +42,12 @@ ROOK = (
     (0, -6),
     (0, -7),
 )
+
+WARELEFANT = (
+    ROOK
+)
+
+
 BISHOP = (
     (1, 1),
     (1, -1),

@@ -27,7 +27,7 @@ class Chess(gym.Env):
         render_mode: str = "human",
         window_size: int = 800,
     ) -> None:
-        self.action_space = spaces.Discrete(644)
+        self.action_space = spaces.Discrete(656) #standard chess board has 640 possible moves. We add 16 more moves to account for the new pieces (winged knight and hoplite)
         self.observation_space = spaces.Box(0, 7, (128,), dtype=np.int32)
 
         self.board: np.ndarray = self.init_board()
@@ -506,6 +506,7 @@ class Chess(gym.Env):
         all_possibles = []
         all_source_pos = []
         all_actions_mask = []
+        print(self.pieces[turn].keys())
         for name in self.pieces[turn].keys():
             # DENY ENEMY KING == FOR CHECKMATE VALIDATION ONLY SO ....
             if name == "king" and deny_enemy_king:
@@ -705,42 +706,58 @@ class Chess(gym.Env):
 
     def step(self, action: int):
         assert not self.is_game_done(), "the game is finished reset"
-        assert action < 644, "action number must be less than 644"
-
-
-        if self.steps == 5:
-            for turn in range(2):
-                for row in range(8):
-                    for col in range(8):
-                        if self.board[turn, row, col] == Pieces.PAWN:
-                            self.board[turn, row, col] = Pieces.HOPLITE
-
-        # if step 5 has been reached, turn all knights into winged knights
-        if self.steps == 15:
-            for turn in range(2):
-                for row in range(8):
-                    for col in range(8):
-                        if self.board[turn, row, col] == Pieces.KNIGHT:
-                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT
-
-        # dutch waterline: if step 10 has been reached, destroy a random row of pieces between 2 and 6 row of pieces
-        if self.steps == 10:
-            random_row_turn_1 = np.random.randint(2, 6)
-            random_row_turn_2 = 7 - random_row_turn_1
-            for turn in range(2):
-                for col in range(8):
-                    self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] = Pieces.EMPTY
+        assert action < 656, "action number must be less than 656"
 
         source_pos, possibles, actions_mask = self.get_all_actions(self.turn)
         assert actions_mask[action], f"Cannot Take This Action = {action}"
         rewards, infos = self.move_piece(
             source_pos[action], possibles[action], self.turn
         )
+                            
         rewards, infos = self.update_checks(rewards, infos)
         rewards, infos = self.update_check_mates(rewards, infos)
 
+        print(self.pieces[self.turn])
+        print(self.pieces_names)
+
         self.turn = 1 - self.turn
         self.steps += 1
+        
+        #hoplites on turn 3
+        if self.steps == 6:
+            for turn in range(2):
+                for row in range(8):
+                    for col in range(8):
+                        if self.board[turn, row, col] == Pieces.PAWN:
+                            self.board[turn, row, col] = Pieces.HOPLITE
+
+        # dutch waterline: if step 10 has been reached, destroy a random row of pieces between 2 and 6 row of pieces on turn 5
+        if self.steps == 10:
+            random_row_turn_1 = np.random.randint(2, 6)
+            random_row_turn_2 = 7 - random_row_turn_1
+            for turn in range(2):
+                for col in range(8):
+                    self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] = Pieces.EMPTY
+                
+        # if step 14 has been reached, turn all knights into winged knights on turn 7
+        if self.steps == 14:
+            for turn in range(2):
+                if 'knight_1' in self.pieces[turn]:
+                    self.pieces[turn]["wingedknight_1"] = self.pieces[turn].pop('knight_1')
+                if 'knight_2' in self.pieces[turn]:
+                    self.pieces[turn]["wingedknight_2"] = self.pieces[turn].pop('knight_2')
+                if 'knight_1' in self.pieces_names:
+                    self.pieces_names.append('wingedknight_1')
+                    self.pieces_names.pop(self.pieces_names.index('knight_1'))
+                if 'knight_2' in self.pieces_names:
+                    self.pieces_names.append('wingedknight_2')
+                    self.pieces_names.pop(self.pieces_names.index('knight_2'))
+                for row in range(8):
+                    for col in range(8):
+                        if self.board[turn, row, col] == Pieces.KNIGHT:
+                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT
+                            print(type(self.pieces))
+                            
         return rewards, self.is_game_done(), infos
 
     def can_castle(self, turn):

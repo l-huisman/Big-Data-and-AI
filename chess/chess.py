@@ -455,13 +455,13 @@ class Chess(gym.Env):
         piece_pos = self.pieces[turn][name]
         src_poses = self.get_source_pos(name, turn)
 
-        if piece_cat == "pawn" and turn < 5:
+        if piece_cat == "pawn":
             return (
                 src_poses,
                 *self.get_actions_for_pawn(piece_pos, turn, deny_enemy_king),
             )
 
-        if piece_cat == "hoplite" and turn >= 5:
+        if piece_cat == "hoplite":
             return (
                 src_poses,
                 *self.get_actions_for_hoplite(piece_pos, turn, deny_enemy_king),
@@ -725,8 +725,18 @@ class Chess(gym.Env):
         self.steps += 1
         
         #hoplites on turn 3
-        if self.steps == 6:
+        if self.steps == 2:
             for turn in range(2):
+                for pawn_num in range(1, 9):  # Assuming pawns are named pawn_1, pawn_2, ..., pawn_8
+                    pawn_key = f"pawn_{pawn_num}"
+                    hoplite_key = f"hoplite_{pawn_num}"
+                    
+                    if pawn_key in self.pieces[turn]:
+                        self.pieces[turn][hoplite_key] = self.pieces[turn].pop(pawn_key)
+                        
+                    if pawn_key in self.pieces_names:
+                        self.pieces_names.append(hoplite_key)
+                        self.pieces_names.remove(pawn_key)
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.PAWN:
@@ -741,7 +751,7 @@ class Chess(gym.Env):
                     self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] = Pieces.EMPTY
                 
         # if step 14 has been reached, turn all knights into winged knights on turn 7
-        if self.steps == 4:
+        if self.steps == 14:
             for turn in range(2):
                 if 'knight_1' in self.pieces[turn]:
                     self.pieces[turn]["wingedknight_1"] = self.pieces[turn].pop('knight_1')
@@ -756,7 +766,8 @@ class Chess(gym.Env):
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.KNIGHT:
-                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT                
+                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT     
+
         return rewards, self.is_game_done(), infos
 
     def can_castle(self, turn):

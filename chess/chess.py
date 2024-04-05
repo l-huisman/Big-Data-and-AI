@@ -424,21 +424,21 @@ class Chess(gym.Env):
             possibles[i] = next_pos
             actions_mask[i] = 1
 
-            # # Castling
-            # if self.can_castle(turn):
-            #     try:
-            #         # King-side castling
-            #         if self.is_empty((row, col + 1), turn) and self.is_empty((row, col + 2), turn):
-            #             possibles[-2] = (row, col + 2)
-            #             actions_mask[-2] = 1
-            #
-            #         # Queen-side castling
-            #         if self.is_empty((row, col - 1), turn) and self.is_empty((row, col - 2), turn) and self.is_empty(
-            #                 (row, col - 3), turn):
-            #             possibles[-1] = (row, col - 2)
-            #             actions_mask[-1] = 1
-            #     except IndexError:
-            #         return possibles, actions_mask
+            # Castling
+            if self.can_castle(turn):
+                try:
+                    # King-side castling
+                    if self.is_empty((row, col + 1), turn) and self.is_empty((row, col + 2), turn):
+                        possibles[-2] = (row, col + 2)
+                        actions_mask[-2] = 1
+
+                    # Queen-side castling
+                    if self.is_empty((row, col - 1), turn) and self.is_empty((row, col - 2), turn) and self.is_empty(
+                            (row, col - 3), turn):
+                        possibles[-1] = (row, col - 2)
+                        actions_mask[-1] = 1
+                except IndexError:
+                    return possibles, actions_mask
         return possibles, actions_mask
 
     def get_source_pos(self, name: str, turn: int):
@@ -746,7 +746,9 @@ class Chess(gym.Env):
             random_row_turn_2 = 7 - random_row_turn_1
             for turn in range(2):
                 for col in range(8):
-                    self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] = Pieces.EMPTY
+                    # Check if the piece is a king before removing it
+                    if self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] != Pieces.KING:
+                        self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] = Pieces.EMPTY
 
         # if step 14 has been reached, turn all knights into winged knights on turn 7
         if self.steps == 14:

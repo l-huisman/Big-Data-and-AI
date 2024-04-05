@@ -506,7 +506,6 @@ class Chess(gym.Env):
         all_possibles = []
         all_source_pos = []
         all_actions_mask = []
-        print(self.pieces[turn].keys())
         for name in self.pieces[turn].keys():
             # DENY ENEMY KING == FOR CHECKMATE VALIDATION ONLY SO ....
             if name == "king" and deny_enemy_king:
@@ -716,10 +715,7 @@ class Chess(gym.Env):
                             
         rewards, infos = self.update_checks(rewards, infos)
         rewards, infos = self.update_check_mates(rewards, infos)
-
-        print(self.pieces[self.turn])
-        print(self.pieces_names)
-
+        
         self.turn = 1 - self.turn
         self.steps += 1
         
@@ -756,7 +752,6 @@ class Chess(gym.Env):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.KNIGHT:
                             self.board[turn, row, col] = Pieces.WINGED_KNIGHT
-                            print(type(self.pieces))
                             
         return rewards, self.is_game_done(), infos
 

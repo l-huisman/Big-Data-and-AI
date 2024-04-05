@@ -364,28 +364,28 @@ class Chess(gym.Env):
         possibles, actions_mask = self.get_empty_actions("hoplite")
         if pos is None:
             return possibles, actions_mask
-    
+
         row, col = pos
         if self.board[turn, row, col] == Pieces.QUEEN:
             return self.get_action_for_queen(pos, turn)
-    
+
         for i, (r, c) in enumerate(Moves.HOPLITE[:4]):
             next_pos = (row + r, col + c)
-    
+
             if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
                 continue
-    
+
             can_moves = (
                 (r == 1 and c == 0 and (self.both_side_empty(next_pos, turn) or self.check_for_enemy(next_pos, turn))),
                 (r == 2 and row == 1 and self.both_side_empty(next_pos, turn)),
                 (r == 1 and abs(c) == 1 and self.check_for_enemy(next_pos, turn)),
                 # TODO: EN PASSANT
             )
-    
+
             if True in can_moves:
                 possibles[i] = next_pos
                 actions_mask[i] = 1
-    
+
         return possibles, actions_mask
 
     def get_actions_for_winged_knight(

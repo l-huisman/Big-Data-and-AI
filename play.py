@@ -12,7 +12,6 @@ from learnings.ppo import PPO
 
 sys.setrecursionlimit(300)
 env = Chess(window_size=800)
-env.render()
 
 # Paths to your trained models
 white_ppo_path = 'results/DoubleAgents/white_ppo_dict.pt'
@@ -27,8 +26,14 @@ ppo = PPO(
 )
 
 # Create an instance of PPOChess
-ppo_chess = PPOChess(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
+try:
+    ppo_chess = PPOChess(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
+except FileNotFoundError:
+    print("Could not find model on specified location, make sure the location is correct."
+          " If you have not trained a model yet, train one first.")
+    sys.exit()
 
+env.render()
 ep = Episode()
 running = True
 while running:

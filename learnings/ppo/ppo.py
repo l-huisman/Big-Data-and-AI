@@ -46,6 +46,7 @@ class PPO(Learning):
         self.to(self.device)
 
     def take_action(self, state: np.ndarray, action_mask: np.ndarray):
+        self.action_dim = len(action_mask)
         state = T.Tensor(state).unsqueeze(0).to(self.device)
         action_mask = T.Tensor(action_mask).unsqueeze(0).to(self.device)
         dist = self.actor(state, action_mask)

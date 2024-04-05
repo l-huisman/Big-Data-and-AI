@@ -27,7 +27,7 @@ class Chess(gym.Env):
         render_mode: str = "human",
         window_size: int = 800,
     ) -> None:
-        self.action_space = spaces.Discrete(656) #standard chess board has 640 possible moves. We add 16 more moves to account for the new pieces (winged knight and hoplite)
+        self.action_space = spaces.Discrete(4096) #standard chess board has 640 possible moves. We add 16 more moves to account for the new pieces (winged knight and hoplite)
         self.observation_space = spaces.Box(0, 7, (128,), dtype=np.int32)
 
         self.board: np.ndarray = self.init_board()
@@ -175,6 +175,7 @@ class Chess(gym.Env):
         self.steps = 0
         self.board = self.init_board()
         self.pieces = self.init_pieces()
+        self.pieces_names = self.get_pieces_names()
         self.checked = [False, False]
 
     def get_pieces_names(self) -> set:
@@ -449,7 +450,7 @@ class Chess(gym.Env):
         return np.array([pos] * size)
 
     def get_actions_for(self, name: str, turn: int, deny_enemy_king: bool = False):
-        assert name in self.pieces_names, f"name not in {self.pieces_names}"
+        assert name in self.pieces_names, f"{name} not in {self.pieces_names}"
         piece_cat = name.split("_")[0]
         piece_pos = self.pieces[turn][name]
         src_poses = self.get_source_pos(name, turn)
@@ -506,6 +507,7 @@ class Chess(gym.Env):
         all_possibles = []
         all_source_pos = []
         all_actions_mask = []
+        length = 0
         for name in self.pieces[turn].keys():
             # DENY ENEMY KING == FOR CHECKMATE VALIDATION ONLY SO ....
             if name == "king" and deny_enemy_king:
@@ -517,6 +519,9 @@ class Chess(gym.Env):
             all_source_pos.append(source_pos)
             all_possibles.append(possibles)
             all_actions_mask.append(actions_mask)
+            length += len(actions_mask)
+        
+        all_actions_mask.append(np.zeros(4096 - length, dtype=bool))
 
         return (
             np.concatenate(all_source_pos),
@@ -703,10 +708,10 @@ class Chess(gym.Env):
 
 
 
-    def step(self, action: int):
+    def step(self, action: int):        
         assert not self.is_game_done(), "the game is finished reset"
-        assert action < 656, "action number must be less than 656"
-
+        assert action < 4096, "action number must be less than 4096"
+        
         source_pos, possibles, actions_mask = self.get_all_actions(self.turn)
         assert actions_mask[action], f"Cannot Take This Action = {action}"
         rewards, infos = self.move_piece(
@@ -736,7 +741,7 @@ class Chess(gym.Env):
                     self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] = Pieces.EMPTY
                 
         # if step 14 has been reached, turn all knights into winged knights on turn 7
-        if self.steps == 14:
+        if self.steps == 4:
             for turn in range(2):
                 if 'knight_1' in self.pieces[turn]:
                     self.pieces[turn]["wingedknight_1"] = self.pieces[turn].pop('knight_1')
@@ -751,8 +756,7 @@ class Chess(gym.Env):
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.KNIGHT:
-                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT
-                            
+                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT                
         return rewards, self.is_game_done(), infos
 
     def can_castle(self, turn):

@@ -226,13 +226,6 @@ class Chess(gym.Env):
 
         return piece in jumps
     
-    def get_warelefant_target(self, row, col, turn):
-        # Example logic, adjust as needed based on your rules
-        # For simplicity, just returning one square diagonally forward
-        if turn == 0:  # Player 1, moving down the board
-            return row + 1, col + 1
-        else:  # Player 2, moving up the board
-            return row - 1, col + 1
 
     def general_validation(
         self,

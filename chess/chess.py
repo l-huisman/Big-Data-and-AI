@@ -756,6 +756,7 @@ class Chess(gym.Env):
             turn, current_row, current_col
         ]
 
+        self.capture_pawn_by_warelefant(next_row, next_col, current_row, current_col, turn)
         self.promote_pawn(next_pos, turn)
         self.board[turn, current_row, current_col] = Pieces.EMPTY
         self.board[1 - turn, 7 - next_row, next_col] = Pieces.EMPTY
@@ -770,7 +771,12 @@ class Chess(gym.Env):
 
         rewards = [Rewards.MOVE, Rewards.MOVE]
         rewards[1 - turn] *= 2
-
+        
+        #  make sure that when i jump with a black warelefant over a white pawn that the black pawn also is captured. now he only captures the pawns of its own color
+        # Check if the piece is a warelefant. then check for pawns or hoplite in the way of the path of the moved piece, if it's a pawn or hoplite, capture the pawn or hoplite
+        return rewards, [set(), set()]\
+        
+    def capture_pawn_by_warelefant(self, next_row: int, next_col: int, current_row: int, current_col: int, turn: int):
         if self.board[turn, next_row, next_col] == Pieces.WARELEFANT:
             if current_row == next_row:
                 start_col = min(current_col, next_col) + 1
@@ -786,16 +792,8 @@ class Chess(gym.Env):
                 for row in range(start_row, end_row):
                     if self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]:
                         self.board[turn, row, current_col] = Pieces.EMPTY
-                        self.board[1 - turn, 7 - row, current_col] = Pieces.EMPTY
+                        self.board[1 - turn, row, current_col] = Pieces.EMPTY
 
-            
-
-        
-        # now make sure that when i jump with a black warelefant over a white pawn that the black pawn also is captured
-        # Check if the piece is a warelefant. then check for pawns or hoplite in the way of the path of the moved piece, if it's a pawn or hoplite, capture the pawn or hoplite
-
-
-        return rewards, [set(), set()]
 
     def is_game_done(self):
         return self.done or (self.steps >= self.max_steps)

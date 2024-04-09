@@ -246,9 +246,6 @@ class Chess(gym.Env):
         return True
 
 
-   
-
-
     def piece_can_jump(self, pos: Cell, turn: int) -> bool:
         jumps = {Pieces.KNIGHT, Pieces.KING, Pieces.WINGED_KNIGHT, Pieces.WARELEFANT}
         piece = self.board[turn, pos[0], pos[1]]
@@ -271,32 +268,22 @@ class Chess(gym.Env):
         if self.is_enemy_king(next_pos, turn) and (not deny_enemy_king):
             return False
 
-        print(current_pos)
-        print(next_pos)
         this_piece = Pieces.EMPTY
         for dic in self.pieces:
             for key, val in dic.items():
                 if val == current_pos:
                     this_piece = key.split("_")[0]
+        
+        # print(this_piece)
 
-        print(f'{this_piece} +')
         if this_piece == "warelefant":
-            if (
-                not self.is_path_empty_pawn(current_pos, next_pos, turn)
-            ):
-                # print("Warelefant cannot jump")
+            if (not self.is_path_empty_pawn(current_pos, next_pos, turn)):
                 return False
         else:
             if (not self.piece_can_jump(current_pos, turn)) and (
                 not self.is_path_empty(current_pos, next_pos, turn)
             ):
-                # print("test2")
                 return False
-            
-        # if (not self.piece_can_jump(current_pos, turn)) and (
-        #     not self.is_path_empty(current_pos, next_pos, turn)
-        # ):
-        #     return False
         
         return True
 
@@ -369,11 +356,11 @@ class Chess(gym.Env):
 
             possibles[i] = next_pos
             actions_mask[i] = 1
+        
+        
 
-            # Check for pawns in the way, if it's a pawn, continue the same direction until an empty spot or capture
+        # Check for pawns or hoplite in the way of the path of the moved piece, if it's a pawn or hoplite, capture the pawn or hoplite
         return possibles, actions_mask
-
-
 
 
     def get_action_for_queen(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
@@ -783,6 +770,37 @@ class Chess(gym.Env):
 
         rewards = [Rewards.MOVE, Rewards.MOVE]
         rewards[1 - turn] *= 2
+
+        if self.board[turn, next_row, next_col] == Pieces.WARELEFANT:
+            if current_row == next_row:
+                start_col = min(current_col, next_col) + 1
+                end_col = max(current_col, next_col)
+                for col in range(start_col, end_col):
+                    if self.board[turn, current_row, col] in [Pieces.PAWN, Pieces.HOPLITE]:
+                        self.board[turn, current_row, col] = Pieces.EMPTY
+                        self.board[1 - turn, 7 - current_row, col] = Pieces.EMPTY
+            elif current_col == next_col:
+                start_row = min(current_row, next_row) + 1
+                end_row = max(current_row, next_row)
+                for row in range(start_row, end_row):
+                    if self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]:
+                        self.board[turn, row, current_col] = Pieces.EMPTY
+                        self.board[1 - turn, 7 - row, current_col] = Pieces.EMPTY
+            else:
+                start_row = min(current_row, next_row) + 1
+                end_row = max(current_row, next_row)
+                start_col = min(current_col, next_col) + 1
+                end_col = max(current_col, next_col)
+                for row in range(start_row, end_row):
+                    for col in range(start_col, end_col):
+                        if self.board[turn, row, col] in [Pieces.PAWN, Pieces.HOPLITE]:
+                            self.board[turn, row, col] = Pieces.EMPTY
+                            self.board[1 - turn, 7 - row, col] = Pieces.EMPTY
+
+        
+        # now make sure that when i jump with a black warelefant over a white pawn that the black pawn also is captured
+        # Check if the piece is a warelefant. then check for pawns or hoplite in the way of the path of the moved piece, if it's a pawn or hoplite, capture the pawn or hoplite
+
 
         return rewards, [set(), set()]
 

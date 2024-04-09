@@ -792,7 +792,7 @@ class Chess(gym.Env):
                 for row in range(start_row, end_row):
                     if self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]:
                         self.board[turn, row, current_col] = Pieces.EMPTY
-                        self.board[1 - turn, row, current_col] = Pieces.EMPTY
+                        self.board[1 - turn, 7 - row, current_col] = Pieces.EMPTY
 
 
     def is_game_done(self):

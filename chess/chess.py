@@ -162,7 +162,6 @@ class Chess(gym.Env):
             rect = text.get_rect()
             rect.center = self.get_left_top(x, yy, offset=self.cell_size // 2)
             self.screen.blit(text, rect)
-
     def close(self) -> None:
         if self.screen is None:
             return
@@ -218,12 +217,41 @@ class Chess(gym.Env):
                 return False
 
         return True
+    
+    def is_path_empty_pawn(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
+        next_row, next_col = next_pos
+        current_row, current_col = current_pos
+
+        diff_row = next_row - current_row
+        diff_col = next_col - current_col
+        sign_row = np.sign(next_row - current_row)
+        sign_col = np.sign(next_col - current_col)
+
+        # Initialize arrays to store intermediate positions
+        size = max(abs(diff_row), abs(diff_col)) - 1
+        rows = np.zeros(size, dtype=np.int32) + next_row
+        cols = np.zeros(size, dtype=np.int32) + next_col
+
+        # If moving vertically
+        if diff_row:
+            rows = np.arange(current_row + sign_row, next_row, sign_row, dtype=np.int32)
+
+        # If moving horizontally
+        if diff_col:
+            cols = np.arange(current_col + sign_col, next_col, sign_col, dtype=np.int32)
+
+        for pos in zip(rows, cols):
+            if not self.both_side_empty_pawn(tuple(pos), turn):
+                return False
+        return True
+
+
+   
+
 
     def piece_can_jump(self, pos: Cell, turn: int) -> bool:
         jumps = {Pieces.KNIGHT, Pieces.KING, Pieces.WINGED_KNIGHT, Pieces.WARELEFANT}
         piece = self.board[turn, pos[0], pos[1]]
-
-
         return piece in jumps
     
 
@@ -243,10 +271,33 @@ class Chess(gym.Env):
         if self.is_enemy_king(next_pos, turn) and (not deny_enemy_king):
             return False
 
-        if (not self.piece_can_jump(current_pos, turn)) and (
-            not self.is_path_empty(current_pos, next_pos, turn)
-        ):
-            return False
+        print(current_pos)
+        print(next_pos)
+        this_piece = Pieces.EMPTY
+        for dic in self.pieces:
+            for key, val in dic.items():
+                if val == current_pos:
+                    this_piece = key.split("_")[0]
+
+        print(f'{this_piece} +')
+        if this_piece == "warelefant":
+            if (
+                not self.is_path_empty_pawn(current_pos, next_pos, turn)
+            ):
+                # print("Warelefant cannot jump")
+                return False
+        else:
+            if (not self.piece_can_jump(current_pos, turn)) and (
+                not self.is_path_empty(current_pos, next_pos, turn)
+            ):
+                # print("test2")
+                return False
+            
+        # if (not self.piece_can_jump(current_pos, turn)) and (
+        #     not self.is_path_empty(current_pos, next_pos, turn)
+        # ):
+        #     return False
+        
         return True
 
     def is_valid_move(
@@ -320,9 +371,6 @@ class Chess(gym.Env):
             actions_mask[i] = 1
 
             # Check for pawns in the way, if it's a pawn, continue the same direction until an empty spot or capture
-            
-            
-            print(possibles[i])
         return possibles, actions_mask
 
 
@@ -567,6 +615,9 @@ class Chess(gym.Env):
 
     def is_empty(self, pos: Cell, turn: int) -> bool:
         return self.board[turn, pos[0], pos[1]] == Pieces.EMPTY
+    
+    def is_empty_pawn(self, pos: Cell, turn: int) -> bool:
+        return self.board[turn, pos[0], pos[1]] == Pieces.EMPTY or self.board[turn, pos[0], pos[1]] == Pieces.PAWN or self.board[turn, pos[0], pos[1]] == Pieces.HOPLITE
 
     def is_enemy_king(self, pos: Cell, turn: int) -> bool:
         r, c = pos
@@ -575,6 +626,11 @@ class Chess(gym.Env):
     def both_side_empty(self, pos: Cell, turn: int) -> bool:
         r, c = pos
         return self.is_empty(pos, turn) and self.is_empty((7 - r, c), 1 - turn)
+    
+    def both_side_empty_pawn(self, pos: Cell, turn: int) -> bool:
+        r, c = pos
+        return self.is_empty_pawn(pos, turn) and self.is_empty_pawn((7 - r, c), 1 - turn) 
+        
 
     def get_pos_king(self, turn: int) -> Cell:
         row, col = np.where(self.board[turn] == Pieces.KING)

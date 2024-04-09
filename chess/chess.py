@@ -779,6 +779,7 @@ class Chess(gym.Env):
                     if self.board[turn, current_row, col] in [Pieces.PAWN, Pieces.HOPLITE]:
                         self.board[turn, current_row, col] = Pieces.EMPTY
                         self.board[1 - turn, 7 - current_row, col] = Pieces.EMPTY
+
             elif current_col == next_col:
                 start_row = min(current_row, next_row) + 1
                 end_row = max(current_row, next_row)
@@ -786,16 +787,8 @@ class Chess(gym.Env):
                     if self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]:
                         self.board[turn, row, current_col] = Pieces.EMPTY
                         self.board[1 - turn, 7 - row, current_col] = Pieces.EMPTY
-            else:
-                start_row = min(current_row, next_row) + 1
-                end_row = max(current_row, next_row)
-                start_col = min(current_col, next_col) + 1
-                end_col = max(current_col, next_col)
-                for row in range(start_row, end_row):
-                    for col in range(start_col, end_col):
-                        if self.board[turn, row, col] in [Pieces.PAWN, Pieces.HOPLITE]:
-                            self.board[turn, row, col] = Pieces.EMPTY
-                            self.board[1 - turn, 7 - row, col] = Pieces.EMPTY
+
+            
 
         
         # now make sure that when i jump with a black warelefant over a white pawn that the black pawn also is captured

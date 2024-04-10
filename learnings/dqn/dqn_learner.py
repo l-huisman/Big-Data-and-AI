@@ -93,4 +93,4 @@ class DQNLearner(Learning):
         self.buffer.add(episode)
 
     def save(self, folder: str, name: str = "dqn"):
-        T.save(self.dqn.state_dict(), f"{folder}/{name}.pth")
+        T.save(self.dqn.state_dict(), f"{folder}/{name}.pt")

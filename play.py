@@ -14,8 +14,8 @@ sys.setrecursionlimit(300)
 env = Chess(window_size=800)
 
 # Paths to your trained models
-white_ppo_path = 'results/DoubleAgents/white_ppo_dict.pt'
-black_ppo_path = 'results/DoubleAgents/black_ppo_dict.pt'
+white_ppo_path = 'results/DoubleAgentsPPO/white_ppo_dict.pt'
+black_ppo_path = 'results/DoubleAgentsPPO/black_ppo_dict.pt'
 
 ppo = PPO(
     env,

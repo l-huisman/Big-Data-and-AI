@@ -91,7 +91,7 @@ def plot_check_mates(
 
 ALPHA = 0.25
 COUNT = 512  # 512
-for name in ["Double Agents", "Single Agent"]:
+for name in ["Double AgentsPPO", "Double AgentsDQN", "Single Agent"]:
     print(name, "...")
     folder = "".join(name.split(" "))
     folder = f"results/{folder}"

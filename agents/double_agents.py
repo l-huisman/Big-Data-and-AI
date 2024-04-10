@@ -28,8 +28,8 @@ class DoubleAgentsChess(BaseAgent):
         self.black_agent.learn()
 
     def save_learners(self):
-        self.white_agent.save(self.result_folder, "white_ppo")
-        self.black_agent.save(self.result_folder, "black_ppo")
-        torch.save(self.white_agent.state_dict(), f"{self.result_folder}/white_ppo_dict.pt")
-        torch.save(self.black_agent.state_dict(), f"{self.result_folder}/black_ppo_dict.pt")
+        self.white_agent.save(self.result_folder, "white")
+        self.black_agent.save(self.result_folder, "black")
+        torch.save(self.white_agent.state_dict(), f"{self.result_folder}/white_dict.pt")
+        torch.save(self.black_agent.state_dict(), f"{self.result_folder}/black_dict.pt")
         

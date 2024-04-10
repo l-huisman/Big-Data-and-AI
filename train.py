@@ -89,7 +89,7 @@ if __name__ == "__main__":
         print(dqn.device)
         print(dqn)
 
-        agent = SingleAgentChess(
+        agent = DoubleAgentsChess(
             env=chess,
             learner=dqn,
             episodes=args["episodes"],

@@ -7,6 +7,7 @@ import numpy as np
 import random
 import sys
 
+from learnings.dqn import DQNLearner
 from learnings.ppo import PPO
 
 sys.setrecursionlimit(300)
@@ -14,19 +15,34 @@ env = Chess(window_size=800)
 env.render()
 
 # Paths to your trained models
-white_ppo_path = 'results/DoubleAgentsPPO/white_ppo_dict.pt'
-black_ppo_path = 'results/DoubleAgentsPPO/black_ppo_dict.pt'
+white_ppo_path = 'results/DoubleAgentsDQN/white_ppo_dict.pt'
+black_ppo_path = 'results/DoubleAgentsDQN/black_ppo_dict.pt'
 
-ppo = PPO(
+# ppo = PPO(
+#     env,
+#     hidden_layers=(2048,) * 4,
+#     epochs=100,
+#     buffer_size=32 * 2,
+#     batch_size=128,
+# )
+
+dqn = DQNLearner(
     env,
-    hidden_layers=(2048,) * 4,
     epochs=100,
-    buffer_size=32 * 2,
+    gamma=0.99,
+    learning_rate=0.003,
+    hidden_layers=(2048,) * 4,
+    buffer_size=32,
     batch_size=128,
+    epsilon=0.1,
+    epsilon_decay=0.995,
+    epsilon_min=0.01,
+    tau=0.99,
+    update_every=4,
 )
 
 # Create an instance of PPOChess
-chess_game = PPOChess(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
+chess_game = PPOChess(env, dqn, 1, 32, "", white_ppo_path, black_ppo_path)
 
 episode = Episode()
 # Play the game

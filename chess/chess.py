@@ -755,7 +755,7 @@ class Chess(gym.Env):
         ]
 
         self.capture_pawn_by_warelefant(next_row, next_col, current_row, current_col, turn)
-        self.promote_pawn(next_pos, turn)
+        self.promote_pawn_or_hoplite(next_pos, turn)
         self.board[turn, current_row, current_col] = Pieces.EMPTY
         self.board[1 - turn, 7 - next_row, next_col] = Pieces.EMPTY
 
@@ -798,10 +798,11 @@ class Chess(gym.Env):
     def is_game_done(self):
         return self.done or (self.steps >= self.max_steps)
 
-    def promote_pawn(self, pos: Cell, turn: int):
+    def promote_pawn_or_hoplite(self, pos: Cell, turn: int):
         row, col = pos
-        if self.board[turn, row, col] == Pieces.PAWN and row == 7:
+        if (self.board[turn, row, col] == Pieces.PAWN or self.board[turn, row, col] == Pieces.HOPLITE) and row == 7:
             self.board[turn, row, col] = Pieces.QUEEN
+        
 
     def step(self, action: int):
         assert not self.is_game_done(), "the game is finished reset"

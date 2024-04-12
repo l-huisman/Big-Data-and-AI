@@ -783,12 +783,15 @@ class Chess(gym.Env):
                     if self.board[turn, current_row, col] in [Pieces.PAWN, Pieces.HOPLITE]:
                         self.board[turn, current_row, col] = Pieces.EMPTY
                         self.board[1 - turn, 7 - current_row, col] = Pieces.EMPTY
+                    if self.board[1 - turn, 7 - current_row, col] in [Pieces.PAWN, Pieces.HOPLITE]:
+                        self.board[turn, current_row, col] = Pieces.EMPTY
+                        self.board[1 - turn, 7 - current_row, col] = Pieces.EMPTY
 
             elif current_col == next_col:
                 start_row = min(current_row, next_row) + 1
                 end_row = max(current_row, next_row)
                 for row in range(start_row, end_row):
-                    if self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]:
+                    if self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE] or self.board[1 - turn, 7 -  row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]:
                         self.board[turn, row, current_col] = Pieces.EMPTY
                         self.board[1 - turn, 7 - row, current_col] = Pieces.EMPTY
 

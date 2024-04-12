@@ -676,10 +676,11 @@ class Chess(gym.Env):
                     break
 
                 p = self.board[1 - turn, 7 - r, c]
+                
                 if p == Pieces.BISHOP or p == Pieces.QUEEN:
                     return True
 
-                if d == 1 and p == Pieces.PAWN:
+                if d == 1 and (p == Pieces.PAWN or p == Pieces.HOPLITE):
                     return True
 
         # CROSS UP
@@ -694,6 +695,9 @@ class Chess(gym.Env):
 
                 p = self.board[1 - turn, 7 - r, c]
                 if p == Pieces.BISHOP or p == Pieces.QUEEN:
+                    return True
+                
+                if d == 1 and (p == Pieces.PAWN or p == Pieces.HOPLITE):
                     return True
 
         # KNIGHTS

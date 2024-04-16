@@ -8,6 +8,7 @@ ROOK = 4
 QUEEN = 5
 KING = 6
 
+# new pieces
 WINGED_KNIGHT = 7
 HOPLITE = 8
 WARELEFANT = 9

@@ -26,8 +26,7 @@ class Chess(gym.Env):
             render_mode: str = "human",
             window_size: int = 800,
     ) -> None:
-        self.action_space = spaces.Discrete(
-            1000)  # standard chess board has 1000 possible moves. We add 16 more moves to account for the new pieces (winged knight and hoplite)
+        self.action_space = spaces.Discrete(1000)  # standard chess board has 1000 possible moves.
         self.observation_space = spaces.Box(0, 7, (128,), dtype=np.int32)
 
         self.board: np.ndarray = self.init_board()
@@ -37,16 +36,17 @@ class Chess(gym.Env):
         self.turn: int = Pieces.WHITE
         self.done: bool = False
         self.steps: int = 0
-        self.checked: bool = [False, False]
+        self.checked: list[bool] = [False, False]
         self.max_steps: int = max_steps
 
-        self.font: Font = None
+        self.font: Font | None = None
         self.cell_size: int = window_size // 8
-        self.screen: Surface = None
+        self.screen: Surface | None = None
         self.window_size: int = window_size
         self.render_mode: str = render_mode
 
-    def init_board(self) -> np.ndarray:
+    @staticmethod
+    def init_board() -> np.ndarray:
         board = np.zeros((2, 8, 8), dtype=np.uint8)
         board[:, 0, 3] = Pieces.QUEEN
         board[:, 0, 4] = Pieces.KING
@@ -56,7 +56,8 @@ class Chess(gym.Env):
         board[:, 0, (2, 5)] = Pieces.BISHOP
         return board
 
-    def init_pieces(self):
+    @staticmethod
+    def init_pieces():
         pieces = {
             "pawn_1": (1, 0),
             "pawn_2": (1, 1),
@@ -130,12 +131,13 @@ class Chess(gym.Env):
         else:
             self.screen = pygame.Surface((self.window_size,) * 2)
 
-    def get_cell_color(self, x: int, y: int) -> tuple[int]:
+    @staticmethod
+    def get_cell_color(x: int, y: int) -> tuple[int]:
         if (x + y) % 2 == 0:
             return Colors.GRAY
         return Colors.BLACK
 
-    def get_left_top(self, x: int, y: int, offset: float = 0) -> tuple[int]:
+    def get_left_top(self, x: int, y: int, offset: float = 0) -> tuple[float, float]:
         return self.cell_size * x + offset, self.cell_size * y + offset
 
     def draw_cell(self, x: int, y: int) -> None:
@@ -169,7 +171,7 @@ class Chess(gym.Env):
         pygame.display.quit()
         pygame.quit()
 
-    def reset(self) -> np.ndarray:
+    def reset(self) -> None:
         self.done = False
         self.turn = Pieces.WHITE
         self.steps = 0
@@ -178,23 +180,25 @@ class Chess(gym.Env):
         self.pieces_names = self.get_pieces_names()
         self.checked = [False, False]
 
-    def get_pieces_names(self) -> set:
+    def get_pieces_names(self) -> list[str]:
         return list(self.pieces[0].keys())
 
-    def is_in_range(self, pos: Cell) -> bool:
+    @staticmethod
+    def is_in_range(pos: Cell) -> bool:
         row, col = pos
-        return row >= 0 and row <= 7 and col >= 0 and col <= 7
+        return 0 <= row <= 7 and 0 <= col <= 7
 
-    def get_size(self, name: str):
+    @staticmethod
+    def get_size(name: str) -> int:
         return Moves.POSSIBLE_MOVES[name]
 
-    def get_empty_actions(self, name: str):
+    def get_empty_actions(self, name: str) -> tuple[np.ndarray, np.ndarray]:
         size = self.get_size(name)
         possibles = np.zeros((size, 2), dtype=np.int32)
-        actions_mask = np.zeros((size), dtype=np.int32)
+        actions_mask = np.zeros(size, dtype=np.int32)
         return possibles, actions_mask
 
-    def is_path_empty(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
+    def is_path_empty(self, current_pos: Cell, next_pos: Cell, turn: int, except_pawn: bool = False) -> bool:
         next_row, next_col = next_pos
         current_row, current_col = current_pos
 
@@ -214,36 +218,13 @@ class Chess(gym.Env):
             cols = np.arange(current_col + sign_col, next_col, sign_col, dtype=np.int32)
 
         for pos in zip(rows, cols):
-            if not self.both_side_empty(tuple(pos), turn):
-                return False
+            if except_pawn:
+                if not self.both_side_empty_pawn(tuple(pos), turn):
+                    return False
+            else:
+                if not self.both_side_empty(tuple(pos), turn):
+                    return False
 
-        return True
-
-    def is_path_empty_pawn(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
-        next_row, next_col = next_pos
-        current_row, current_col = current_pos
-
-        diff_row = next_row - current_row
-        diff_col = next_col - current_col
-        sign_row = np.sign(next_row - current_row)
-        sign_col = np.sign(next_col - current_col)
-
-        # Initialize arrays to store intermediate positions
-        size = max(abs(diff_row), abs(diff_col)) - 1
-        rows = np.zeros(size, dtype=np.int32) + next_row
-        cols = np.zeros(size, dtype=np.int32) + next_col
-
-        # If moving vertically
-        if diff_row:
-            rows = np.arange(current_row + sign_row, next_row, sign_row, dtype=np.int32)
-
-        # If moving horizontally
-        if diff_col:
-            cols = np.arange(current_col + sign_col, next_col, sign_col, dtype=np.int32)
-
-        for pos in zip(rows, cols):
-            if not self.both_side_empty_pawn(tuple(pos), turn):
-                return False
         return True
 
     def piece_can_jump(self, pos: Cell, turn: int) -> bool:
@@ -276,7 +257,7 @@ class Chess(gym.Env):
         # print(this_piece)
 
         if this_piece == "warelefant":
-            if (not self.is_path_empty_pawn(current_pos, next_pos, turn)):
+            if not self.is_path_empty(current_pos, next_pos, turn, except_pawn=True):
                 return False
         else:
             if (not self.piece_can_jump(current_pos, turn)) and (
@@ -299,21 +280,20 @@ class Chess(gym.Env):
             return False
         return True
 
-    def is_lead_to_check(self, current_pos: int, next_pos: int, turn: int) -> bool:
+    def is_lead_to_check(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
         temp = Chess(render_mode="rgb_array")
         temp.board = np.copy(self.board)
         temp.move_piece(current_pos, next_pos, turn)
         return temp.is_check(temp.get_pos_king(turn), turn)
 
-    def get_actions_for_bishop(
-            self, pos: Cell, turn: int, deny_enemy_king: bool = False
-    ):
-        possibles, actions_mask = self.get_empty_actions("bishop")
+    def get_actions_for_piece(self, pos: Cell, turn: int, piece: str, moves: list[tuple[int, int]],
+                              deny_enemy_king: bool = False):
+        possibles, actions_mask = self.get_empty_actions(piece)
         if pos is None:
             return possibles, actions_mask
 
         row, col = pos
-        for i, (r, c) in enumerate(Moves.BISHOP):
+        for i, (r, c) in enumerate(moves):
             next_pos = (row + r, col + c)
 
             if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
@@ -325,38 +305,13 @@ class Chess(gym.Env):
         return possibles, actions_mask
 
     def get_actions_for_rook(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
-        possibles, actions_mask = self.get_empty_actions("rook")
-        if pos is None:
-            return possibles, actions_mask
+        return self.get_actions_for_piece(pos, turn, "rook", Moves.ROOK, deny_enemy_king)
 
-        row, col = pos
-        for i, (r, c) in enumerate(Moves.ROOK):
-            next_pos = (row + r, col + c)
-
-            if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
-                continue
-
-            possibles[i] = next_pos
-            actions_mask[i] = 1
-
-        return possibles, actions_mask
+    def get_actions_for_bishop(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
+        return self.get_actions_for_piece(pos, turn, "bishop", Moves.BISHOP, deny_enemy_king)
 
     def get_actions_for_war_elefant(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
-        possibles, actions_mask = self.get_empty_actions("warelefant")
-        if pos is None:
-            return possibles, actions_mask
-
-        row, col = pos
-        for i, (r, c) in enumerate(Moves.WARELEFANT):
-            next_pos = (row + r, col + c)
-
-            if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
-                continue
-
-            possibles[i] = next_pos
-            actions_mask[i] = 1
-
-        return possibles, actions_mask
+        return self.get_actions_for_piece(pos, turn, "warelefant", Moves.WARELEFANT, deny_enemy_king)
 
     def get_action_for_queen(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
         possibles_rook, actions_mask_rook = self.get_actions_for_rook(
@@ -398,24 +353,8 @@ class Chess(gym.Env):
 
         return possibles, actions_mask
 
-    def get_actions_for_knight(
-            self, pos: Cell, turn: int, deny_enemy_king: bool = False
-    ):
-        possibles, actions_mask = self.get_empty_actions("knight")
-
-        if pos is None:
-            return possibles, actions_mask
-
-        row, col = pos
-        for i, (r, c) in enumerate(Moves.KNIGHT):
-            next_pos = (row + r, col + c)
-            if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
-                continue
-
-            possibles[i] = next_pos
-            actions_mask[i] = 1
-
-        return possibles, actions_mask
+    def get_actions_for_knight(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
+        return self.get_actions_for_piece(pos, turn, "knight", Moves.KNIGHT, deny_enemy_king)
 
     def get_actions_for_hoplite(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
         possibles, actions_mask = self.get_empty_actions("hoplite")
@@ -465,7 +404,6 @@ class Chess(gym.Env):
         return possibles, actions_mask
 
     def get_actions_for_king(self, pos: Cell, turn: int):
-        pos
         row, col = pos
         possibles, actions_mask = self.get_empty_actions("king")
 
@@ -506,7 +444,7 @@ class Chess(gym.Env):
         size = self.get_size(cat)
         return np.array([pos] * size)
 
-    def get_actions_for(self, name: str, turn: int, deny_enemy_king: bool = False):
+    def get_actions_for(self, name: str, turn: int, deny_enemy_king: bool = False) -> tuple:
         assert name in self.pieces_names, f"{name} not in {self.pieces_names}"
         piece_cat = name.split("_")[0]
         piece_pos = self.pieces[turn][name]
@@ -781,8 +719,6 @@ class Chess(gym.Env):
                 reward = getattr(Rewards, piece)
                 rewards = self.addReward(rewards, reward, turn)
 
-        #  make sure that when i jump with a black warelefant over a white pawn that the black pawn also is captured. now he only captures the pawns of its own color
-        # Check if the piece is a warelefant. then check for pawns or hoplite in the way of the path of the moved piece, if it's a pawn or hoplite, capture the pawn or hoplite
         return rewards, [set(), set()]
 
     def addReward(self, rewards: list[int] = None, reward: int = 0, turn: int = 1):
@@ -811,8 +747,8 @@ class Chess(gym.Env):
                 start_row = min(current_row, next_row) + 1
                 end_row = max(current_row, next_row)
                 for row in range(start_row, end_row):
-                    if self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE] or self.board[
-                        1 - turn, 7 - row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]:
+                    if (self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE] or
+                            self.board[1 - turn, 7 - row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]):
                         self.board[turn, row, current_col] = Pieces.EMPTY
                         self.board[1 - turn, 7 - row, current_col] = Pieces.EMPTY
                         for key, value in self.pieces[turn].items():

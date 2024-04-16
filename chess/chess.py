@@ -1,18 +1,17 @@
-import gym
-import copy
-import pygame
-import numpy as np
-import chess.moves as Moves
-import chess.pieces as Pieces
-import chess.colors as Colors
-import chess.rewards as Rewards
-import chess.info_keys as InfoKeys
-
-from gym import spaces
 from typing import Union
+
+import gym
+import numpy as np
+import pygame
+from gym import spaces
 from pygame.font import Font
 from pygame.surface import Surface
 
+import chess.colors as Colors
+import chess.info_keys as InfoKeys
+import chess.moves as Moves
+import chess.pieces as Pieces
+import chess.rewards as Rewards
 from chess.types import Cell
 
 
@@ -22,12 +21,13 @@ class Chess(gym.Env):
     }
 
     def __init__(
-        self,
-        max_steps: int = 128,
-        render_mode: str = "human",
-        window_size: int = 800,
+            self,
+            max_steps: int = 128,
+            render_mode: str = "human",
+            window_size: int = 800,
     ) -> None:
-        self.action_space = spaces.Discrete(4096) #standard chess board has 640 possible moves. We add 16 more moves to account for the new pieces (winged knight and hoplite)
+        self.action_space = spaces.Discrete(
+            1000)  # standard chess board has 1000 possible moves. We add 16 more moves to account for the new pieces (winged knight and hoplite)
         self.observation_space = spaces.Box(0, 7, (128,), dtype=np.int32)
 
         self.board: np.ndarray = self.init_board()
@@ -246,19 +246,17 @@ class Chess(gym.Env):
                 return False
         return True
 
-
     def piece_can_jump(self, pos: Cell, turn: int) -> bool:
         jumps = {Pieces.KNIGHT, Pieces.KING, Pieces.WINGED_KNIGHT, Pieces.WARELEFANT}
         piece = self.board[turn, pos[0], pos[1]]
         return piece in jumps
-    
 
     def general_validation(
-        self,
-        current_pos: Cell,
-        next_pos: Cell,
-        turn: int,
-        deny_enemy_king: bool,
+            self,
+            current_pos: Cell,
+            next_pos: Cell,
+            turn: int,
+            deny_enemy_king: bool,
     ) -> bool:
         if not self.is_in_range(next_pos):
             return False
@@ -282,18 +280,18 @@ class Chess(gym.Env):
                 return False
         else:
             if (not self.piece_can_jump(current_pos, turn)) and (
-                not self.is_path_empty(current_pos, next_pos, turn)
+                    not self.is_path_empty(current_pos, next_pos, turn)
             ):
                 return False
 
         return True
 
     def is_valid_move(
-        self,
-        current_pos: Cell,
-        next_pos: Cell,
-        turn: int,
-        deny_enemy_king: bool,
+            self,
+            current_pos: Cell,
+            next_pos: Cell,
+            turn: int,
+            deny_enemy_king: bool,
     ) -> bool:
         if not self.general_validation(current_pos, next_pos, turn, deny_enemy_king):
             return False
@@ -308,7 +306,7 @@ class Chess(gym.Env):
         return temp.is_check(temp.get_pos_king(turn), turn)
 
     def get_actions_for_bishop(
-        self, pos: Cell, turn: int, deny_enemy_king: bool = False
+            self, pos: Cell, turn: int, deny_enemy_king: bool = False
     ):
         possibles, actions_mask = self.get_empty_actions("bishop")
         if pos is None:
@@ -342,7 +340,7 @@ class Chess(gym.Env):
             actions_mask[i] = 1
 
         return possibles, actions_mask
-    
+
     def get_actions_for_war_elefant(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
         possibles, actions_mask = self.get_empty_actions("warelefant")
         if pos is None:
@@ -359,7 +357,6 @@ class Chess(gym.Env):
             actions_mask[i] = 1
 
         return possibles, actions_mask
-
 
     def get_action_for_queen(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
         possibles_rook, actions_mask_rook = self.get_actions_for_rook(
@@ -402,9 +399,9 @@ class Chess(gym.Env):
         return possibles, actions_mask
 
     def get_actions_for_knight(
-        self, pos: Cell, turn: int, deny_enemy_king: bool = False
+            self, pos: Cell, turn: int, deny_enemy_king: bool = False
     ):
-        possibles, actions_mask = self.get_empty_actions("knight")        
+        possibles, actions_mask = self.get_empty_actions("knight")
 
         if pos is None:
             return possibles, actions_mask
@@ -449,7 +446,7 @@ class Chess(gym.Env):
         return possibles, actions_mask
 
     def get_actions_for_winged_knight(
-        self, pos: Cell, turn: int, deny_enemy_king: bool = False
+            self, pos: Cell, turn: int, deny_enemy_king: bool = False
     ):
         possibles, actions_mask = self.get_empty_actions("wingedknight")
 
@@ -544,7 +541,7 @@ class Chess(gym.Env):
                 src_poses,
                 *self.get_actions_for_rook(piece_pos, turn, deny_enemy_king),
             )
-        
+
         if piece_cat == "warelefant":
             return (
                 src_poses,
@@ -587,7 +584,7 @@ class Chess(gym.Env):
             all_actions_mask.append(actions_mask)
             length += len(actions_mask)
 
-        all_actions_mask.append(np.zeros(4096 - length, dtype=bool))
+        all_actions_mask.append(np.zeros(1000 - length, dtype=bool))
         return (
             np.concatenate(all_source_pos),
             np.concatenate(all_possibles),
@@ -602,7 +599,8 @@ class Chess(gym.Env):
         return self.board[turn, pos[0], pos[1]] == Pieces.EMPTY
 
     def is_empty_pawn(self, pos: Cell, turn: int) -> bool:
-        return self.board[turn, pos[0], pos[1]] == Pieces.EMPTY or self.board[turn, pos[0], pos[1]] == Pieces.PAWN or self.board[turn, pos[0], pos[1]] == Pieces.HOPLITE
+        return self.board[turn, pos[0], pos[1]] == Pieces.EMPTY or self.board[turn, pos[0], pos[1]] == Pieces.PAWN or \
+            self.board[turn, pos[0], pos[1]] == Pieces.HOPLITE
 
     def is_enemy_king(self, pos: Cell, turn: int) -> bool:
         r, c = pos
@@ -615,7 +613,6 @@ class Chess(gym.Env):
     def both_side_empty_pawn(self, pos: Cell, turn: int) -> bool:
         r, c = pos
         return self.is_empty_pawn(pos, turn) and self.is_empty_pawn((7 - r, c), 1 - turn)
-
 
     def get_pos_king(self, turn: int) -> Cell:
         row, col = np.where(self.board[turn] == Pieces.KING)
@@ -676,7 +673,7 @@ class Chess(gym.Env):
                     break
 
                 p = self.board[1 - turn, 7 - r, c]
-                
+
                 if p == Pieces.BISHOP or p == Pieces.QUEEN:
                     return True
 
@@ -696,7 +693,7 @@ class Chess(gym.Env):
                 p = self.board[1 - turn, 7 - r, c]
                 if p == Pieces.BISHOP or p == Pieces.QUEEN:
                     return True
-                
+
                 if d == 1 and (p == Pieces.PAWN or p == Pieces.HOPLITE):
                     return True
 
@@ -757,6 +754,9 @@ class Chess(gym.Env):
         self.board[turn, next_row, next_col] = self.board[
             turn, current_row, current_col
         ]
+        # Set default rewards, [-1, -2], -1 for the player who moved the piece, -2 for the other player
+        rewards = [Rewards.MOVE, Rewards.MOVE]
+        rewards[1 - turn] *= 2
 
         self.capture_pawn_by_warelefant(next_row, next_col, current_row, current_col, turn)
         self.promote_pawn_or_hoplite(next_pos, turn)
@@ -765,18 +765,31 @@ class Chess(gym.Env):
 
         for (key, value) in self.pieces[turn].items():
             if value == tuple(current_pos):
+                # Update the location of the piece in the pieces array
                 self.pieces[turn][key] = tuple(next_pos)
 
         for (key, value) in self.pieces[1 - turn].items():
             if value == (7 - next_pos[0], next_pos[1]):
+                # Remove the location from the piece that was removed in the pieces array
                 self.pieces[1 - turn][key] = None
 
-        rewards = [Rewards.MOVE, Rewards.MOVE]
-        rewards[1 - turn] *= 2
+                # add a reward for capturing a piece
+                piece = key.split("_")[0]
+                piece = piece.upper()
+
+                # get the reward from the rewards.py based on the name of the piece
+                reward = getattr(Rewards, piece)
+                rewards = self.addReward(rewards, reward, turn)
 
         #  make sure that when i jump with a black warelefant over a white pawn that the black pawn also is captured. now he only captures the pawns of its own color
         # Check if the piece is a warelefant. then check for pawns or hoplite in the way of the path of the moved piece, if it's a pawn or hoplite, capture the pawn or hoplite
-        return rewards, [set(), set()]\
+        return rewards, [set(), set()]
+
+    def addReward(self, rewards: list[int] = None, reward: int = 0, turn: int = 1):
+        rewards = [Rewards.MOVE, Rewards.MOVE] if rewards is None else rewards
+        rewards[turn] += reward
+        rewards[1 - turn] += -reward
+        return rewards
 
     def capture_pawn_by_warelefant(self, next_row: int, next_col: int, current_row: int, current_col: int, turn: int):
         if self.board[turn, next_row, next_col] == Pieces.WARELEFANT:
@@ -787,17 +800,27 @@ class Chess(gym.Env):
                     if self.board[turn, current_row, col] in [Pieces.PAWN, Pieces.HOPLITE]:
                         self.board[turn, current_row, col] = Pieces.EMPTY
                         self.board[1 - turn, 7 - current_row, col] = Pieces.EMPTY
-                    if self.board[1 - turn, 7 - current_row, col] in [Pieces.PAWN, Pieces.HOPLITE]:
-                        self.board[turn, current_row, col] = Pieces.EMPTY
-                        self.board[1 - turn, 7 - current_row, col] = Pieces.EMPTY
+                        for key, value in self.pieces[turn].items():
+                            if value == (current_row, col):
+                                self.pieces[turn][key] = None
+                        for key, value in self.pieces[1 - turn].items():
+                            if value == (7 - current_row, col):
+                                self.pieces[1 - turn][key] = None
 
             elif current_col == next_col:
                 start_row = min(current_row, next_row) + 1
                 end_row = max(current_row, next_row)
                 for row in range(start_row, end_row):
-                    if self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE] or self.board[1 - turn, 7 -  row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]:
+                    if self.board[turn, row, current_col] in [Pieces.PAWN, Pieces.HOPLITE] or self.board[
+                        1 - turn, 7 - row, current_col] in [Pieces.PAWN, Pieces.HOPLITE]:
                         self.board[turn, row, current_col] = Pieces.EMPTY
                         self.board[1 - turn, 7 - row, current_col] = Pieces.EMPTY
+                        for key, value in self.pieces[turn].items():
+                            if value == (row, current_col):
+                                self.pieces[turn][key] = None
+                        for key, value in self.pieces[1 - turn].items():
+                            if value == (7 - row, current_col):
+                                self.pieces[1 - turn][key] = None
 
     def is_game_done(self):
         return self.done or (self.steps >= self.max_steps)
@@ -806,11 +829,10 @@ class Chess(gym.Env):
         row, col = pos
         if (self.board[turn, row, col] == Pieces.PAWN or self.board[turn, row, col] == Pieces.HOPLITE) and row == 7:
             self.board[turn, row, col] = Pieces.QUEEN
-        
 
     def step(self, action: int):
         assert not self.is_game_done(), "the game is finished reset"
-        assert action < 4096, "action number must be less than 4096"
+        assert action < 1000, "action number must be less than 1000"
 
         source_pos, possibles, actions_mask = self.get_all_actions(self.turn)
         assert actions_mask[action], f"Cannot Take This Action = {action}"
@@ -869,9 +891,9 @@ class Chess(gym.Env):
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.KNIGHT:
-                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT    
+                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT
 
-        # if step 20 has been reached, turn all rooks into war elefants on turn 10
+                            # if step 20 has been reached, turn all rooks into war elefants on turn 10
         if self.steps == 2:
             for turn in range(2):
                 if 'rook_1' in self.pieces[turn]:
@@ -887,7 +909,7 @@ class Chess(gym.Env):
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.ROOK:
-                            self.board[turn, row, col] = Pieces.WARELEFANT     
+                            self.board[turn, row, col] = Pieces.WARELEFANT
 
         return rewards, self.is_game_done(), infos
 

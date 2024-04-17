@@ -22,5 +22,5 @@ ASCIIS = (
 )
 
 
-def get_ascii(color: int, piece: int):
+def get_ascii(color: int, piece: int) -> str:
     return ASCIIS[color][piece - 1][0]

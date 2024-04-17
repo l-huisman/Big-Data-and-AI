@@ -555,12 +555,12 @@ class Chess(gym.Env):
         diff_col = abs(col - col_enemy_king)
         return diff_row <= 1 and diff_col <= 1
 
-    def is_threatened_by_piece(self, king_pos: Cell, turn: int, directions: list[tuple[int, int]], pieces: list[int],
+    def is_threatened_by_piece(self, king_pos: Cell, turn: int, moves: list[tuple[int, int]], pieces: list[int],
                                check_range: int = 8) -> bool:
         rk, ck = king_pos
-        for direction in directions:
+        for move in moves:
             for d in range(1, check_range):
-                r, c = rk + d * direction[0], ck + d * direction[1]
+                r, c = rk + d * move[0], ck + d * move[1]
                 if not self.is_in_range((r, c)):
                     break
                 if not self.is_empty((r, c), turn):
@@ -571,21 +571,16 @@ class Chess(gym.Env):
         return False
 
     def is_threatened_by_horizontal(self, king_pos: Cell, turn: int) -> bool:
-        return self.is_threatened_by_piece(king_pos, turn, [(1, 0), (-1, 0), (0, 1), (0, -1)],
-                                           [Pieces.ROOK, Pieces.QUEEN, Pieces.WARELEFANT])
+        return self.is_threatened_by_piece(king_pos, turn, Moves.ROOK, [Pieces.ROOK, Pieces.QUEEN, Pieces.WARELEFANT])
 
     def is_threatened_by_diagonal(self, king_pos: Cell, turn: int) -> bool:
-        return self.is_threatened_by_piece(king_pos, turn, [(1, 1), (-1, -1), (1, -1), (-1, 1)],
-                                           [Pieces.BISHOP, Pieces.QUEEN])
+        return self.is_threatened_by_piece(king_pos, turn, Moves.BISHOP, [Pieces.BISHOP, Pieces.QUEEN])
 
     def is_threatened_by_knight(self, king_pos: Cell, turn: int) -> bool:
         return self.is_threatened_by_piece(king_pos, turn, Moves.KNIGHT, [Pieces.KNIGHT], check_range=1)
 
     def is_threatened_by_pawn(self, king_pos: Cell, turn: int) -> bool:
-        var = self.is_threatened_by_piece(king_pos, turn, [(1, -1), (1, 1)], [Pieces.PAWN, Pieces.HOPLITE], check_range=1)
-        if var:
-            print("Threatened by pawn")
-        return var
+        return self.is_threatened_by_piece(king_pos, turn, Moves.PAWN, [Pieces.PAWN, Pieces.HOPLITE], check_range=1)
 
     def is_check(self, king_pos: Cell, turn: int) -> bool:
         if self.is_threatened_by_horizontal(king_pos, turn):
@@ -663,11 +658,12 @@ class Chess(gym.Env):
 
                 # get the reward from the rewards.py based on the name of the piece
                 reward = getattr(Rewards, piece)
-                rewards = self.addReward(rewards, reward, turn)
+                rewards = self.add_reward(rewards, reward, turn)
 
         return rewards, [set(), set()]
 
-    def addReward(self, rewards: list[int] = None, reward: int = 0, turn: int = 1):
+    @staticmethod
+    def add_reward(rewards: list[int] = None, reward: int = 0, turn: int = 1):
         rewards = [Rewards.MOVE, Rewards.MOVE] if rewards is None else rewards
         rewards[turn] += reward
         rewards[1 - turn] += -reward

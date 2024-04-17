@@ -36,14 +36,16 @@ except FileNotFoundError:
 env.render()
 ep = Episode()
 running = True
+counter = 0
 while running:
+    counter += 1
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key != pygame.K_ESCAPE:
-                running = False
-                continue
+            break
+        if event.type == pygame.KEYDOWN and event.key != pygame.K_ESCAPE:
+            running = False
+            break
     turn = env.turn
     if turn == 0:
         action_str = input("Choose action (e.g., 'e2e4'): ")
@@ -61,11 +63,11 @@ while running:
             to_pos = np.array([t1, t2])
 
             src, dst, mask = env.get_all_actions(turn)
-            action = np.where((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
+            action = np.nonzero((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
 
             print(f"Action = {action}", src[action], dst[action])
             action = action[0]
-            rewards, done, infos = env.step(action)
+            rewards, done, infos, _, _ = env.step(action)
             print(f"Rewards = {rewards}")
             print(f"Infos = {infos}")
             print("-" * 64)
@@ -80,13 +82,12 @@ while running:
         done, _ = ppo_chess.take_action(turn, ep)
 
         rewards = ep.rewards
-        print("turn: ", env.turn)
+        print("turn: ", counter)
         print(f"Rewards = {rewards}")
         print("-" * 64)
         env.render()
     if done:
         env.reset()
         print("RESET")
-
 
 env.close()

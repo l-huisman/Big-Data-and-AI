@@ -47,14 +47,15 @@ chess_game = PPOChess(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
 episode = Episode()
 # Play the game
 counter = 0
-while True:
+running = True
+while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
     done, _ = chess_game.take_action(chess_game.env.turn, episode)
     # print("turn: ", chess_game.env.turn)
     env.render()
-    sleep(.1)  # Pause for a short time to make the game viewable
+    sleep(1)  # Pause for a short time to make the game viewable
     counter += 1
     if done:
         print("Game Over")

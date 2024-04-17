@@ -156,7 +156,7 @@ class Chess(gym.Env):
 
             yy = abs((color * 7) - y)
             text = self.font.render(
-                Pieces.get_ascii(color, self.board[color, row, col]),
+                Pieces.get_ascii(color, int(self.board[color, row, col])),
                 True,
                 Colors.WHITE,
                 self.get_cell_color(x, yy),
@@ -171,7 +171,7 @@ class Chess(gym.Env):
         pygame.display.quit()
         pygame.quit()
 
-    def reset(self) -> None:
+    def reset(self, **kwargs) -> None:
         self.done = False
         self.turn = Pieces.WHITE
         self.steps = 0
@@ -219,10 +219,10 @@ class Chess(gym.Env):
 
         for pos in zip(rows, cols):
             if except_pawn:
-                if not self.both_side_empty_pawn(tuple(pos), turn):
+                if not self.both_side_empty_pawn(pos, turn):
                     return False
             else:
-                if not self.both_side_empty(tuple(pos), turn):
+                if not self.both_side_empty(pos, turn):
                     return False
 
         return True
@@ -232,13 +232,19 @@ class Chess(gym.Env):
         piece = self.board[turn, pos[0], pos[1]]
         return piece in jumps
 
-    def general_validation(
-            self,
-            current_pos: Cell,
-            next_pos: Cell,
-            turn: int,
-            deny_enemy_king: bool,
-    ) -> bool:
+    def is_path_empty_for_piece(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
+        this_piece = Pieces.EMPTY
+        for dic in self.pieces:
+            for key, val in dic.items():
+                if val == current_pos:
+                    this_piece = key.split("_")[0]
+
+        if this_piece == "warelefant":
+            return self.is_path_empty(current_pos, next_pos, turn, except_pawn=True)
+        else:
+            return (not self.piece_can_jump(current_pos, turn)) and (self.is_path_empty(current_pos, next_pos, turn))
+
+    def general_validation(self, current_pos: Cell, next_pos: Cell, turn: int, deny_enemy_king: bool) -> bool:
         if not self.is_in_range(next_pos):
             return False
 
@@ -248,23 +254,8 @@ class Chess(gym.Env):
         if self.is_enemy_king(next_pos, turn) and (not deny_enemy_king):
             return False
 
-        this_piece = Pieces.EMPTY
-        for dic in self.pieces:
-            for key, val in dic.items():
-                if val == current_pos:
-                    this_piece = key.split("_")[0]
-
-        # print(this_piece)
-
-        if this_piece == "warelefant":
-            if not self.is_path_empty(current_pos, next_pos, turn, except_pawn=True):
-                return False
-        else:
-            if (not self.piece_can_jump(current_pos, turn)) and (
-                    not self.is_path_empty(current_pos, next_pos, turn)
-            ):
-                return False
-
+        if not self.is_path_empty_for_piece(current_pos, next_pos, turn):
+            return False
         return True
 
     def is_valid_move(
@@ -553,7 +544,7 @@ class Chess(gym.Env):
         return self.is_empty_pawn(pos, turn) and self.is_empty_pawn((7 - r, c), 1 - turn)
 
     def get_pos_king(self, turn: int) -> Cell:
-        row, col = np.where(self.board[turn] == Pieces.KING)
+        row, col = np.nonzero(self.board[turn] == Pieces.KING)
         return row[0], col[0]
 
     def is_neighbor_enemy_king(self, pos: Cell, turn: int) -> bool:
@@ -564,92 +555,47 @@ class Chess(gym.Env):
         diff_col = abs(col - col_enemy_king)
         return diff_row <= 1 and diff_col <= 1
 
-    def is_check(self, king_pos: Cell, turn: int) -> bool:
+    def is_threatened_by_piece(self, king_pos: Cell, turn: int, directions: list[tuple[int, int]], pieces: list[int],
+                               check_range: int = 8) -> bool:
         rk, ck = king_pos
-
-        # GO TO UP ROW
-        for r in range(rk + 1, 8):
-            if not self.is_empty((r, ck), turn):
-                break
-            p = self.board[1 - turn, 7 - r, ck]
-            if p == Pieces.ROOK or p == Pieces.QUEEN or p == Pieces.WARELEFANT:
-                return True
-
-        # GO TO DOWN ROW
-        for r in range(rk - 1, -1, -1):
-            if not self.is_empty((r, ck), turn):
-                break
-            p = self.board[1 - turn, 7 - r, ck]
-            if p == Pieces.ROOK or p == Pieces.QUEEN or p == Pieces.WARELEFANT:
-                return True
-
-        # GO TO RIGHT COL
-        for c in range(ck + 1, 8):
-            if not self.is_empty((rk, c), turn):
-                break
-            p = self.board[1 - turn, 7 - rk, c]
-            if p == Pieces.ROOK or p == Pieces.QUEEN or p == Pieces.WARELEFANT:
-                return True
-
-        # GOT TO LEFT COL
-        for c in range(ck - 1, -1, -1):
-            if not self.is_empty((rk, c), turn):
-                break
-            p = self.board[1 - turn, 7 - rk, c]
-            if p == Pieces.ROOK or p == Pieces.QUEEN or p == Pieces.WARELEFANT:
-                return True
-
-        # CROSS DOWN
-        for r in range(rk + 1, 8):
-            # RIGHT
-            d = r - rk
-            for c in [ck + d, ck - d]:
+        for direction in directions:
+            for d in range(1, check_range):
+                r, c = rk + d * direction[0], ck + d * direction[1]
                 if not self.is_in_range((r, c)):
-                    continue
-
+                    break
                 if not self.is_empty((r, c), turn):
                     break
-
                 p = self.board[1 - turn, 7 - r, c]
-
-                if p == Pieces.BISHOP or p == Pieces.QUEEN:
+                if p in pieces:
                     return True
+        return False
 
-                if d == 1 and (p == Pieces.PAWN or p == Pieces.HOPLITE):
-                    return True
+    def is_threatened_by_horizontal(self, king_pos: Cell, turn: int) -> bool:
+        return self.is_threatened_by_piece(king_pos, turn, [(1, 0), (-1, 0), (0, 1), (0, -1)],
+                                           [Pieces.ROOK, Pieces.QUEEN, Pieces.WARELEFANT])
 
-        # CROSS UP
-        for r in range(rk - 1, -1, -1):
-            d = r - rk
-            for c in [ck + d, ck - d]:
-                if not self.is_in_range((r, c)):
-                    continue
+    def is_threatened_by_diagonal(self, king_pos: Cell, turn: int) -> bool:
+        return self.is_threatened_by_piece(king_pos, turn, [(1, 1), (-1, -1), (1, -1), (-1, 1)],
+                                           [Pieces.BISHOP, Pieces.QUEEN])
 
-                if not self.is_empty((r, c), turn):
-                    break
+    def is_threatened_by_knight(self, king_pos: Cell, turn: int) -> bool:
+        return self.is_threatened_by_piece(king_pos, turn, Moves.KNIGHT, [Pieces.KNIGHT], check_range=1)
 
-                p = self.board[1 - turn, 7 - r, c]
-                if p == Pieces.BISHOP or p == Pieces.QUEEN:
-                    return True
+    def is_threatened_by_pawn(self, king_pos: Cell, turn: int) -> bool:
+        var = self.is_threatened_by_piece(king_pos, turn, [(1, -1), (1, 1)], [Pieces.PAWN, Pieces.HOPLITE], check_range=1)
+        if var:
+            print("Threatened by pawn")
+        return var
 
-                if d == 1 and (p == Pieces.PAWN or p == Pieces.HOPLITE):
-                    return True
-
-        # KNIGHTS
-        for r, c in Moves.KNIGHT:
-            nr, nc = rk + r, ck + c
-            if not self.is_in_range((nr, nc)):
-                continue
-            if self.board[1 - turn, 7 - nr, nc] == Pieces.KNIGHT:
-                return True
-
-        # WINGED KNIGHTS
-        for r, c in Moves.WINGED_KNIGHT:
-            nr, nc = rk + r, ck + c
-            if not self.is_in_range((nr, nc)):
-                continue
-            if self.board[1 - turn, 7 - nr, nc] == Pieces.WINGED_KNIGHT:
-                return True
+    def is_check(self, king_pos: Cell, turn: int) -> bool:
+        if self.is_threatened_by_horizontal(king_pos, turn):
+            return True
+        if self.is_threatened_by_diagonal(king_pos, turn):
+            return True
+        if self.is_threatened_by_knight(king_pos, turn):
+            return True
+        if self.is_threatened_by_pawn(king_pos, turn):
+            return True
         return False
 
     def update_checks(self, rewards: list[int] = None, infos: list[set] = None):
@@ -784,6 +730,7 @@ class Chess(gym.Env):
 
         # hoplites on turn 3
         if self.steps == 6:
+            print("Hoplites")
             for turn in range(2):
                 for pawn_num in range(1, 9):  # Assuming pawns are named pawn_1, pawn_2, ..., pawn_8
                     pawn_key = f"pawn_{pawn_num}"
@@ -803,6 +750,7 @@ class Chess(gym.Env):
         # Dutch waterline: if step 10 has been reached, destroy a random row of pieces between 2 and 6 row of pieces
         # on turn 5
         if self.steps == 10:
+            print("Dutch waterline")
             random_row_turn_1 = np.random.randint(2, 6)
             random_row_turn_2 = 7 - random_row_turn_1
             for turn in range(2):
@@ -813,6 +761,7 @@ class Chess(gym.Env):
 
         # if step 14 has been reached, turn all knights into winged knights on turn 7
         if self.steps == 14:
+            print("Winged knights")
             for turn in range(2):
                 if 'knight_1' in self.pieces[turn]:
                     self.pieces[turn]["wingedknight_1"] = self.pieces[turn].pop('knight_1')
@@ -831,6 +780,7 @@ class Chess(gym.Env):
 
                             # if step 20 has been reached, turn all rooks into war elefants on turn 10
         if self.steps == 2:
+            print("War elefants")
             for turn in range(2):
                 if 'rook_1' in self.pieces[turn]:
                     self.pieces[turn]["warelefant_1"] = self.pieces[turn].pop('rook_1')

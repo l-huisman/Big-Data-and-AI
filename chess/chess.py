@@ -726,7 +726,6 @@ class Chess(gym.Env):
 
         # hoplites on turn 3
         if self.steps == 6:
-            print("Hoplites")
             for turn in range(2):
                 for pawn_num in range(1, 9):  # Assuming pawns are named pawn_1, pawn_2, ..., pawn_8
                     pawn_key = f"pawn_{pawn_num}"
@@ -746,8 +745,7 @@ class Chess(gym.Env):
         # Dutch waterline: if step 10 has been reached, destroy a random row of pieces between 2 and 6 row of pieces
         # on turn 5
         if self.steps == 10:
-            print("Dutch waterline")
-            random_row_turn_1 = np.random.randint(2, 6)
+            random_row_turn_1 = np.random.default_rng(641).integers(2, 6)
             random_row_turn_2 = 7 - random_row_turn_1
             for turn in range(2):
                 for col in range(8):
@@ -757,7 +755,6 @@ class Chess(gym.Env):
 
         # if step 14 has been reached, turn all knights into winged knights on turn 7
         if self.steps == 14:
-            print("Winged knights")
             for turn in range(2):
                 if 'knight_1' in self.pieces[turn]:
                     self.pieces[turn]["wingedknight_1"] = self.pieces[turn].pop('knight_1')
@@ -774,9 +771,8 @@ class Chess(gym.Env):
                         if self.board[turn, row, col] == Pieces.KNIGHT:
                             self.board[turn, row, col] = Pieces.WINGED_KNIGHT
 
-                            # if step 20 has been reached, turn all rooks into war elefants on turn 10
+                            # if step 20 has been reached, turn all rooks into war elephants on turn 10
         if self.steps == 2:
-            print("War elefants")
             for turn in range(2):
                 if 'rook_1' in self.pieces[turn]:
                     self.pieces[turn]["warelefant_1"] = self.pieces[turn].pop('rook_1')
@@ -809,7 +805,7 @@ class Chess(gym.Env):
         rook_1_pos = self.pieces[turn]['rook_1']
         rook_2_pos = self.pieces[turn]['rook_2']
 
-        # check values for Nonetype
+        # check values for None type
         if king_pos is None or rook_1_pos is None or rook_2_pos is None:
             return False
 

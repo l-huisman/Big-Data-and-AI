@@ -2,13 +2,14 @@ import numpy as np
 import torch as T
 import torch.nn as nn
 import cv2
+from fastapi import HTTPException
 
 
 def build_base_model(
-    input_size: int,
-    hidden_layers: tuple[int],
-    output_size: int,
-    last_activation: nn.Module = nn.Identity(),
+        input_size: int,
+        hidden_layers: tuple[int],
+        output_size: int,
+        last_activation: nn.Module = nn.Identity(),
 ) -> nn.Module:
     layers = [
         nn.Linear(input_size, hidden_layers[0]),
@@ -33,7 +34,7 @@ def make_batch_ids(n: int, batch_size: int, shuffle: bool = True) -> np.ndarray:
     indices = np.arange(n, dtype=np.int64)
     if shuffle:
         np.random.shuffle(indices)
-    return [indices[i : i + batch_size] for i in starts]
+    return [indices[i: i + batch_size] for i in starts]
 
 
 def tensor_to_numpy(x: T.Tensor) -> np.ndarray:
@@ -52,4 +53,28 @@ def save_to_video(path: str, frames: np.ndarray, fps: int = 2):
     for f in frames:
         out.write(f)
     out.release()
-    
+
+
+def raise_http_exception(status_code, detail):
+    raise HTTPException(status_code=status_code, detail=detail)
+
+
+def validate_board_size(board, logger = None):
+    if len(board[0]) != 8 or len(board[1]) != 8:
+        raise_http_exception(400, f"Invalid board size. ({len(board[0])}, {len(board[1])})")
+    for row in board[0]:
+        if len(row) != 8:
+            raise_http_exception(400, f"Invalid board size. ({len(row)})")
+    for row in board[1]:
+        if len(row) != 8:
+            raise_http_exception(400, f"Invalid board size. ({len(row)})")
+
+
+def convert_move_to_positions(action_str):
+    f1 = int(action_str[1]) - 1
+    f2 = ord(action_str[0]) - ord('a')
+    from_pos = np.array([f1, f2])
+    f1 = int(action_str[3]) - 1
+    f2 = ord(action_str[2]) - ord('a')
+    to_pos = np.array([f1, f2])
+    return from_pos, to_pos

@@ -1,14 +1,15 @@
+import numpy as np
 from pydantic import BaseModel
 
 
 class MoveResponse(BaseModel):
-    board: str
-    cards: str
-    resources: str
+    board: list
+    cards: list
+    resources: int
     has_game_ended: bool
 
 
 class InitializeResponse(BaseModel):
-    board: str
-    cards: str
-    resources: str
+    board: list
+    cards: list
+    resources: int

@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 
 from learnings.ppo import PPO
-from learnings.dqn import DQNLearner
 from utils import convert_move_to_positions, validate_board_size, raise_http_exception
 from apimodels.requests import MoveRequest
 from apimodels.responses import MoveResponse, InitializeResponse
@@ -14,8 +13,6 @@ import logging
 
 WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
 BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
-WHITE_DQN_PATH = 'results/DoubleAgentsDQN/white_dict.pt'
-BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
 
 app = FastAPI()
 logger = logging.getLogger(__name__)
@@ -77,6 +74,7 @@ def move(move_request: MoveRequest):
     action_str = move_request.move
 
     try:
+        # - TODO: Check error's thrown and make handling those better
         from_pos, to_pos = convert_move_to_positions(action_str)
         src, dst, _ = env.get_all_actions(env.turn)
         action = np.nonzero((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]

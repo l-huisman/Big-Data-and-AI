@@ -32,7 +32,7 @@ across both operating systems:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/<your_username>/art-of-war-ai.git  # Replace with your repo URL
+   git clone https://github.com/l-huisman/Big-Data-and-AI.git
    ```
 
 2. **Install dependencies:**
@@ -40,16 +40,19 @@ across both operating systems:
     * **Linux/macOS:**
 
       ```bash
-      cd art-of-war-ai  # Navigate to project directory
+      cd Big-Data-and-AI/backend  # Navigate to project directory
       pip3 install -r requirements.txt
       ```
 
     * **Windows:**
 
       ```bash
-      cd art-of-war-ai  # Navigate to project directory
+      cd Big-Data-and-AI/backend  # Navigate to project directory
       pip install -r requirements.txt
       ```
+      
+    **Note:** Make sure to first start the virtual environment if you are using one. For more info on venv, see [here](https://docs.python.org/3/library/venv.html).
+
 
 **Training the Models:**
 
@@ -87,3 +90,29 @@ across both operating systems:
 
 * Run `python3 modeltest.py <model_name>`where `<model_name>` is either `ppo` or `dqn` to observe the models compete
   against each other.
+
+
+## FastAPI Integration
+
+This project includes a FastAPI to interact with the trained AI models. 
+
+### Starting the API
+
+1. **Make sure you have trained a model.**
+2. Open a terminal or command prompt and navigate to the project directory.
+3. Start the API using Uvicorn:
+
+   ```bash
+   uvicorn api:app --reload
+   ```
+
+4. The API will be available at [`http://127.0.0.1:8000/`](http://127.0.0.1:8000/).
+
+**Note:** 
+  * Replace `8000` with the port number specified in `uvicorn` if different.
+  * Uvicorn should be installed with the requirements but if not, you may need to install `uvicorn` using `pip install uvicorn`.
+
+### API Routes
+
+All api router can be found in the Swagger UI at [`http://127.0.0.1:8000/docs`](http://127.0.0.1:8000/docs).
+

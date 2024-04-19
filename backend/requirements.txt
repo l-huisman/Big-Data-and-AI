@@ -19,3 +19,4 @@ torchvision==0.17.2
 tqdm==4.66.2
 triton==2.2.0
 typing_extensions==4.11.0
+uvicorn==0.29.0

@@ -24,3 +24,18 @@ ASCIIS = (
 
 def get_ascii(color: int, piece: int) -> str:
     return ASCIIS[color][piece - 1][0]
+
+
+def get_piece_name(piece: int) -> str:
+    return {
+        EMPTY: "empty",
+        PAWN: "pawn",
+        BISHOP: "bishop",
+        KNIGHT: "knight",
+        ROOK: "rook",
+        QUEEN: "queen",
+        KING: "king",
+        WINGED_KNIGHT: "winged_knight",
+        HOPLITE: "hoplite",
+        WARELEFANT: "warelefant",
+    }[piece]

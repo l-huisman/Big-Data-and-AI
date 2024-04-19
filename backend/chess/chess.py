@@ -877,3 +877,26 @@ class Chess(gym.Env):
 
         # Check if the current position is different from the initial position
         return current_pos != initial_pos
+
+    def set_board(self, board: np.array) -> None:
+        self.board = board
+        self.pieces = self.get_pieces_from_board(board)
+        self.pieces_names = self.get_pieces_names()
+
+    def get_pieces_from_board(self, board: np.array) -> list[dict]:
+        pieces_0 = self.get_pieces_from_board_side(board[0])
+        pieces_1 = self.get_pieces_from_board_side(board[1])
+        return [pieces_0, pieces_1]
+
+    @staticmethod
+    def get_pieces_from_board_side(board_side: np.array) -> dict:
+        pieces = {}
+        counter = 1
+        for i, row in enumerate(board_side):
+            for j, piece in enumerate(row):
+                if piece != 0:
+                    name = Pieces.get_piece_name(piece)
+
+                    pieces[name + "_" + str(counter)] = (i, j)
+                    counter += 1
+        return pieces

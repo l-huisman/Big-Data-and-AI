@@ -37,7 +37,7 @@ ppo_chess = PPOChess(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
 def initialize():
     try:
         env.reset()
-        init_response = InitializeResponse(board=env.board.tolist(), cards=[], resources=0)
+        init_response = InitializeResponse(board=env.board.tolist(), cards=[], resources=0, pieces=env.pieces)
         return init_response
     except FileNotFoundError:
         raise HTTPException(status_code=500, detail="Could not find model, maybe no model has been trained yet.")
@@ -47,9 +47,22 @@ def initialize():
 def move(move_request: MoveRequest):
     if ppo_chess is None:
         raise HTTPException(status_code=404, detail="No game has been initialized yet.")
+    board = np.array(move_request.board)
+    if not board.any():
+        raise HTTPException(status_code=400, detail="Please provide a board.")
+    if len(board[0]) != 8:
+        raise HTTPException(status_code=400, detail="Invalid board size. (" + str(len(board[0])) + ")")
+    if len(board[1]) != 8:
+        raise HTTPException(status_code=400, detail="Invalid board size. (" + str(len(board[1])) + ")")
+    for row in board[0]:
+        if len(row) != 8:
+            raise HTTPException(status_code=400, detail="Invalid board size. (" + str(len(row)) + ")")
+    for row in board[1]:
+        if len(row) != 8:
+            raise HTTPException(status_code=400, detail="Invalid board size. (" + str(len(row)) + ")")
+
+    env.set_board(board)
     action_str = move_request.move
-    if action_str == 'q':
-        return {"message": "Game has ended."}
     try:
         f1 = int(action_str[1]) - 1
         f2 = ord(action_str[0]) - ord('a')
@@ -58,18 +71,18 @@ def move(move_request: MoveRequest):
         f2 = ord(action_str[2]) - ord('a')
         to_pos = np.array([f1, f2])
 
-        src, dst, mask = env.get_all_actions(env.turn)
-        action = np.where((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
+        src, dst, _ = env.get_all_actions(env.turn)
+        action = np.nonzero((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
         if len(action) == 0:
-            raise Exception("Invalid move.")
+            raise HTTPException(status_code=400, detail="Invalid move.")
 
-        env.step(action[0])
+        env.step(int(action[0]))
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid move.")
 
     try:
         done, _ = ppo_chess.take_action(env.turn, episode)
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="An error occurred while taking action.")
 
     move_response = MoveResponse(board=env.board.tolist(), cards=[], resources=0, has_game_ended=done)

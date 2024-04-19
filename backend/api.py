@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from learnings.ppo import PPO
 from learnings.dqn import DQNLearner
 from apimodels.requests import MoveRequest
-from apimodels.responses import MoveResponse
+from apimodels.responses import MoveResponse, InitializeResponse
 from agents import PPOChess
 from buffer.episode import Episode
 from chess import Chess
@@ -29,29 +29,25 @@ ppo = PPO(
     batch_size=128,
 )
 
-ppo_chess: PPOChess
-episode: Episode
+episode = Episode()
+ppo_chess = PPOChess(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
 
 
 @app.get("/initialize", status_code=201)
 def initialize():
-    global ppo_chess, episode
     try:
         env.reset()
-        ppo_chess = PPOChess(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
-        episode = Episode()
-        return {"message": "Started new game successfully."}
+        init_response = InitializeResponse(board=env.board.tolist(), cards=[], resources=0)
+        return init_response
     except FileNotFoundError:
         raise HTTPException(status_code=500, detail="Could not find model, maybe no model has been trained yet.")
 
 
 @app.post("/move")
 def move(move_request: MoveRequest):
-    global ppo_chess, episode
-    if ppo_chess or episode is None:
+    if ppo_chess is None:
         raise HTTPException(status_code=404, detail="No game has been initialized yet.")
     action_str = move_request.move
-    move_response = MoveResponse()
     if action_str == 'q':
         return {"message": "Game has ended."}
     try:
@@ -76,9 +72,6 @@ def move(move_request: MoveRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while taking action.")
 
-    move_response.board = env.board
-    move_response.cards = {}
-    move_response.resources = 0
-    move_response.has_game_ended = done
+    move_response = MoveResponse(board=env.board.tolist(), cards=[], resources=0, has_game_ended=done)
 
     return move_response

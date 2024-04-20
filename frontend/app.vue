@@ -1,5 +1,14 @@
+<script setup lang="ts">
+const router = useRouter()
+
+const nav = [
+  { label: 'Home', to: '/' }
+]
+</script>
+
 <template>
-  <div>
-    <NuxtWelcome />
-  </div>
+  <NuxtLayout dir="routing/pages" :nav="nav" current-route>
+    <NuxtPage />
+    <NuxtLoadingIndicator />
+  </NuxtLayout>
 </template>

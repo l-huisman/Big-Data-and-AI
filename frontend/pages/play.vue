@@ -17,6 +17,7 @@
                         <img :src="getImageUrl(image)" alt="not working" class="h-[180px]" />
                     </div>
                 </div> -->
+
                 <div class=" flex flex-row">
                     <img src="../assets/images/hoplite.png" alt="not working"
                         class=" h-[180px] mr-[10px] right-0 ml-auto mb-[20px]">
@@ -49,9 +50,14 @@ export default {
       ]
     };
   },
+  mounted() {
+    //   let recaptchaScript = document.createElement('script')
+    //   recaptchaScript.setAttribute('src', '../bundle.js')
+    //   document.head.appendChild(recaptchaScript)
+    },
   methods: {
     getImageUrl(imageName) {
-        return require(`../assets/images/${imageName}.png`);
+        return `../assets/images/${imageName}.png`;
     }
   }
 };

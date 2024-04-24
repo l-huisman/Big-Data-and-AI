@@ -2,22 +2,20 @@
   <div class="grid grid-cols-8 ml-30">
     <template v-for="(row, RowIndex) in this.dict" :key="'row-' + RowIndex">
       <template v-for="(square, colIndex) in row" :key="'square-' + colIndex">
-        <div :class="{
-          'bg-[#D0C27A]': GetSquareColors(RowIndex),
-          'bg-[#AA8439]': !GetSquareColors(RowIndex)
-        }" class="w-[60px] h-[60px] pt-[10px] pb-[10px] flex justify-center items-center">
-        <div v-if="RowIndex == 0"       class="text-[#AA8439] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">1</div>
-        <div v-else-if="RowIndex == 8"  class="text-[#D0C27A] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">2</div>
-        <div v-else-if="RowIndex == 16" class="text-[#AA8439] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">3</div>
-        <div v-else-if="RowIndex == 24" class="text-[#D0C27A] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">4</div>
-        <div v-else-if="RowIndex == 32" class="text-[#AA8439] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">5</div>
-        <div v-else-if="RowIndex == 40" class="text-[#D0C27A] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">6</div>
-        <div v-else-if="RowIndex == 48" class="text-[#AA8439] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">7</div>
-        <div v-else-if="RowIndex == 56" class="text-[#D0C27A] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">8</div>
-        <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
-          'text-[#D0C27A]': GetSquareColors(RowIndex),
-          'text-[#AA8439]': !GetSquareColors(RowIndex)
-        }">1</div>
+        <div :class="{ 'bg-[#D0C27A]': GetSquareColors(RowIndex), 'bg-[#AA8439]': !GetSquareColors(RowIndex) }"
+          class="w-[60px] h-[60px] pt-[10px] pb-[10px] flex justify-center items-center">
+
+          <!-- show the numbers on the left side of the chessboard -->
+          <div v-if="RowIndex % 8 == 0" class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
+            'text-[#D0C27A]': !GetSquareColors(RowIndex), 'text-[#AA8439]': GetSquareColors(RowIndex)
+          }">{{ (RowIndex /
+            8) + 1}}</div>
+          <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
+            'text-[#D0C27A]': GetSquareColors(RowIndex),
+            'text-[#AA8439]': !GetSquareColors(RowIndex)
+          }">1</div>
+
+          <!-- show the chessboard + pieces -->
           <span>
             <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')" :src="getPieceImagePath(square, 'black')"
               alt="Chess Piece">
@@ -25,18 +23,15 @@
               :src="getPieceImagePath(square, 'white')" alt="Chess Piece">
           </span>
 
-        <div v-if="RowIndex == 56"      class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">a</div>
-        <div v-else-if="RowIndex == 57" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">b</div>
-        <div v-else-if="RowIndex == 58" class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">c</div>
-        <div v-else-if="RowIndex == 59" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">d</div>
-        <div v-else-if="RowIndex == 60" class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">e</div>
-        <div v-else-if="RowIndex == 61" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">f</div>
-        <div v-else-if="RowIndex == 62" class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">g</div>
-        <div v-else-if="RowIndex == 63" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">h</div>
-        <div v-else class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]" :class="{
-          'text-[#D0C27A]': GetSquareColors(RowIndex),
-          'text-[#AA8439]': !GetSquareColors(RowIndex)
-        }">1</div>
+          <!-- show the letters on the bottom of the chessboard -->
+          <div v-if="RowIndex >= 56" class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]" :class="{
+            'text-[#D0C27A]': !GetSquareColors(RowIndex),
+            'text-[#AA8439]': GetSquareColors(RowIndex)
+          }">{{ String.fromCharCode(RowIndex + 9).toLowerCase() }}</div>
+          <div v-else class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]" :class="{
+            'text-[#D0C27A]': GetSquareColors(RowIndex),
+            'text-[#AA8439]': !GetSquareColors(RowIndex)
+          }">1</div>
         </div>
       </template>
     </template>
@@ -68,6 +63,8 @@ export default {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0]
       ],
+      whitePieces: [],
+      blackPieces: [],
       pieceImagesWhite: {
         1: '/_nuxt/assets/images/pieces/pawn white.png',
         2: '/_nuxt/assets/images/pieces/bishop white.png',
@@ -87,32 +84,37 @@ export default {
     };
   },
   mounted() {
-    const first64 = this.gamestate.slice(0, 8);
-    const last64 = this.gamestate.slice(8).reverse();
-
-    for (let i = 0; i < first64.length; i++) {
-      for (let j = 0; j < first64[i].length; j++) {
-        if (first64[i][j] != 0) {
-          this.dict.push({
-            'white': first64[i][j]
-          });
-        }
-        else if (last64[i][j] != 0) {
-          this.dict.push({
-            'black': last64[i][j]
-          });
-        }
-        else {
-          this.dict.push({
-            'Empty': first64[i][j]
-          });
-        }
-
-      }
-    }
+    this.SplitGamestate();
+    this.CreateDict();
   },
 
   methods: {
+    SplitGamestate() {
+      this.whitePieces = this.gamestate.slice(0, 8);
+      this.blackPieces = this.gamestate.slice(8).reverse();
+    },
+    CreateDict() {
+      for (let i = 0; i < this.whitePieces.length; i++) {
+        for (let j = 0; j < this.whitePieces[i].length; j++) {
+          if (this.whitePieces[i][j] != 0) {
+            this.dict.push({
+              'white': this.whitePieces[i][j]
+            });
+          }
+          else if (this.blackPieces[i][j] != 0) {
+            this.dict.push({
+              'black': this.blackPieces[i][j]
+            });
+          }
+          else {
+            this.dict.push({
+              'Empty': this.whitePieces[i][j]
+            });
+          }
+
+        }
+      }
+    },
     getPieceImagePath(pieceNumber, color) {
       if (color == 'white') {
         return this.pieceImagesWhite[pieceNumber];

@@ -1,5 +1,5 @@
 <template>
-    <div class="flex h-screen w-screen mt-[155px] text-white">
+    <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
             <Chessboard />
         </div>
@@ -12,13 +12,30 @@
                 resource points: 0
             </div>
             <div>
-                <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row">
-                    <div v-for="(image, imageIndex) in row" :key="imageIndex" class="mr-[10px]">
-                        <img :src="getImageUrl(image)" alt="not working" class="h-[180px]" />
+                <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row ">
+                    <div v-for="(image, imageIndex) in row" :key="imageIndex" class="mr-[10px] w-fit right-0 ml-auto">
+                        <img :src="getImageUrl(image)" alt="not working" class="h-[165px] mb-[10px]" />
                     </div>
                 </div>
+                <!-- <div class=" flex flex-row">
+                    <img src="../assets/images/cards/hoplite.png" alt="not working"
+                        class=" h-[180px] mr-[10px] right-0 ml-auto mb-[20px]">
+                    <img src="../assets/images/cards/hoplite.png" alt="not working" class=" h-[180px] mr-[10px]">
+                    <img src="../assets/images/cards/hoplite.png" alt="not working" class=" h-[180px]">
+                </div>
+                <div class=" flex flex-row">
+                    <img src="../assets/images/cards/winged knight.png" alt="not working"
+                        class=" h-[180px] mr-[10px] right-0 ml-auto mb-[20px]">
+                    <img src="../assets/images/cards/dutch waterline.png" alt="not working" class=" h-[180px] mr-[10px]">
+                    <img src="../assets/images/cards/war elefant.png" alt="not working" class=" h-[180px]">
+                </div> -->
             </div>
         </div>
+    </div>
+
+    <div class="ml-[10%] text-white">
+        <!-- <div>e.g. e2e4</div> -->
+        <input type="text" placeholder="  e.g. e2e4">
     </div>
 </template>
 

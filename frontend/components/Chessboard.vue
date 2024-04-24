@@ -10,7 +10,7 @@
           }"
           class="w-[70px] h-[70px] flex justify-center items-center">
           <span class="text-white">{{ square }}</span>
-<!-- <img src="../../chess/pieces/__pycache__/bishop.cpython-311.pyc" alt="not work"> -->
+            <img src="../assets/images/pieces/bishop black.png" alt="not work">
         </div>
       </template>
     </template>
@@ -42,6 +42,7 @@ export default {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0]
       ]
+      
     };
   },
   mounted() {
@@ -52,7 +53,7 @@ export default {
       for (let j = 0; j < first64[i].length; j++) {
         if (first64[i][j] != 0) {
           this.dict.push({
-            // color: 'white',
+            // key: 'white',
             'white': first64[i][j]
           });
         }

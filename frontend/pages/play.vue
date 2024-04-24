@@ -12,23 +12,10 @@
                 resource points: 0
             </div>
             <div>
-                <!-- <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row">
+                <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row">
                     <div v-for="(image, imageIndex) in row" :key="imageIndex" class="mr-[10px]">
                         <img :src="getImageUrl(image)" alt="not working" class="h-[180px]" />
                     </div>
-                </div> -->
-
-                <div class=" flex flex-row">
-                    <img src="../assets/images/hoplite.png" alt="not working"
-                        class=" h-[180px] mr-[10px] right-0 ml-auto mb-[20px]">
-                    <img src="../assets/images/hoplite.png" alt="not working" class=" h-[180px] mr-[10px]">
-                    <img src="../assets/images/hoplite.png" alt="not working" class=" h-[180px]">
-                </div>
-                <div class=" flex flex-row">
-                    <img src="../assets/images/winged knight.png" alt="not working"
-                        class=" h-[180px] mr-[10px] right-0 ml-auto mb-[20px]">
-                    <img src="../assets/images/dutch waterline.png" alt="not working" class=" h-[180px] mr-[10px]">
-                    <img src="../assets/images/war elefant.png" alt="not working" class=" h-[180px]">
                 </div>
             </div>
         </div>
@@ -50,14 +37,9 @@ export default {
       ]
     };
   },
-  mounted() {
-    //   let recaptchaScript = document.createElement('script')
-    //   recaptchaScript.setAttribute('src', '../bundle.js')
-    //   document.head.appendChild(recaptchaScript)
-    },
   methods: {
     getImageUrl(imageName) {
-        return `../assets/images/${imageName}.png`;
+        return `/_nuxt/assets/images/cards/${imageName}.png`;
     }
   }
 };

@@ -8,10 +8,10 @@
             'bg-[#D0C27A]': (RowIndex + colIndex) % 2 === 0,
             'bg-[#AA8439]': (RowIndex + colIndex) % 2 !== 0
           }"
-          class="w-[70px] h-[70px] flex justify-center items-center">
-          <!-- <span class="text-white">{{ square }}</span> -->
+          class="w-[60px] h-[60px] p-[10px] flex justify-center items-center">
             <span>
-              <img v-if="square !== 0" :src="getPieceImagePath(square)" alt="Chess Piece" class="w-full h-full absolute inset-0 w-[40px] h-[40px]">
+              <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')" :src="getPieceImagePath(square, 'black')" alt="Chess Piece" >
+              <img v-else-if="square !== 0  && dict[RowIndex].hasOwnProperty('white')" :src="getPieceImagePath(square, 'white')" alt="Chess Piece" >
             </span>
         </div>
       </template>
@@ -44,11 +44,19 @@ export default {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0]
       ],
-      pieceImages: {
+      pieceImagesWhite: {
+        1: '/_nuxt/assets/images/pieces/pawn white.png',
+        2: '/_nuxt/assets/images/pieces/bishop white.png',
+        3: '/_nuxt/assets/images/pieces/knight white.png',
+        4: '/_nuxt/assets/images/pieces/rook white.png',
+        5: '/_nuxt/assets/images/pieces/queen white.png',
+        6: '/_nuxt/assets/images/pieces/king white.png',
+      },
+      pieceImagesBlack: {
         1: '/_nuxt/assets/images/pieces/pawn black.png',
-        2: '/_nuxt/assets/images/pieces/rook black.png',
+        2: '/_nuxt/assets/images/pieces/bishop black.png',
         3: '/_nuxt/assets/images/pieces/knight black.png',
-        4: '/_nuxt/assets/images/pieces/bishop black.png',
+        4: '/_nuxt/assets/images/pieces/rook black.png',
         5: '/_nuxt/assets/images/pieces/queen black.png',
         6: '/_nuxt/assets/images/pieces/king black.png',
       }
@@ -62,8 +70,6 @@ export default {
       for (let j = 0; j < first64[i].length; j++) {
         if (first64[i][j] != 0) {
           this.dict.push({
-            // key: 'white',
-            // value: first64[i][j]
             'white': first64[i][j]
           });
         }
@@ -80,13 +86,16 @@ export default {
 
       }
     }
-
-    console.log(this.dict);
   },
 
   methods: {
-    getPieceImagePath(pieceNumber) {
-      return this.pieceImages[pieceNumber];
+    getPieceImagePath(pieceNumber, color) {
+      if(color == 'white') {
+        return this.pieceImagesWhite[pieceNumber];
+      }
+      else {
+        return this.pieceImagesBlack[pieceNumber];
+      }
     }
   }
 };

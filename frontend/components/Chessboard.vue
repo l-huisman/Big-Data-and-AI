@@ -1,21 +1,5 @@
 <template>
   <div class="grid grid-cols-8 ml-30">
-    <template v-for="(row, rowIndex) in 8" :key="'row-' + rowIndex">
-      <template v-for="(square, colIndex) in 8" :key="'square-' + colIndex">
-        <div :class="{
-          'bg-[#D0C27A]': (rowIndex + colIndex) % 2 === 0,
-          'bg-[#AA8439]': (rowIndex + colIndex) % 2 !== 0
-        }" class="w-[65px] h-[65px] flex justify-center items-center">
-          <span class="text-white">{{ square }}</span>
-        </div>
-      </template>
-    </template>
-  </div>
-</template>
-
-
-<!-- <template>
-  <div class="grid grid-cols-8 ml-30">
     <template v-for="(row, RowIndex) in this.dict" :key="'row-' + RowIndex">
       <template v-for="(square, colIndex) in row" :key="'square-' + colIndex">
         
@@ -25,17 +9,14 @@
             'bg-[#AA8439]': (RowIndex + colIndex) % 2 !== 0
           }"
           class="w-[70px] h-[70px] flex justify-center items-center">
-          <span class="text-white">{{ this.dict[RowIndex].value }}</span>
+          <span class="text-white">{{ square }}</span>
+<!-- <img src="../../chess/pieces/__pycache__/bishop.cpython-311.pyc" alt="not work"> -->
         </div>
       </template>
     </template>
   </div>
-</template>  -->
+</template> 
 
-<!-- square = white 4 -->
-<!-- colIndex = key value -->
-<!-- row = { key: white} -->
-<!-- rowIndex = i -->
 
 <script>
 export default {
@@ -71,27 +52,27 @@ export default {
       for (let j = 0; j < first64[i].length; j++) {
         if (first64[i][j] != 0) {
           this.dict.push({
-            color: 'white',
-            number: first64[i][j]
+            // color: 'white',
+            'white': first64[i][j]
           });
         }
         else if (last64[i][j] != 0) {
           this.dict.push({
-            color: 'black',
-            number: last64[i][j]
+            // color: 'black',
+            'black': last64[i][j]
           });
         }
         else {
           this.dict.push({ 
-            color: 'Empty',
-            number: first64[i][j]
+            // color: 'Empty',
+            'Empty': first64[i][j]
           });
         }
 
       }
     }
 
-    console.log(this.dict[0, 1]);
+    console.log(this.dict);
   },
 };
 </script>

@@ -5,9 +5,9 @@
         <div :class="{
           'bg-[#D0C27A]': GetSquareColors(RowIndex),
           'bg-[#AA8439]': !GetSquareColors(RowIndex)
-        }" class="w-[60px] h-[60px]  pt-[10px] pb-[10px] flex justify-center items-center">
-        <div v-if="RowIndex == 0" class="text-[#AA8439] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">1</div>
-        <div v-else-if="RowIndex == 8" class="text-[#D0C27A] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">2</div>
+        }" class="w-[60px] h-[60px] pt-[10px] pb-[10px] flex justify-center items-center">
+        <div v-if="RowIndex == 0"       class="text-[#AA8439] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">1</div>
+        <div v-else-if="RowIndex == 8"  class="text-[#D0C27A] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">2</div>
         <div v-else-if="RowIndex == 16" class="text-[#AA8439] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">3</div>
         <div v-else-if="RowIndex == 24" class="text-[#D0C27A] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">4</div>
         <div v-else-if="RowIndex == 32" class="text-[#AA8439] text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">5</div>
@@ -25,15 +25,15 @@
               :src="getPieceImagePath(square, 'white')" alt="Chess Piece">
           </span>
 
-        <div v-if="RowIndex == 56" class="text-[#D0C27A] text-sm mt-auto ml-auto  pr-[5px] mb-[-9px]">a</div>
-        <div v-else-if="RowIndex == 57" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[5px] mb-[-9px]">b</div>
-        <div v-else-if="RowIndex == 58" class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[5px] mb-[-9px]">c</div>
-        <div v-else-if="RowIndex == 59" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[5px] mb-[-9px]">d</div>
-        <div v-else-if="RowIndex == 60" class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[5px] mb-[-9px]">e</div>
-        <div v-else-if="RowIndex == 61" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[5px] mb-[-9px]">f</div>
-        <div v-else-if="RowIndex == 62" class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[5px] mb-[-9px]">g</div>
-        <div v-else-if="RowIndex == 63" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[5px] mb-[-9px]">h</div>
-        <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-7px] pr-[5px] mb-[-9px]" :class="{
+        <div v-if="RowIndex == 56"      class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">a</div>
+        <div v-else-if="RowIndex == 57" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">b</div>
+        <div v-else-if="RowIndex == 58" class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">c</div>
+        <div v-else-if="RowIndex == 59" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">d</div>
+        <div v-else-if="RowIndex == 60" class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">e</div>
+        <div v-else-if="RowIndex == 61" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">f</div>
+        <div v-else-if="RowIndex == 62" class="text-[#D0C27A] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">g</div>
+        <div v-else-if="RowIndex == 63" class="text-[#AA8439] text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">h</div>
+        <div v-else class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]" :class="{
           'text-[#D0C27A]': GetSquareColors(RowIndex),
           'text-[#AA8439]': !GetSquareColors(RowIndex)
         }">1</div>

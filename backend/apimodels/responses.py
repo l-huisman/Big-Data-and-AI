@@ -1,6 +1,9 @@
 import numpy as np
 from pydantic import BaseModel
 
+class AIGameResponse(BaseModel):
+    game: list
+    statistics: list
 
 class MoveResponse(BaseModel):
     board: list

@@ -2,6 +2,7 @@
     <div class="flex h-screen w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
             <Chessboard />
+            <button @click="fetchGameAIvsAI('PPO', 'PPO')">Start AI vs AI</button>
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">
@@ -25,17 +26,24 @@ export default {
   components: {
     Chessboard
   },
-  data() {
-    return {
-      imageRows: [
-        ['hoplite', 'hoplite', 'hoplite'],
-        ['winged knight', 'dutch waterline', 'war elefant']
-      ]
-    };
+  mounted() {
+    console.log('Component mounted.')
+
   },
   methods: {
-    getImageUrl(imageName) {
-        return require(`../assets/images/${imageName}.png`);
+    async fetchGameAIvsAI(white_model, black_model) {
+      const response = await fetch('http://127.0.0.1:8000/aigame', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          white_model: white_model,
+          black_model: black_model
+        })
+      });
+      const data = await response.json();
+      console.log(data);
     }
   }
 };

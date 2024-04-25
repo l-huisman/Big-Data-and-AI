@@ -6,12 +6,16 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from agents import PPOChess
-from apimodels.requests import MoveRequest
-from apimodels.responses import MoveResponse, InitializeResponse
+from apimodels.requests import MoveRequest, AIGameRequest
+from apimodels.responses import MoveResponse, InitializeResponse, AIGameResponse
 from buffer.episode import Episode
 from chess import Chess
 from learnings.ppo import PPO
 from utils import convert_move_to_positions, validate_board_size, raise_http_exception
+import numpy as np
+import sys
+import logging
+import pygame
 
 WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
 BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
@@ -67,6 +71,68 @@ def initialize():
         logger.error(f"An error occurred while resetting the game. {e}")
         raise HTTPException(status_code=500, detail="An error occurred while initializing the game.")
 
+@app.post("/aigame", status_code=201)
+def aigame(aigame_request: AIGameRequest):
+    logger.info(f"Received aigame request: {aigame_request}")
+    response = AIGameResponse(game=[], statistics=[])
+    try:       
+        match aigame_request.white_model.capitalize():
+            case "PPO":
+                white_model = WHITE_PPO_PATH
+            case _:
+                white_model = WHITE_PPO_PATH
+                
+        match aigame_request.black_model.capitalize():
+            case "PPO":
+                black_model = BLACK_PPO_PATH
+            case _:
+                black_model = BLACK_PPO_PATH    
+                
+        env = Chess(window_size=800)
+
+        ppo = PPO(
+            env,
+            hidden_layers=(2048,) * 4,
+            epochs=100,
+            buffer_size=32 * 2,
+            batch_size=128,
+        )           
+        
+        ppo_chess = PPOChess(env, ppo, 1, 32, "", white_model, black_model)
+        episode = Episode()
+        logger.info("Initialized AI game.")
+        
+        # Play the game
+        counter = 0
+        states = []
+
+        response.game.append(ppo_chess.env.get_state(ppo_chess.env.turn).tolist())
+        
+        while True:
+            done, _ = ppo_chess.take_action(ppo_chess.env.turn, episode)
+            response.game.append(ppo_chess.env.get_state(ppo_chess.env.turn).tolist())
+            
+            # print("turn: ", chess_game.env.turn)
+            # env.render()
+            counter += 1
+            if done:
+                #GameStates | Win -1 of 1 | nr turns | nr checks
+                data = {'States': states, 'Win': ppo_chess.env.turn, 'Turns': counter}  
+                #mydict.append(data)
+
+                print("Game Over")
+                print("Winner: White" if ppo_chess.env.turn else "Winner: Black")
+                print("Game Length: ", counter)
+                break
+        
+        logger.info(f"AI game completed.")
+        return response
+    except FileNotFoundError as e:
+        logger.error(f"Could not find model on specified location, make sure the location is correct. {e}")
+        raise HTTPException(status_code=500, detail="Could not find any model.")
+    except Exception as e:
+        logger.error(f"An error occurred while resetting the game. {e}")
+        raise HTTPException(status_code=500, detail="An error occurred while initializing the game.")
 
 @app.post("/move")
 def move(move_request: MoveRequest):

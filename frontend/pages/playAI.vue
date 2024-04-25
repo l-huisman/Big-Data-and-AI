@@ -2,7 +2,9 @@
     <div class="flex h-screen w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
             <Chessboard />
-            <button @click="fetchGameAIvsAI('PPO', 'PPO')">Start AI vs AI</button>
+            <button class="bg-[#569575] hover:bg-[#76b092] text-white center font-bold py-2 px-4 rounded" @click="fetchGameAIvsAI('PPO', 'PPO')">
+              Start AI vs AI
+            </button>
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">
@@ -23,6 +25,10 @@
 import Chessboard from '../components/Chessboard.vue';
 
 export default {
+  data() {
+    return {
+    }
+  },
   components: {
     Chessboard
   },

@@ -55,7 +55,17 @@ def initialize():
 def aigame(aigame_request: AIGameRequest):
     logger.info(f"Received aigame request: {aigame_request}")
     response = AIGameResponse(game=[], statistics=[])
-    try:       
+    try:             
+        env = Chess(window_size=800)
+
+        ppo = PPO(
+            env,
+            hidden_layers=(2048,) * 4,
+            epochs=100,
+            buffer_size=32 * 2,
+            batch_size=128,
+        )           
+        
         match aigame_request.white_model.capitalize():
             case "PPO":
                 white_model = WHITE_PPO_PATH
@@ -68,41 +78,25 @@ def aigame(aigame_request: AIGameRequest):
             case _:
                 black_model = BLACK_PPO_PATH    
                 
-        env = Chess(window_size=800)
-
-        ppo = PPO(
-            env,
-            hidden_layers=(2048,) * 4,
-            epochs=100,
-            buffer_size=32 * 2,
-            batch_size=128,
-        )           
-        
         ppo_chess = PPOChess(env, ppo, 1, 32, "", white_model, black_model)
         episode = Episode()
         logger.info("Initialized AI game.")
         
         # Play the game
         counter = 0
-        states = []
-
         response.game.append(ppo_chess.env.get_state(ppo_chess.env.turn).tolist())
         
         while True:
             done, _ = ppo_chess.take_action(ppo_chess.env.turn, episode)
             response.game.append(ppo_chess.env.get_state(ppo_chess.env.turn).tolist())
             
-            # print("turn: ", chess_game.env.turn)
-            # env.render()
             counter += 1
             if done:
-                #GameStates | Win -1 of 1 | nr turns | nr checks
-                data = {'States': states, 'Win': ppo_chess.env.turn, 'Turns': counter}  
-                #mydict.append(data)
+                #TODO: Add / get statistics
 
-                print("Game Over")
-                print("Winner: White" if ppo_chess.env.turn else "Winner: Black")
-                print("Game Length: ", counter)
+                logger.info("Game Over")
+                logger.info("Winner: White" if ppo_chess.env.turn else "Winner: Black")
+                logger.info("Game Length: ", counter)
                 break
         
         logger.info(f"AI game completed.")

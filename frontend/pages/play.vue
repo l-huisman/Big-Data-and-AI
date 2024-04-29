@@ -1,7 +1,7 @@
 <template>
     <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
-            <Chessboard />
+            <Chessboard :board="this.move_request.board"  :key="boardKey"/>
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">
@@ -21,7 +21,9 @@
         </div>
     </div>
     <div class="ml-[10%] text-white">
-        <input type="text" placeholder="e.g. e2e4" class="text-black px-4 rounded-[2px] h-[28px]">
+        <input :value="this.move_request.move" type="text" placeholder="e.g. e2e4"
+            class="text-black px-4 rounded-[2px] h-[28px]">
+        <button @click="makeMove()">Move</button>
     </div>
 </template>
 
@@ -39,15 +41,11 @@ export default {
                 ['hoplite', 'hoplite', 'hoplite'],
                 ['winged knight', 'dutch waterline', 'war elefant']
             ],
+            boardKey: 0,
             move_request: {
                 move: 'e2e4',
                 turn: 1,
-                board: [],
-            }
-        };
-    },
-    mounted() {
-        this.move_request.board = [[
+                board: [[
                     [4, 3, 2, 5, 6, 2, 3, 4],
                     [1, 1, 1, 1, 1, 1, 1, 1],
                     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -66,20 +64,29 @@ export default {
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0]]
-                ];
-        this.makeMove()
+                ],
+            }
+        };
+    },
+    mounted() {
+        // this.makeMove()
     },
     methods: {
         getImageUrl(imageName) {
             return `/_nuxt/assets/images/cards/${imageName}.png`;
         },
         makeMove() {
+            this.move_request.board[0].reverse();
             axios.post('http://127.0.0.1:8000/move', this.move_request)
                 .then(response => {
-                    console.log('Move response:', response.data);
+                    this.move_request.board = response.data.board;
+                    this.move_request.turn += 1;
+                    this.move_request.move = '';
+                    this.boardKey++;
+                    console.log('Move request:', this.move_request.board);
                 })
                 .catch(error => {
-                    console.error('Error making move:', error);
+                    console.error('Error making move:', error.response.data.detail);
                 });
         }
     }

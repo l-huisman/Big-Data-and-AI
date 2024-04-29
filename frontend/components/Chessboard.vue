@@ -42,8 +42,12 @@
 <script>
 import axios from 'axios';
 export default {
+  props: {
+    board: Array 
+  },
   data() {
     return {
+      gameBoard: this.board,
       dict: [],
       numbers: [1, 2, 3, 4, 5, 6, 7, 8],
       whitePieces: [],
@@ -67,7 +71,11 @@ export default {
     };
   },
   mounted() {
-    this.initialize();
+    // this.initialize();
+    console.log(this.gameBoard);
+    this.whitePieces = this.gameBoard[1];
+    this.blackPieces = this.gameBoard[0].reverse();
+    this.CreateDict();
   },
   methods: {
     initialize() {

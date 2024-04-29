@@ -1,7 +1,7 @@
 <template>
     <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
-            <Chessboard :board="this.move_request.board" :key="boardKey"/>
+            <Chessboard :board="this.move_request.board" :key="boardKey" />
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">
@@ -75,25 +75,21 @@ export default {
         },
         makeMove() {
             this.move_request.board[0].reverse();
-            console.log("test")
+            console.log(this.move_request.move);
+            console.log(this.move_request.turn);
             // console.log(this.move_request.board);
-            // console.log(this.move_request.move);
-            // console.log(this.move_request.turn);
-            
             axios.post('http://127.0.0.1:8000/move', this.move_request)
                 .then(response => {
                     this.move_request.board = response.data.board;
-                    this.move_request.turn += 1;
+                    // this.move_request.turn += 1;
                     this.recoursePoints += 1;
                     this.move_request.move = '';
-                    console.log(this.move_request.board);
                     this.boardKey++;
                 })
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);
                 });
-
-            // this.move_request.board[0].reverse();
+            console.log(this.move_request.board);
         }
     }
 };

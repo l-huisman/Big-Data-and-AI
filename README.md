@@ -98,7 +98,7 @@ This project includes a FastAPI to interact with the trained AI models.
 
 ### Starting the API
 
-1. **Make sure you have trained a model.**
+1. **Make sure you have trained a model.** 
 2. Open a terminal or command prompt and navigate to the project directory.
 3. Start the API using Uvicorn:
 

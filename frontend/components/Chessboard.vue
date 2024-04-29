@@ -9,7 +9,7 @@
           <div v-if="RowIndex % 8 == 0" class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
             'text-[#D0C27A]': !GetSquareColors(RowIndex), 'text-[#AA8439]': GetSquareColors(RowIndex)
           }">{{ (RowIndex /
-            8) + 1}}</div>
+            8) + 1 }}</div>
           <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
             'text-[#D0C27A]': GetSquareColors(RowIndex),
             'text-[#AA8439]': !GetSquareColors(RowIndex)
@@ -40,29 +40,12 @@
 
 
 <script>
+import axios from 'axios';
 export default {
   data() {
     return {
       dict: [],
       numbers: [1, 2, 3, 4, 5, 6, 7, 8],
-      gamestate: [
-        [4, 3, 2, 5, 6, 2, 3, 4],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [4, 3, 2, 5, 6, 2, 3, 4],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
-      ],
       whitePieces: [],
       blackPieces: [],
       pieceImagesWhite: {
@@ -84,14 +67,19 @@ export default {
     };
   },
   mounted() {
-    this.SplitGamestate();
-    this.CreateDict();
+    this.initialize();
   },
-
   methods: {
-    SplitGamestate() {
-      this.whitePieces = this.gamestate.slice(0, 8);
-      this.blackPieces = this.gamestate.slice(8).reverse();
+    initialize() {
+      axios.get('http://127.0.0.1:8000/initialize')
+        .then(response => {
+          this.whitePieces = response.data.board[0];
+          this.blackPieces = response.data.board[1].reverse();
+          this.CreateDict();
+        })
+        .catch(error => {
+          console.error('Error initializing game:', error);
+        });
     },
     CreateDict() {
       for (let i = 0; i < this.whitePieces.length; i++) {

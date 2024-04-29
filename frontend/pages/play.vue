@@ -28,24 +28,61 @@
 
 <script>
 import Chessboard from '../components/Chessboard.vue';
+import axios from 'axios';
 
 export default {
-  components: {
-    Chessboard
-  },
-  data() {
-    return {
-      imageRows: [
-        ['hoplite', 'hoplite', 'hoplite'],
-        ['winged knight', 'dutch waterline', 'war elefant']
-      ]
-    };
-  },
-  methods: {
-    getImageUrl(imageName) {
-        return `/_nuxt/assets/images/cards/${imageName}.png`;
+    components: {
+        Chessboard
+    },
+    data() {
+        return {
+            imageRows: [
+                ['hoplite', 'hoplite', 'hoplite'],
+                ['winged knight', 'dutch waterline', 'war elefant']
+            ],
+            moveInput: 'e2e4',
+            turn: 1,
+            board: [
+                [4, 3, 2, 5, 6, 2, 3, 4],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [4, 3, 2, 5, 6, 2, 3, 4],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0]
+            ],
+        };
+    },
+    mounted() {
+        this.makeMove()
+    },
+    methods: {
+        getImageUrl(imageName) {
+            return `/_nuxt/assets/images/cards/${imageName}.png`;
+        },
+        makeMove() {
+            axios.post('http://127.0.0.1:8000/move', {
+                move: this.moveInput,
+                turn: this.turn,
+                board: this.board
+            })
+                .then(response => {
+                    console.log('Move response:', response.data);
+                })
+                .catch(error => {
+                    console.error('Error making move:', error);
+                });
+        }
     }
-  }
 };
 
 

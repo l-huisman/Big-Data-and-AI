@@ -72,23 +72,23 @@ export default {
   },
   mounted() {
     // this.initialize();
-    console.log(this.gameBoard);
     this.whitePieces = this.gameBoard[1];
     this.blackPieces = this.gameBoard[0].reverse();
+    console.log(this.gameBoard);
     this.CreateDict();
   },
   methods: {
-    initialize() {
-      axios.get('http://127.0.0.1:8000/initialize')
-        .then(response => {
-          this.whitePieces = response.data.board[0];
-          this.blackPieces = response.data.board[1].reverse();
-          this.CreateDict();
-        })
-        .catch(error => {
-          console.error('Error initializing game:', error);
-        });
-    },
+    // initialize() {
+    //   axios.get('http://127.0.0.1:8000/initialize')
+    //     .then(response => {
+    //       this.whitePieces = response.data.board[0];
+    //       this.blackPieces = response.data.board[1].reverse();
+    //       this.CreateDict();
+    //     })
+    //     .catch(error => {
+    //       console.error('Error initializing game:', error);
+    //     });
+    // },
     CreateDict() {
       for (let i = 0; i < this.whitePieces.length; i++) {
         for (let j = 0; j < this.whitePieces[i].length; j++) {

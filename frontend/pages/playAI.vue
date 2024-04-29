@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-screen w-screen mt-[155px] text-white">
     <div class="ml-[10%] text-2xl">
-      <Chessboard />
+      <Chessboard :board="board"/>
     </div>
     <div class="ml-[50px] flex flex-col w-[45%]" >
       <div class=" text-2xl mb-[10px]">
@@ -126,7 +126,27 @@ export default {
       imageRows: [
         ['hoplite', 'hoplite', 'hoplite'],
         ['winged knight', 'dutch waterline', 'war elefant']
-      ]
+      ],
+      board: [[
+                    [4, 3, 2, 6, 5, 2, 3, 4],
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0]
+                ],
+                [
+                    [4, 3, 2, 6, 5, 2, 3, 4],
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0]]
+                ],
     };
   },
   methods: {

@@ -73,6 +73,7 @@ export default {
     initialize() {
       axios.get('http://127.0.0.1:8000/initialize')
         .then(response => {
+          console.log(response.data)
           this.whitePieces = response.data.board[0];
           this.blackPieces = response.data.board[1].reverse();
           this.CreateDict();

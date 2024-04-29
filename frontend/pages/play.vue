@@ -61,29 +61,29 @@ export default {
                 [0, 0, 0, 0, 0, 0, 0, 0]
             ],
         };
-    },
-    mounted() {
-        this.makeMove()
-    },
-    methods: {
-        getImageUrl(imageName) {
-            return `/_nuxt/assets/images/cards/${imageName}.png`;
         },
-        makeMove() {
-            axios.post('http://127.0.0.1:8000/move', {
-                move: this.moveInput,
-                turn: this.turn,
-                board: this.board
-            })
-                .then(response => {
-                    console.log('Move response:', response.data);
+            mounted() {
+            this.makeMove()
+        },
+        methods: {
+            getImageUrl(imageName) {
+                return `/_nuxt/assets/images/cards/${imageName}.png`;
+            },
+            makeMove() {
+                axios.post('http://127.0.0.1:8000/move', {
+                    move: this.moveInput,
+                    turn: this.turn,
+                    board: this.board
                 })
-                .catch(error => {
-                    console.error('Error making move:', error);
-                });
+                    .then(response => {
+                        console.log('Move response:', response.data);
+                    })
+                    .catch(error => {
+                        console.error('Error making move:', error);
+                    });
+            }
         }
-    }
-};
+    };
 
 
 </script>

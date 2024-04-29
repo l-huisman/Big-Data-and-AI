@@ -74,7 +74,6 @@ export default {
     // this.initialize();
     this.whitePieces = this.gameBoard[1];
     this.blackPieces = this.gameBoard[0].reverse();
-    console.log(this.gameBoard);
     this.CreateDict();
   },
   methods: {

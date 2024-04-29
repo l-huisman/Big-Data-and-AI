@@ -74,47 +74,29 @@ export default {
         getImageUrl(imageName) {
             return `/_nuxt/assets/images/cards/${imageName}.png`;
         },
-        parseMove(move) {
-            const fileFrom = move.charCodeAt(0) - 'a'.charCodeAt(0);
-            const rankFrom = parseInt(move[1]) - 1;
-            const fileTo = move.charCodeAt(2) - 'a'.charCodeAt(0);
-            const rankTo = parseInt(move[3]) - 1;
-            return { fileFrom, rankFrom, fileTo, rankTo };
-        },
-        applyMove(move) {
-            const { fileFrom, rankFrom, fileTo, rankTo } = this.parseMove(move);
-            const piece = this.move_request.board[1][rankFrom][fileFrom];
-            this.move_request.board[1][rankTo][fileTo] = piece;
-            this.move_request.board[1][rankFrom][fileFrom] = 0;
-        },
-        undoMove(move) {
-            const { fileFrom, rankFrom, fileTo, rankTo } = this.parseMove(move);
-            const piece = this.move_request.board[1][rankTo][fileTo];
-            this.move_request.board[1][rankFrom][fileFrom] = piece; 
-            this.move_request.board[1][rankTo][fileTo] = 0; 
-        },
+
         makeMove() {
-            this.applyMove(this.move_request.move)
-            this.boardKey++;
             this.move_request.board[0].reverse();
 
-            setTimeout(() => {
-                this.undoMove(this.move_request.move)
-                this.move_request.board[0].reverse();
-                console.log(this.move_request.board)
+            axios.post('http://127.0.0.1:8000/move', this.move_request)
+                .then(response => {
+                    // this.move_request.board = response.data.board;
+                    // this.move_request.turn += 1;
+                    this.recoursePoints += 1;
+                    this.move_request.move = '';
+                    console.log('response:', response.data.board[0]);
 
-                axios.post('http://127.0.0.1:8000/move', this.move_request)
-                    .then(response => {
-                        this.move_request.board = response.data.board;
-                        // this.move_request.turn += 1;
-                        this.recoursePoints += 1;
-                        this.move_request.move = '';
+                    this.move_request.board[1] = response.data.board[1];
+                    this.boardKey++;
+                    setTimeout(() => {
+                        this.move_request.board[0] = response.data.board[0];
                         this.boardKey++;
-                    })
-                    .catch(error => {
-                        console.error('Error making move:', error.response.data.detail);
-                    });
-            }, 2000);
+                    }, 2000);
+                })
+                .catch(error => {
+                    console.error('Error making move:', error.response.data.detail);
+                });
+                console.log(this.move_request.board)
         }
     }
 };

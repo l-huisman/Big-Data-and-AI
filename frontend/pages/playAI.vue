@@ -3,16 +3,16 @@
     <div class="ml-[10%] text-2xl">
       <Chessboard />
     </div>
-    <div class="ml-[50px] flex flex-col w-[45%]">
+    <div class="ml-[50px] flex flex-col w-[45%]" >
       <div class=" text-2xl mb-[10px]">
         <div>Turn 1</div>
       </div>
-      <div class="flex flex-row bg-[#f2f2f2] rounded-[5px] border-[10px] border-[#f2f2f2]">
-        <div class="w-[50%]" >
-          <Line :data="chartData" :options="chartOptions"></Line>
-          <Bar id="my-chart-id" :options="chartOptions" :data="chartData" />
+      <div class="flex flex-row bg-[#afe0c8] rounded-[5px] border-[7px] border-[#5a9679]">
+        <div class="w-1/2">
+          <Line height="200px" :data="chartData" :options="chartOptions"></Line>
+          <Line height="200px" :data="chartData1" :options="chartOptions1"></Line>
         </div>
-        <div class="w-[50%]">
+        <div class="w-1/2">
           <Pie id="pie-chart" :options="pieChartOptions" :data="pieChartData" />
         </div>
       </div>
@@ -24,7 +24,7 @@
 import Chessboard from '../components/Chessboard.vue';
 import axios from 'axios';
 
-import { Bar, Line, Pie } from 'vue-chartjs'
+import { Line, Pie } from 'vue-chartjs'
 import Chart from 'chart.js/auto';
 
 export default {
@@ -34,61 +34,99 @@ export default {
   },
   components: {
     Chessboard,
-    Bar,
     Line,
     Pie
   },
   data() {
     return {
+      //win chances
       chartData: {
-        labels: ['January', 'February', 'March'],
-        datasets: [{ data: [40, 20, 12] }]
+        labels: ['January', 'February', 'March', 'January', 'February'],
+        datasets: [
+          { data: [40, 20, 10, 40, 20,], label: 'White', borderColor: '#567cb8' },
+          { data: [30, 50, 10, 40, 10], label: 'Black', borderColor: '#94979c' }
+        ]
       },
       chartOptions: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Win chances per turn',
+          }
+        },
         responsive: true,
         scales: {
           x: {
             type: 'category',
-            labels: ['January', 'February', 'March'],
+            labels: ['January', 'February', 'March', 'January', 'February'],
+            title: {
+              display: true,
+              text: 'Turns',
+            }
           },
           y: {
             min: 0,
-            max: 50
+            max: 100,
+            title: {
+              display: true,
+              text: '%',
+            }
           }
         }
       },
-      lineChartData: {
-        labels: ['January', 'February', 'March'],
-        datasets: [{
-          label: 'My Line Dataset',
-          borderColor: 'rgba(255, 99, 132, 1)',
-          borderWidth: 1,
-          data: [30, 40, 50]
-        }]
+      //total rewards per turn
+      chartData1: {
+        labels: ['January', 'February', 'March', 'January', 'February'],
+        datasets: [
+          { data: [40, 20, 10, 40, 20,], label: 'White', borderColor: '#567cb8' },
+          { data: [30, 50, 10, 40, 10], label: 'Black', borderColor: '#94979c' }
+        ]
       },
-      lineChartOptions: {
+      chartOptions1: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Total rewards per turn',
+          }
+        },
         responsive: true,
         scales: {
           x: {
             type: 'category',
-            labels: ['January', 'February', 'March'],
+            labels: ['January', 'February', 'March', 'January', 'February'],
+            title: {
+              display: true,
+              text: 'Turns',
+            }
           },
           y: {
-            min: 0,
-            max: 60
+            min: -300,
+            max: 300,
+            title: {
+              display: true,
+              text: 'Rewards',
+            }
           }
         }
       },
+      //total of checks
       pieChartData: {
-        labels: ['Red', 'Blue', 'Yellow'],
+        labels: ['White', 'Black'],
         datasets: [{
-          data: [30, 20, 50],
-          backgroundColor: ['pink', 'lightblue', 'lightgrey']
+          data: [70, 30],
+          backgroundColor: ['#567cb8', '#94979c']
         }]
       },
       pieChartOptions: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Total of checks',
+          }
+        },
         responsive: true
       },
+      turn: 1,
       imageRows: [
         ['hoplite', 'hoplite', 'hoplite'],
         ['winged knight', 'dutch waterline', 'war elefant']

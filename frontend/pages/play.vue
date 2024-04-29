@@ -20,9 +20,8 @@
             </div>
         </div>
     </div>
-
     <div class="ml-[10%] text-white">
-        <input type="text" placeholder="  e.g. e2e4">
+        <input type="text" placeholder="e.g. e2e4" class="text-black px-4 rounded-[2px] h-[28px]">
     </div>
 </template>
 
@@ -40,50 +39,51 @@ export default {
                 ['hoplite', 'hoplite', 'hoplite'],
                 ['winged knight', 'dutch waterline', 'war elefant']
             ],
-            moveInput: 'e2e4',
-            turn: 1,
-            board: [
-                [4, 3, 2, 5, 6, 2, 3, 4],
-                [1, 1, 1, 1, 1, 1, 1, 1],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [4, 3, 2, 5, 6, 2, 3, 4],
-                [1, 1, 1, 1, 1, 1, 1, 1],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0]
-            ],
-        };
-        },
-            mounted() {
-            this.makeMove()
-        },
-        methods: {
-            getImageUrl(imageName) {
-                return `/_nuxt/assets/images/cards/${imageName}.png`;
-            },
-            makeMove() {
-                axios.post('http://127.0.0.1:8000/move', {
-                    move: this.moveInput,
-                    turn: this.turn,
-                    board: this.board
-                })
-                    .then(response => {
-                        console.log('Move response:', response.data);
-                    })
-                    .catch(error => {
-                        console.error('Error making move:', error);
-                    });
+            move_request: {
+                move: 'e2e4',
+                turn: 1,
+                board: [],
             }
+        };
+    },
+    mounted() {
+        this.move_request.board = [[
+                    [4, 3, 2, 5, 6, 2, 3, 4],
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0]
+                ],
+                [
+                    [4, 3, 2, 5, 6, 2, 3, 4],
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0]]
+                ];
+        this.makeMove()
+    },
+    methods: {
+        getImageUrl(imageName) {
+            return `/_nuxt/assets/images/cards/${imageName}.png`;
+        },
+        makeMove() {
+            axios.post('http://127.0.0.1:8000/move', this.move_request)
+                .then(response => {
+                    console.log('Move response:', response.data);
+                })
+                .catch(error => {
+                    console.error('Error making move:', error);
+                });
         }
-    };
+    }
+};
 
 
 </script>
@@ -98,6 +98,6 @@ body {
     border-color: rgb(216, 90, 90);
     border-width: 2px;
     border-style: solid;
-    height: 165px
+    height: 163px
 }
 </style>

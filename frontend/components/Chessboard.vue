@@ -18,9 +18,9 @@
           <!-- show the chessboard + pieces -->
           <span>
             <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')" :src="getPieceImagePath(square, 'black')"
-              alt="Chess Piece">
+              >
             <img v-else-if="square !== 0 && dict[RowIndex].hasOwnProperty('white')"
-              :src="getPieceImagePath(square, 'white')" alt="Chess Piece">
+              :src="getPieceImagePath(square, 'white')" alt="." >
           </span>
 
           <!-- show the letters on the bottom of the chessboard -->
@@ -73,7 +73,12 @@ export default {
   mounted() {
     // this.initialize();
     this.whitePieces = this.gameBoard[1];
-    this.blackPieces = this.gameBoard[0].reverse();
+
+    // for (let i = 0; i < 8; i++) {
+    //     this.gameBoard[0][i].reverse(); 
+    // }
+    this.gameBoard[0].reverse();
+    this.blackPieces = this.gameBoard[0];
     this.CreateDict();
   },
   methods: {

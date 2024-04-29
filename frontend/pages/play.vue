@@ -76,18 +76,20 @@ export default {
         },
 
         makeMove() {
+            // for (let i = 0; i < 8; i++) {
+            //     this.move_request.board[0][i].reverse();
+            // }
             this.move_request.board[0].reverse();
 
             axios.post('http://127.0.0.1:8000/move', this.move_request)
                 .then(response => {
-                    // this.move_request.board = response.data.board;
                     // this.move_request.turn += 1;
                     this.recoursePoints += 1;
                     this.move_request.move = '';
-                    console.log('response:', response.data.board[0]);
 
                     this.move_request.board[1] = response.data.board[1];
                     this.boardKey++;
+
                     setTimeout(() => {
                         this.move_request.board[0] = response.data.board[0];
                         this.boardKey++;
@@ -96,7 +98,6 @@ export default {
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);
                 });
-                console.log(this.move_request.board)
         }
     }
 };

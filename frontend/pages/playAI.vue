@@ -4,7 +4,7 @@
       <Chessboard />
     </div>
     <div class="ml-[50px] flex flex-col w-[45%]">
-      <div class=" text-2xl mb-[110px]">
+      <div class=" text-2xl mb-[10px]">
         <div>Turn 1</div>
       </div>
       <div class="flex flex-row bg-[#f2f2f2] rounded-[5px] border-[10px] border-[#f2f2f2]">
@@ -79,7 +79,7 @@ export default {
         labels: ['Red', 'Blue', 'Yellow'],
         datasets: [{
           data: [30, 20, 50],
-          backgroundColor: ['pink', 'lightblue', 'grey']
+          backgroundColor: ['pink', 'lightblue', 'lightgrey']
         }]
       },
       pieChartOptions: {

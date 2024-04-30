@@ -73,12 +73,7 @@ export default {
   mounted() {
     // this.initialize();
     this.whitePieces = this.gameBoard[1];
-
-    // for (let i = 0; i < 8; i++) {
-    //     this.gameBoard[0][i].reverse(); 
-    // }
-    this.gameBoard[0].reverse();
-    this.blackPieces = this.gameBoard[0];
+    this.blackPieces = this.gameBoard[0].reverse();
     this.CreateDict();
   },
   methods: {

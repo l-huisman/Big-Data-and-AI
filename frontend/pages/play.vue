@@ -10,7 +10,7 @@
                 <div v-else> - {{ Math.abs(pointsBoard1 - pointsBoard2) }}</div>
             </div>
             <div class="bla ml-[20px] flex flex-row  right-0 ml-auto mb-[12px] text-lg justify-end">
-                resource points: 0
+                resource points: {{ this.recoursePoints }}
             </div>
             <div>
                 <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row justify-end">
@@ -93,7 +93,6 @@ export default {
             axios.post('http://127.0.0.1:8000/move', this.move_request)
                 .then(response => {
                     this.errorMessage = '';
-                    this.recoursePoints += 1;
                     this.move_request.move = '';
 
                     this.move_request.board[1] = response.data.board[1];
@@ -103,6 +102,8 @@ export default {
                         this.move_request.board[0] = response.data.board[0];
                         this.boardKey++;
                     }, 2000);
+                    
+                    this.recoursePoints += 1;
                 })
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);

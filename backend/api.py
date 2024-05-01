@@ -14,7 +14,8 @@ import pygame
 
 WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
 BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
-
+WHITE_DQN_PATH = 'results/DoubleAgentsDQN/white_dict.pt'
+BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
 
 app = FastAPI()
 
@@ -97,11 +98,19 @@ def aigame(aigame_request: AIGameRequest):
         match aigame_request.white_model.capitalize():
             case "PPO":
                 white_model = WHITE_PPO_PATH
+            case "DQN":
+                #white_model = WHITE_DQN_PATH
+                logger.info("DQN not implemented yet, using PPO instead.")
+                white_model = WHITE_PPO_PATH
             case _:
                 white_model = WHITE_PPO_PATH
                 
         match aigame_request.black_model.capitalize():
             case "PPO":
+                black_model = BLACK_PPO_PATH
+            case "DQN":
+                #black_model = BLACK_DQN_PATH
+                logger.info("DQN not implemented yet, using PPO instead.")
                 black_model = BLACK_PPO_PATH
             case _:
                 black_model = BLACK_PPO_PATH    

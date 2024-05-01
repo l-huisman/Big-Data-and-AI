@@ -9,7 +9,7 @@
           <div v-if="RowIndex % 8 == 0" class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
             'text-[#D0C27A]': !GetSquareColors(RowIndex), 'text-[#AA8439]': GetSquareColors(RowIndex)
           }">{{ (RowIndex /
-            8) + 1}}</div>
+            8) + 1 }}</div>
           <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
             'text-[#D0C27A]': GetSquareColors(RowIndex),
             'text-[#AA8439]': !GetSquareColors(RowIndex)
@@ -18,9 +18,9 @@
           <!-- show the chessboard + pieces -->
           <span>
             <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')" :src="getPieceImagePath(square, 'black')"
-              alt="Chess Piece">
+              >
             <img v-else-if="square !== 0 && dict[RowIndex].hasOwnProperty('white')"
-              :src="getPieceImagePath(square, 'white')" alt="Chess Piece">
+              :src="getPieceImagePath(square, 'white')" alt="." >
           </span>
 
           <!-- show the letters on the bottom of the chessboard -->
@@ -40,29 +40,16 @@
 
 
 <script>
+import axios from 'axios';
 export default {
+  props: {
+    board: Array 
+  },
   data() {
     return {
+      gameBoard: this.board,
       dict: [],
       numbers: [1, 2, 3, 4, 5, 6, 7, 8],
-      gamestate: [
-        [4, 3, 2, 5, 6, 2, 3, 4],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [4, 3, 2, 5, 6, 2, 3, 4],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
-      ],
       whitePieces: [],
       blackPieces: [],
       pieceImagesWhite: {
@@ -84,15 +71,23 @@ export default {
     };
   },
   mounted() {
-    this.SplitGamestate();
+    // this.initialize();
+    this.whitePieces = this.gameBoard[1];
+    this.blackPieces = this.gameBoard[0].reverse();
     this.CreateDict();
   },
-
   methods: {
-    SplitGamestate() {
-      this.whitePieces = this.gamestate.slice(0, 8);
-      this.blackPieces = this.gamestate.slice(8).reverse();
-    },
+    // initialize() {
+    //   axios.get('http://127.0.0.1:8000/initialize')
+    //     .then(response => {
+    //       this.whitePieces = response.data.board[0];
+    //       this.blackPieces = response.data.board[1].reverse();
+    //       this.CreateDict();
+    //     })
+    //     .catch(error => {
+    //       console.error('Error initializing game:', error);
+    //     });
+    // },
     CreateDict() {
       for (let i = 0; i < this.whitePieces.length; i++) {
         for (let j = 0; j < this.whitePieces[i].length; j++) {

@@ -5,7 +5,7 @@ from learnings.dqn import DQNLearner
 import sys
 
 args = dict({
-    "episodes": 100,
+    "episodes": 10,
     "render_each": 20,
     "save_on_learn": True,
     "chess": dict({

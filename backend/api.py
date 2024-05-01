@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
 from learnings.ppo import PPO
 from utils import convert_move_to_positions, validate_board_size, raise_http_exception
 from apimodels.requests import MoveRequest, AIGameRequest
@@ -16,7 +15,22 @@ import pygame
 WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
 BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
 
+
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, filename='api.log', format='%(asctime)s|%(name)s:%(levelname)s - %(message)s')
 logger.info("API started.")

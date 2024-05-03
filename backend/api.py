@@ -121,11 +121,11 @@ def aigame(aigame_request: AIGameRequest):
         
         # Play the game
         counter = 0
-        response.game.append(ppo_chess.env.get_state(ppo_chess.env.turn).tolist())
+        response.game.append(ppo_chess.env.board.tolist())
         
         while True:
             done, _ = ppo_chess.take_action(ppo_chess.env.turn, episode)
-            response.game.append(ppo_chess.env.get_state(ppo_chess.env.turn).tolist())
+            response.game.append(ppo_chess.env.board.tolist())
             
             counter += 1
             if done:

@@ -59,6 +59,9 @@ export default {
         4: '/_nuxt/assets/images/pieces/rook white.png',
         5: '/_nuxt/assets/images/pieces/queen white.png',
         6: '/_nuxt/assets/images/pieces/king white.png',
+        7: '/_nuxt/assets/images/pieces/winged_hussar white.png',
+        8: '/_nuxt/assets/images/pieces/hoplite white.png',
+        9: '/_nuxt/assets/images/pieces/war_elephant white.png',
       },
       pieceImagesBlack: {
         1: '/_nuxt/assets/images/pieces/pawn black.png',
@@ -67,6 +70,9 @@ export default {
         4: '/_nuxt/assets/images/pieces/rook black.png',
         5: '/_nuxt/assets/images/pieces/queen black.png',
         6: '/_nuxt/assets/images/pieces/king black.png',
+        7: '/_nuxt/assets/images/pieces/winged_hussar black.png',
+        8: '/_nuxt/assets/images/pieces/hoplite black.png',
+        9: '/_nuxt/assets/images/pieces/war_elephant black.png',
       }
     };
   },

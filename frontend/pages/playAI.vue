@@ -1,10 +1,10 @@
 <template>
   <div class="flex h-screen w-screen mt-[155px] text-white">
     <div class="ml-[10%] text-2xl">
-      <Chessboard :board="board" />
+      <Chessboard :board="board" :key="boardKey" />
       <!-- <Chessboard :board="board" @update:board="newState" /> -->
     </div>
-    <div class="ml-[50px] flex flex-col w-[45%]" >
+    <div class="ml-[50px] flex flex-col w-[45%]">
       <div class=" text-2xl mb-[10px]">
         <div>Turn 1</div>
       </div>
@@ -17,7 +17,8 @@
           <option value="PPO">PPO</option>
           <option value="DQN">DQN</option>
         </select>
-        <button @click="fetchGameAIvsAI(fmodel, smodel)" class="w-full rounded-full bg-[#3B6651] p-2">Start AI game</button>
+        <button @click="fetchGameAIvsAI(fmodel, smodel)" class="w-full rounded-full bg-[#3B6651] p-2">Start AI
+          game</button>
       </div>
       <div class="flex flex-row bg-[#afe0c8] rounded-[5px] border-[7px] border-[#5a9679]">
         <div class="w-1/2">
@@ -44,26 +45,27 @@ export default {
       fmodel: 'PPO',
       smodel: 'PPO',
       newState: [],
+      boardKey: 0,
       board: [[
-                    [4, 3, 2, 6, 5, 2, 3, 4],
-                    [1, 1, 1, 1, 1, 1, 1, 1],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0]
-                ],
-                [
-                    [4, 3, 2, 6, 5, 2, 3, 4],
-                    [1, 1, 1, 1, 1, 1, 1, 1],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0]]
-                ],
+        [4, 3, 2, 6, 5, 2, 3, 4],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      [
+        [4, 3, 2, 6, 5, 2, 3, 4],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]]
+      ],
     }
 
   },
@@ -84,12 +86,22 @@ export default {
       this.runAIvsAI(data.game);
     },
     // not working yet
-    runAIvsAI(game) {
+    async runAIvsAI(game) {
       for (let i = 1; i < game.length; i++) {
-        setTimeout(() => {
-          this.newState = game[i];
-        }, 1000);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        this.makeMove(game[i]);
       }
+    },
+    makeMove(board) {
+      this.board[0].reverse();
+
+      this.board[1] = board[1];
+      this.boardKey++;
+
+      setTimeout(() => {
+        this.board[0] = board[0];
+        this.boardKey++;
+      }, 2000);
     }
   }
 };

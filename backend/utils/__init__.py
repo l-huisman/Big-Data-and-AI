@@ -4,6 +4,10 @@ import torch.nn as nn
 import cv2
 from fastapi import HTTPException
 
+BOARD_LENGTH = 8
+BOARD_WIDTH = 8
+BOARD_SIDES = 2
+
 
 def build_base_model(
         input_size: int,
@@ -59,15 +63,18 @@ def raise_http_exception(status_code, detail):
     raise HTTPException(status_code=status_code, detail=detail)
 
 
-def validate_board_size(board, logger = None):
-    if len(board[0]) != 8 or len(board[1]) != 8:
-        raise_http_exception(400, f"Invalid board size. ({len(board[0])}, {len(board[1])})")
+def validate_board_size(board, logger=None):
+    if len(board) != BOARD_SIDES:
+        raise_http_exception(400, f"Invalid board size. ({len(board)}) should be {BOARD_SIDES}.")
+    if len(board[0]) != BOARD_WIDTH or len(board[1]) != BOARD_WIDTH:
+        raise_http_exception(400,
+                             f"Invalid board size. ({len(board[0])}, {len(board[1])}) should be {BOARD_WIDTH}, {BOARD_WIDTH}")
     for row in board[0]:
-        if len(row) != 8:
-            raise_http_exception(400, f"Invalid board size. ({len(row)})")
+        if len(row) != BOARD_LENGTH:
+            raise_http_exception(400, f"Invalid board size. ({len(row)}) should be {BOARD_LENGTH}")
     for row in board[1]:
-        if len(row) != 8:
-            raise_http_exception(400, f"Invalid board size. ({len(row)})")
+        if len(row) != BOARD_LENGTH:
+            raise_http_exception(400, f"Invalid board size. ({len(row)}) should be {BOARD_LENGTH}")
 
 
 def convert_move_to_positions(action_str):

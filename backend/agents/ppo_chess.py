@@ -37,4 +37,6 @@ class PPOChess(SingleAgentChess):
         goal = InfoKeys.CHECK_MATE_WIN in infos[turn]
         episode.add(state, rewards[turn], action, goal, prob, value, mask)
 
-        return done, [state, rewards, action, goal, prob, value, mask]
+        # original return statement
+        # return done, [state, rewards, action, goal, prob, value, mask]
+        return done, [state, rewards, action, goal, prob, value, mask, infos]

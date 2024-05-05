@@ -128,15 +128,15 @@ def aigame(aigame_request: AIGameRequest):
         # Play the game
         counter = 0
         response.game.append(ppo_chess.env.board.tolist())
+        response.statistics.append({"rewards": [0,0], "infos": [[], []], "end": False})
         
         while True:
             done, _ = ppo_chess.take_action(ppo_chess.env.turn, episode)
+            response.statistics.append({"rewards": _[1], "infos": _[7], "end": done})
             response.game.append(ppo_chess.env.board.tolist())
             
             counter += 1
             if done:
-                #TODO: Add / get statistics
-
                 logger.info("Game Over")
                 logger.info("Winner: White" if ppo_chess.env.turn else "Winner: Black")
                 logger.info("Game Length: ", counter)

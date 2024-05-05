@@ -17,16 +17,16 @@
           <option value="PPO">PPO</option>
           <option value="DQN">DQN</option>
         </select>
-        <button @click="fetchGameAIvsAI(fmodel, smodel)" class="w-full rounded-full bg-[#3B6651] p-2">Start AI
+        <button @click="fetchGameAIvsAI(fmodel, smodel), setupCharts()"
+          class="w-full rounded-full bg-[#3B6651] p-2">Start AI
           game</button>
       </div>
-      <div class="flex flex-row bg-[#afe0c8] rounded-[5px] border-[7px] border-[#5a9679]">
+      <div class="flex flex-row bg-[#afe0c8] rounded-[20px] border-[10px] border-[#5a9679]">
         <div class="w-1/2">
-          <!-- <Line height="200px" :data="chartData" :options="chartOptions"></Line> -->
-          <!-- <Line height="200px" :data="chartData1" :options="chartOptions1"></Line> -->
+          <div id="reward-chart" style="width: 100%; height: 300px;"></div>
         </div>
         <div class="w-1/2">
-          <!-- <Pie id="pie-chart" :options="pieChartOptions" :data="pieChartData" /> -->
+          <!-- <div id="reward-chart2" style="width: 100%; height: 300px;"></div> -->
         </div>
       </div>
     </div>
@@ -35,6 +35,7 @@
 
 <script>
 import Chessboard from '../components/Chessboard.vue';
+import * as echarts from 'echarts';
 
 export default {
   components: {
@@ -44,7 +45,8 @@ export default {
     return {
       fmodel: 'PPO',
       smodel: 'PPO',
-      newState: [],
+      rewardChart: null,
+      rewards: [],
       boardKey: 0,
       board: [[
         [4, 3, 2, 6, 5, 2, 3, 4],
@@ -69,6 +71,9 @@ export default {
     }
 
   },
+  mounted() {
+    this.setupCharts();
+  },
   methods: {
     async fetchGameAIvsAI(white_model, black_model) {
       const response = await fetch('http://127.0.0.1:8000/aigame', {
@@ -83,13 +88,13 @@ export default {
       });
       const data = await response.json();
       console.log(data);
-      this.runAIvsAI(data.game);
+      this.runAIvsAI(data.game, data.statistics);
     },
-    // not working yet
-    async runAIvsAI(game) {
+    async runAIvsAI(game, stats) {
       for (let i = 1; i < game.length; i++) {
         await new Promise(resolve => setTimeout(resolve, 1000));
         this.makeMove(game[i]);
+        this.updateCharts(stats[i]);
       }
     },
     makeMove(board) {
@@ -102,6 +107,70 @@ export default {
         this.board[0] = board[0];
         this.boardKey++;
       }, 2000);
+    },
+    setupCharts() {
+      var chartDom = document.getElementById('reward-chart');
+      this.rewardChart = echarts.init(chartDom);
+      var option;
+
+      option = {
+        xAxis: {
+          type: 'category',
+          data: ['1', '10', '20', '30', '40', '50', '100']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            name: 'Reward White',
+            data: [0],
+            type: 'line'
+          },
+          {
+            name: 'Reward Black',
+            data: [0],
+            type: 'line'
+          }
+        ]
+      };
+
+      option && this.rewardChart.setOption(option);
+    },
+    updateCharts(stats) {
+      console.log(stats)
+      this.rewardChart.setOption({
+        series: [
+          {
+            name: 'Reward White',
+            data: [stats["rewards"][0]],
+            type: 'line'
+          },
+          {
+            name: 'Reward Black',
+            data: [stats["rewards"][1]],
+            type: 'line'
+          }
+        ]
+      });
+      
+      // work in progress currently the chart is updating but just shows the last value this was a fix but did not work so i commented it out
+      // this.rewardsWhite.push(stats["rewards"][0]);
+      // this.rewardsBlack.push(stats["rewards"][1]);
+      // this.rewardChart.setOption({
+      //   series: [
+      //     {
+      //       name: 'Reward White',
+      //       data: [this.rewardsWhite.values],
+      //       type: 'line'
+      //     },
+      //     {
+      //       name: 'Reward Black',
+      //       data: [this.rewardsBlack],
+      //       type: 'line'
+      //     }
+      //   ]
+      // });
     }
   }
 };

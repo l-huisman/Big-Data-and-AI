@@ -51,7 +51,7 @@ class Chess(gym.Env):
         board = np.zeros((2, 8, 8), dtype=np.uint8)
         board[:, 0, 3] = Pieces.QUEEN
         board[:, 0, 4] = Pieces.KING
-        # board[:, 1, :] = Pieces.PAWN
+        board[:, 1, :] = Pieces.PAWN
         board[:, 0, (0, 7)] = Pieces.ROOK
         board[:, 0, (1, 6)] = Pieces.KNIGHT
         board[:, 0, (2, 5)] = Pieces.BISHOP
@@ -247,19 +247,15 @@ class Chess(gym.Env):
 
     def general_validation(self, current_pos: Cell, next_pos: Cell, turn: int, deny_enemy_king: bool) -> bool:
         if not self.is_in_range(next_pos):
-            print(f"not in range: {current_pos} -> {next_pos}, {turn}, {deny_enemy_king}")
             return False
 
         if not self.is_empty(next_pos, turn):
-            print(f"not empty: {current_pos} -> {next_pos}, {turn}, {deny_enemy_king}")
             return False
 
         if self.is_enemy_king(next_pos, turn) and (not deny_enemy_king):
-            print(f"enemy king: {current_pos} -> {next_pos}, {turn}, {deny_enemy_king}")
             return False
 
         if not self.is_path_empty_for_piece(current_pos, next_pos, turn):
-            print(f"path not empty: {current_pos} -> {next_pos}, {turn}, {deny_enemy_king}")
             return False
         return True
 

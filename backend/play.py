@@ -65,6 +65,33 @@ while running:
             src, dst, mask = env.get_all_actions(turn)
             action = np.where((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
 
+            # getting all valid actions for the piece
+            all_possible_actions_for_piece = np.where((src == from_pos).all(axis=1))[0]
+            all_playable_actions_for_piece = []
+            for i in all_possible_actions_for_piece:
+                if mask[i] == 1:
+                    all_playable_actions_for_piece.append(i)
+            all_playable_actions_for_piece = np.array(all_playable_actions_for_piece)
+
+            print("Possible actions:")
+            for i in all_possible_actions_for_piece:
+                to_loc = dst[i]
+                from_loc = src[i]
+                string_to = chr(to_loc[1] + ord('a')) + str(to_loc[0] + 1)
+                string_from = chr(from_loc[1] + ord('a')) + str(from_loc[0] + 1)
+                print(f"{src[i]} -> {dst[i]} or {string_from} -> {string_to}")
+            print("Possible actions:")
+            for i in all_playable_actions_for_piece:
+                to_loc = dst[i]
+                from_loc = src[i]
+                string_to = chr(to_loc[1] + ord('a')) + str(to_loc[0] + 1)
+                string_from = chr(from_loc[1] + ord('a')) + str(from_loc[0] + 1)
+                print(f"{src[i]} -> {dst[i]} or {string_from} -> {string_to}")
+
+            if len(action) == 0:
+                print("Invalid action")
+                continue
+
             print(f"Action = {action}", src[action], dst[action])
             action = action[0]
             rewards, done, infos = env.step(action)

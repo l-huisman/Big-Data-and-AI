@@ -26,7 +26,8 @@ class Chess(gym.Env):
             render_mode: str = "human",
             window_size: int = 800,
     ) -> None:
-        self.action_space = spaces.Discrete(1000)  # standard chess board has 1000 possible moves.
+        self.action_space_length = 3584
+        self.action_space = spaces.Discrete(self.action_space_length)  # standard chess board has 1000 possible moves.
         self.observation_space = spaces.Box(0, 7, (128,), dtype=np.int32)
 
         self.board: np.ndarray = self.init_board()
@@ -242,7 +243,7 @@ class Chess(gym.Env):
         if this_piece == "warelefant":
             return self.is_path_empty(current_pos, next_pos, turn, except_pawn=True)
         else:
-            return (not self.piece_can_jump(current_pos, turn)) and (self.is_path_empty(current_pos, next_pos, turn))
+            return (self.piece_can_jump(current_pos, turn)) or (self.is_path_empty(current_pos, next_pos, turn))
 
     def general_validation(self, current_pos: Cell, next_pos: Cell, turn: int, deny_enemy_king: bool) -> bool:
         if not self.is_in_range(next_pos):
@@ -409,22 +410,6 @@ class Chess(gym.Env):
 
             possibles[i] = next_pos
             actions_mask[i] = 1
-
-            # Castling
-            # if self.can_castle(turn):
-            #     try:
-            #         # King-side castling
-            #         if self.is_empty((row, col + 1), turn) and self.is_empty((row, col + 2), turn):
-            #             possibles[-2] = (row, col + 2)
-            #             actions_mask[-2] = 1
-
-            #         # Queen-side castling
-            #         if self.is_empty((row, col - 1), turn) and self.is_empty((row, col - 2), turn) and self.is_empty(
-            #                 (row, col - 3), turn):
-            #             possibles[-1] = (row, col - 2)
-            #             actions_mask[-1] = 1
-            #     except IndexError:
-            #         return possibles, actions_mask
         return possibles, actions_mask
 
     def get_source_pos(self, name: str, turn: int):
@@ -513,7 +498,7 @@ class Chess(gym.Env):
             all_actions_mask.append(actions_mask)
             length += len(actions_mask)
 
-        all_actions_mask.append(np.zeros(1000 - length, dtype=bool))
+        all_actions_mask.append(np.zeros(self.action_space_length - length, dtype=bool))
         return (
             np.concatenate(all_source_pos),
             np.concatenate(all_possibles),
@@ -680,6 +665,19 @@ class Chess(gym.Env):
 
         return rewards, infos
 
+    def update_draw(self, rewards: list[int] = None, infos: list[set] = None):
+        rewards = [0, 0] if rewards is None else rewards
+        infos = [set(), set()] if infos is None else infos
+
+        if self.steps >= self.max_steps:
+            rewards[0] += Rewards.DRAW
+            rewards[1] += Rewards.DRAW
+
+            infos[0].add(InfoKeys.DRAW)
+            infos[1].add(InfoKeys.DRAW)
+
+        return rewards, infos
+
     def move_piece(self, current_pos: Cell, next_pos: Cell, turn: int):
         next_row, next_col = next_pos
         current_row, current_col = current_pos
@@ -763,7 +761,7 @@ class Chess(gym.Env):
 
     def step(self, action: int):
         assert not self.is_game_done(), "the game is finished reset"
-        assert action < 1000, "action number must be less than 1000"
+        assert action < self.action_space_length, f"action number must be less than {self.action_space_length}."
 
         source_pos, possibles, actions_mask = self.get_all_actions(self.turn)
         assert actions_mask[action], f"Cannot Take This Action = {action}"
@@ -773,6 +771,7 @@ class Chess(gym.Env):
 
         rewards, infos = self.update_checks(rewards, infos)
         rewards, infos = self.update_check_mates(rewards, infos)
+        rewards, infos = self.update_draw(rewards, infos)
 
         self.turn = 1 - self.turn
         self.steps += 1

@@ -32,7 +32,7 @@ class Chess(gym.Env):
 
         self.board: np.ndarray = self.init_board()
         self.pieces: list[dict] = self.init_pieces()
-        self.pieces_names: list[str] = self.get_pieces_names()
+        self.pieces_names: tuple = self.get_pieces_names()
 
         self.turn: int = Pieces.WHITE
         self.done: bool = False
@@ -181,8 +181,10 @@ class Chess(gym.Env):
         self.pieces_names = self.get_pieces_names()
         self.checked = [False, False]
 
-    def get_pieces_names(self) -> list[str]:
-        return list(self.pieces[0].keys())
+    def get_pieces_names(self) -> tuple:
+        zero = list(self.pieces[0].keys())
+        one = list(self.pieces[1].keys())
+        return zero, one
 
     @staticmethod
     def is_in_range(pos: Cell) -> bool:
@@ -421,7 +423,7 @@ class Chess(gym.Env):
         return np.array([pos] * size)
 
     def get_actions_for(self, name: str, turn: int, deny_enemy_king: bool = False) -> tuple:
-        assert name in self.pieces_names, f"{name} not in {self.pieces_names}"
+        assert name in self.pieces_names[turn], f"{name} not in {self.pieces_names[turn]}"
         piece_cat = name.split("_")[0]
         piece_pos = self.pieces[turn][name]
         src_poses = self.get_source_pos(name, turn)
@@ -786,9 +788,9 @@ class Chess(gym.Env):
                     if pawn_key in self.pieces[turn]:
                         self.pieces[turn][hoplite_key] = self.pieces[turn].pop(pawn_key)
 
-                    if pawn_key in self.pieces_names:
-                        self.pieces_names.append(hoplite_key)
-                        self.pieces_names.remove(pawn_key)
+                    if pawn_key in self.pieces_names[turn]:
+                        self.pieces_names[turn].append(hoplite_key)
+                        self.pieces_names[turn].remove(pawn_key)
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.PAWN:
@@ -812,12 +814,12 @@ class Chess(gym.Env):
                     self.pieces[turn]["wingedknight_1"] = self.pieces[turn].pop('knight_1')
                 if 'knight_2' in self.pieces[turn]:
                     self.pieces[turn]["wingedknight_2"] = self.pieces[turn].pop('knight_2')
-                if 'knight_1' in self.pieces_names:
-                    self.pieces_names.append('wingedknight_1')
-                    self.pieces_names.pop(self.pieces_names.index('knight_1'))
-                if 'knight_2' in self.pieces_names:
-                    self.pieces_names.append('wingedknight_2')
-                    self.pieces_names.pop(self.pieces_names.index('knight_2'))
+                if 'knight_1' in self.pieces_names[turn]:
+                    self.pieces_names[turn].append('wingedknight_1')
+                    self.pieces_names[turn].pop(self.pieces_names[turn].index('knight_1'))
+                if 'knight_2' in self.pieces_names[turn]:
+                    self.pieces_names[turn].append('wingedknight_2')
+                    self.pieces_names[turn].pop(self.pieces_names[turn].index('knight_2'))
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.KNIGHT:
@@ -830,12 +832,12 @@ class Chess(gym.Env):
                     self.pieces[turn]["warelefant_1"] = self.pieces[turn].pop('rook_1')
                 if 'rook_2' in self.pieces[turn]:
                     self.pieces[turn]["warelefant_2"] = self.pieces[turn].pop('rook_2')
-                if 'rook_1' in self.pieces_names:
-                    self.pieces_names.append('warelefant_1')
-                    self.pieces_names.pop(self.pieces_names.index('rook_1'))
-                if 'rook_2' in self.pieces_names:
-                    self.pieces_names.append('warelefant_2')
-                    self.pieces_names.pop(self.pieces_names.index('rook_2'))
+                if 'rook_1' in self.pieces_names[turn]:
+                    self.pieces_names[turn].append('warelefant_1')
+                    self.pieces_names[turn].pop(self.pieces_names[turn].index('rook_1'))
+                if 'rook_2' in self.pieces_names[turn]:
+                    self.pieces_names[turn].append('warelefant_2')
+                    self.pieces_names[turn].pop(self.pieces_names[turn].index('rook_2'))
                 for row in range(8):
                     for col in range(8):
                         if self.board[turn, row, col] == Pieces.ROOK:

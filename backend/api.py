@@ -15,8 +15,6 @@ from utils import convert_move_to_positions, validate_board_size, raise_http_exc
 
 WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
 BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
-WHITE_DQN_PATH = 'results/DoubleAgentsDQN/white_dict.pt'
-BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
 
 app = FastAPI()
 
@@ -37,18 +35,6 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, filename='api.log', format='%(asctime)s|%(name)s:%(levelname)s - %(message)s')
 logger.info("API started.")
 
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 sys.setrecursionlimit(300)
 env = Chess(window_size=800)

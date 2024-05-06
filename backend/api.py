@@ -1,23 +1,54 @@
+import logging
+import numpy as np
+import pygame
+import sys
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
-from learnings.ppo import PPO
-from utils import convert_move_to_positions, validate_board_size, raise_http_exception
+from agents import PPOChess
 from apimodels.requests import MoveRequest
 from apimodels.responses import MoveResponse, InitializeResponse
-from agents import PPOChess
 from buffer.episode import Episode
 from chess import Chess
-import numpy as np
-import sys
-import logging
+from learnings.ppo import PPO
+from utils import convert_move_to_positions, validate_board_size, raise_http_exception
 
 WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
 BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
+WHITE_DQN_PATH = 'results/DoubleAgentsDQN/white_dict.pt'
+BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, filename='api.log', format='%(asctime)s|%(name)s:%(levelname)s - %(message)s')
 logger.info("API started.")
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 sys.setrecursionlimit(300)
 env = Chess(window_size=800)
@@ -54,6 +85,12 @@ def initialize():
 @app.post("/move")
 def move(move_request: MoveRequest):
     logger.info(f"Received move request: {move_request}")
+    try:
+        env.reset()
+    except Exception as e:
+        logger.error(f"An error occurred while resetting the game. {e}")
+        raise HTTPException(status_code=500, detail="An error occurred while resetting the game.")
+
     if ppo_chess is None:
         logger.error("No game has been initialized yet.")
         raise_http_exception(404, "No game has been initialized yet.")
@@ -80,7 +117,10 @@ def move(move_request: MoveRequest):
         action = np.nonzero((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
         if len(action) == 0:
             raise_http_exception(400, "Invalid move.")
-        env.step(int(action[0]))
+        _, done, _ = env.step(int(action[0]))
+
+        if done:
+            return MoveResponse(board=env.board.tolist(), cards=[], resources=0, has_game_ended=done)
     except HTTPException as e:
         logger.warning(f"An error occurred while processing the move. {e}")
         raise e

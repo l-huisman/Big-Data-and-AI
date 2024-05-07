@@ -1,7 +1,3 @@
-import logging
-import numpy as np
-import pygame
-import sys
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from learnings.ppo import PPO
@@ -11,8 +7,6 @@ from apimodels.requests import MoveRequest, AIGameRequest
 from apimodels.responses import MoveResponse, InitializeResponse, AIGameResponse
 from buffer.episode import Episode
 from chess import Chess
-from learnings.ppo import PPO
-from utils import convert_move_to_positions, validate_board_size, raise_http_exception
 import numpy as np
 import sys
 import logging
@@ -25,26 +19,15 @@ BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:8000",
-    "http://localhost:8080",
-]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, filename='api.log', format='%(asctime)s|%(name)s:%(levelname)s - %(message)s')
 logger.info("API started.")
 
 origins = [
-    "http://localhost",
     "http://localhost:3000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8080",
 ]
 
 app.add_middleware(
@@ -91,15 +74,7 @@ def aigame(aigame_request: AIGameRequest):
     logger.info(f"Received aigame request: {aigame_request}")
     response = AIGameResponse(game=[], statistics=[])
     try:             
-        env = Chess(window_size=800)
-
-        ppo = PPO(
-            env,
-            hidden_layers=(2048,) * 4,
-            epochs=100,
-            buffer_size=32 * 2,
-            batch_size=128,
-        )           
+        env.reset()     
         
         match aigame_request.white_model.capitalize():
             case "PPO":

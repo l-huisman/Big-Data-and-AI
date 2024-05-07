@@ -22,7 +22,7 @@
         </div>
     </div>
     <div class="ml-[10%] text-white">
-        <input v-model="this.move_request.move" type="text" placeholder="e.g. e2e4" v-on:keyup.enter="makeMove()"
+        <input v-model="move_request.move" type="text" placeholder="e.g. e2e4" v-on:keyup.enter="makeMove()"
             class="text-black px-4 rounded-[2px] h-[28px] mr-[20px]">
         <button class="bg-[#123456] pl-[15px] pr-[15px] pb-[3px] pt-[3px]" @click="makeMove()">Move</button>
         <div class="text-[#db3d35]">
@@ -34,6 +34,7 @@
 <script>
 import Chessboard from '../components/Chessboard.vue';
 import axios from 'axios';
+import { baseUrl } from '../base-url.js';
 
 export default {
     components: {
@@ -87,12 +88,8 @@ export default {
         }
     },
     methods: {
-        handlePositionClicked(position) {
-            this.move_request.move = position;
-            this.makeMove();
-        },
         initialize() {
-            axios.get('http://127.0.0.1:8000/initialize')
+            axios.get(`${baseUrl}/initialize`)
                 .then(response => {
                     this.move_request.board = response.data.board;
                     console.log(this.move_request.board);
@@ -102,13 +99,10 @@ export default {
                     console.error('Error initializing game:', error);
                 });
         },
-        getImageUrl(imageName) {
-            return `/_nuxt/assets/images/cards/${imageName}.png`;
-        },
         makeMove() {
             this.move_request.board[0].reverse();
 
-            axios.post('http://127.0.0.1:8000/move', this.move_request)
+            axios.post(`${baseUrl}/move`, this.move_request)
                 .then(response => {
                     this.errorMessage = '';
                     this.move_request.move = '';
@@ -128,6 +122,10 @@ export default {
                     this.errorMessage = error.response.data.detail;
                     this.move_request.board[0].reverse();
                 });
+        },
+        handlePositionClicked(position) {
+            this.move_request.move = position;
+            this.makeMove();
         },
         calculatePiecePoints(piece) {
             switch (piece) {
@@ -158,7 +156,10 @@ export default {
                 }
             }
             return totalPoints;
-        }
+        },
+        getImageUrl(imageName) {
+            return `/_nuxt/assets/images/cards/${imageName}.png`;
+        },
     }
 };
 

@@ -53,8 +53,8 @@ export default {
                 move: '',
                 turn: 1,
                 board: [[
-                    [4, 3, 2, 6, 5, 2, 3, 4],
-                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -63,8 +63,8 @@ export default {
                     [0, 0, 0, 0, 0, 0, 0, 0]
                 ],
                 [
-                    [4, 3, 2, 6, 5, 2, 3, 4],
-                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -75,6 +75,9 @@ export default {
             }
         };
     },
+    mounted() {
+        this.initialize();
+    },
     computed: {
         pointsBoard1() {
             return this.calculateBoardPoints(this.move_request.board[1]);
@@ -84,6 +87,17 @@ export default {
         }
     },
     methods: {
+        initialize() {
+            axios.get('http://127.0.0.1:8000/initialize')
+                .then(response => {
+                    this.move_request.board = response.data.board;
+                    console.log(this.move_request.board);
+                    this.boardKey++;
+                })
+                .catch(error => {
+                    console.error('Error initializing game:', error);
+                });
+        },
         getImageUrl(imageName) {
             return `/_nuxt/assets/images/cards/${imageName}.png`;
         },
@@ -102,7 +116,7 @@ export default {
                         this.move_request.board[0] = response.data.board[0];
                         this.boardKey++;
                     }, 2000);
-                    
+
                     this.recoursePoints += 1;
                 })
                 .catch(error => {

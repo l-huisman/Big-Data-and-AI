@@ -2,7 +2,8 @@
   <div class="grid grid-cols-8 ml-30">
     <template v-for="(row, RowIndex) in this.dict" :key="'row-' + RowIndex">
       <template v-for="(square, colIndex) in row" :key="'square-' + colIndex">
-        <div :class="{ 'hover:bg-[#b0a468] bg-[#D0C27A]': GetSquareColors(RowIndex), 'hover:bg-[#8a6b2d] bg-[#AA8439]': !GetSquareColors(RowIndex) }"
+        <div @click="changeClickToMove(RowIndex)"
+          :class="{ 'hover:bg-[#b0a468] bg-[#D0C27A]': GetSquareColors(RowIndex), 'hover:bg-[#8a6b2d] bg-[#AA8439]': !GetSquareColors(RowIndex) }"
           class="w-[60px] h-[60px] pt-[10px] pb-[10px] flex justify-center items-center">
 
           <!-- show the numbers on the left side of the chessboard -->
@@ -13,11 +14,11 @@
           <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">&nbsp;</div>
 
           <!-- show the chessboard + pieces -->
-          <span @click="test()">
-              <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')"
-                :src="getPieceImagePath(square, 'black')">
-              <img v-else-if="square !== 0 && dict[RowIndex].hasOwnProperty('white')"
-                :src="getPieceImagePath(square, 'white')" alt="." >
+          <span>
+            <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')"
+              :src="getPieceImagePath(square, 'black')">
+            <img v-else-if="square !== 0 && dict[RowIndex].hasOwnProperty('white')"
+              :src="getPieceImagePath(square, 'white')" alt=".">
           </span>
 
           <!-- show the letters on the bottom of the chessboard -->
@@ -46,6 +47,7 @@ export default {
       numbers: [1, 2, 3, 4, 5, 6, 7, 8],
       whitePieces: [],
       blackPieces: [],
+      position: '',
       pieceImagesWhite: {
         1: '/_nuxt/assets/images/pieces/pawn white.png',
         2: '/_nuxt/assets/images/pieces/bishop white.png',
@@ -76,8 +78,16 @@ export default {
     this.CreateDict();
   },
   methods: {
-    test() {
-      console.log('test');
+    changeClickToMove(index) {
+      const row = Math.floor(index / 8) + 1;
+      const column = String.fromCharCode(97 + (index % 8));
+      const position = column + row;
+      this.position = this.position + position;
+
+      if (this.position.length == 4) {
+        this.$emit('position-clicked', this.position);
+        this.position = '';
+      }
     },
     CreateDict() {
       for (let i = 0; i < this.whitePieces.length; i++) {

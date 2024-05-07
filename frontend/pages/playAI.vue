@@ -36,6 +36,7 @@
 <script>
 import Chessboard from '../components/Chessboard.vue';
 import * as echarts from 'echarts';
+import { baseUrl } from '../base-url.js';
 
 export default {
   components: {
@@ -76,7 +77,7 @@ export default {
   },
   methods: {
     async fetchGameAIvsAI(white_model, black_model) {
-      const response = await fetch('http://127.0.0.1:8000/aigame', {
+      const response = await fetch(`${baseUrl}/aigame`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

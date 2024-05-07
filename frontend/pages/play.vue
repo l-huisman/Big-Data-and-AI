@@ -22,7 +22,7 @@
         </div>
     </div>
     <div class="ml-[10%] text-white">
-        <input v-model="move_request.move" type="text" placeholder="e.g. e2e4" v-on:keyup.enter="makeMove()"
+        <input v-model="this.move_request.move" type="text" placeholder="e.g. e2e4" v-on:keyup.enter="makeMove()"
             class="text-black px-4 rounded-[2px] h-[28px] mr-[20px]">
         <button class="bg-[#123456] pl-[15px] pr-[15px] pb-[3px] pt-[3px]" @click="makeMove()">Move</button>
         <div class="text-[#db3d35]">
@@ -92,7 +92,6 @@ export default {
             axios.get(`${baseUrl}/initialize`)
                 .then(response => {
                     this.move_request.board = response.data.board;
-                    console.log(this.move_request.board);
                     this.boardKey++;
                 })
                 .catch(error => {

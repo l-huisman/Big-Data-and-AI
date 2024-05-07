@@ -1,7 +1,7 @@
 <template>
     <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
-            <Chessboard :board="this.move_request.board" :key="boardKey" />
+            <Chessboard :board="this.move_request.board" :key="boardKey" @position-clicked="handlePositionClicked"/>
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">
@@ -87,6 +87,10 @@ export default {
         }
     },
     methods: {
+        handlePositionClicked(position) {
+            this.move_request.move = position;
+            this.makeMove();
+        },
         initialize() {
             axios.get('http://127.0.0.1:8000/initialize')
                 .then(response => {

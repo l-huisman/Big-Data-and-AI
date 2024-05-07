@@ -128,27 +128,22 @@ export default {
         calculatePiecePoints(piece) {
             switch (piece) {
                 case 0:
-                    return 0; // Empty square
-                case 1:
-                    return 1; // Pawn
-                case 2:
-                    return 3; // Bishop
-                case 3:
-                    return 3; // Knight
-                case 4:
-                    return 5; // Rook
-                case 5:
-                    return 9; // Queen
                 case 6:
-                    return 5; // Winged Knight
-                case 7:
-                    return 3; // Hoplite
+                    return 0;
+                case 1:
+                    return 1; 
+                case 2:
+                case 3:
                 case 8:
-                    return 5; // War Elephant
+                    return 3; 
+                case 4:
+                case 7:
                 case 9:
-                    return 0; // King
+                    return 5; 
+                case 5:
+                    return 9; 
                 default:
-                    return 0; // Handle unknown pieces
+                    return 0; 
             }
         },
         calculateBoardPoints(board) {

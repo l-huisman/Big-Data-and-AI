@@ -116,3 +116,19 @@ This project includes a FastAPI to interact with the trained AI models.
 
 All api router can be found in the Swagger UI at [`http://127.0.0.1:8000/docs`](http://127.0.0.1:8000/docs).
 
+### Starting the Front-end
+* Open a terminal or command prompt and navigate to the project directory.
+* First install npm by running the command:
+
+    ```bash
+    npm install
+    ```
+
+* Then run it by using the command:
+
+    ```bash
+    npm run dev
+    ```
+
+* It will generate a link similar to the following: [http://localhost:3000]
+

@@ -1,7 +1,7 @@
 <template>
     <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
-            <Chessboard :board="this.move_request.board" :key="boardKey" @position-clicked="handlePositionClicked"/>
+            <Chessboard :board="this.move_request.board" :key="boardKey" @position-clicked="handlePositionClicked" />
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">
@@ -9,6 +9,7 @@
                 <div v-if="pointsBoard1 >= pointsBoard2"> + {{ Math.abs(pointsBoard1 - pointsBoard2) }}</div>
                 <div v-else> - {{ Math.abs(pointsBoard1 - pointsBoard2) }}</div>
             </div>
+
             <div class="bla ml-[20px] flex flex-row  right-0 ml-auto mb-[12px] text-lg justify-end">
                 resource points: {{ this.recoursePoints }}
             </div>
@@ -21,13 +22,16 @@
             </div>
         </div>
     </div>
-    <div class="ml-[10%] text-white">
+    <div v-if="!this.gameEnded" class="ml-[10%] text-white">
         <input v-model="this.move_request.move" type="text" placeholder="e.g. e2e4" v-on:keyup.enter="makeMove()"
             class="text-black px-4 rounded-[2px] h-[28px] mr-[20px]">
         <button class="bg-[#123456] pl-[15px] pr-[15px] pb-[3px] pt-[3px]" @click="makeMove()">Move</button>
         <div class="text-[#db3d35]">
             {{ this.errorMessage }}
         </div>
+    </div>
+    <div v-else class="ml-[10%] text-white">
+        <button class="bg-[#123456] pl-[15px] pr-[15px] pb-[3px] pt-[3px]" @click="initialize()">Play again</button>
     </div>
 </template>
 
@@ -49,7 +53,7 @@ export default {
             ],
             boardKey: 0,
             recoursePoints: 0,
-            temporaryBoard: [],
+            gameEnded: false,
             move_request: {
                 move: '',
                 turn: 1,
@@ -89,6 +93,7 @@ export default {
     },
     methods: {
         initialize() {
+            this.gameEnded = false;
             axios.get(`${baseUrl}/initialize`)
                 .then(response => {
                     this.move_request.board = response.data.board;
@@ -106,6 +111,8 @@ export default {
                     this.errorMessage = '';
                     this.move_request.move = '';
 
+                    this.gameEnded = response.data.has_game_ended;
+                    console.log('Game ended:', this.gameEnded);
                     this.move_request.board[1] = response.data.board[1];
                     this.boardKey++;
 
@@ -123,8 +130,10 @@ export default {
                 });
         },
         handlePositionClicked(position) {
-            this.move_request.move = position;
-            this.makeMove();
+            if (!this.gameEnded) {
+                this.move_request.move = position;
+                this.makeMove();
+            }
         },
         calculatePiecePoints(piece) {
             switch (piece) {

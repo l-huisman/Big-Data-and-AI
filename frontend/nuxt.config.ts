@@ -7,5 +7,11 @@ export default defineNuxtConfig({
       tailwindcss: {},
       autoprefixer: {},
     },
+    
   },
+  plugins: [
+    {src: '~/plugins/chart.js', mode: 'client'}
+  ],
 })
+
+

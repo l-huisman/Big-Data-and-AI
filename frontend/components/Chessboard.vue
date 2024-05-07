@@ -2,7 +2,7 @@
   <div class="grid grid-cols-8 ml-30">
     <template v-for="(row, RowIndex) in this.dict" :key="'row-' + RowIndex">
       <template v-for="(square, colIndex) in row" :key="'square-' + colIndex">
-        <div :class="{ 'bg-[#D0C27A]': GetSquareColors(RowIndex), 'bg-[#AA8439]': !GetSquareColors(RowIndex) }"
+        <div :class="{ 'hover:bg-[#b0a468] bg-[#D0C27A]': GetSquareColors(RowIndex), 'hover:bg-[#8a6b2d] bg-[#AA8439]': !GetSquareColors(RowIndex) }"
           class="w-[60px] h-[60px] pt-[10px] pb-[10px] flex justify-center items-center">
 
           <!-- show the numbers on the left side of the chessboard -->
@@ -10,17 +10,14 @@
             'text-[#D0C27A]': !GetSquareColors(RowIndex), 'text-[#AA8439]': GetSquareColors(RowIndex)
           }">{{ (RowIndex /
             8) + 1 }}</div>
-          <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
-            'text-[#D0C27A]': GetSquareColors(RowIndex),
-            'text-[#AA8439]': !GetSquareColors(RowIndex)
-          }">1</div>
+          <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">&nbsp;</div>
 
           <!-- show the chessboard + pieces -->
-          <span>
-            <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')" :src="getPieceImagePath(square, 'black')"
-              >
-            <img v-else-if="square !== 0 && dict[RowIndex].hasOwnProperty('white')"
-              :src="getPieceImagePath(square, 'white')" alt="." >
+          <span @click="test()">
+              <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')"
+                :src="getPieceImagePath(square, 'black')">
+              <img v-else-if="square !== 0 && dict[RowIndex].hasOwnProperty('white')"
+                :src="getPieceImagePath(square, 'white')" alt="." >
           </span>
 
           <!-- show the letters on the bottom of the chessboard -->
@@ -28,10 +25,7 @@
             'text-[#D0C27A]': !GetSquareColors(RowIndex),
             'text-[#AA8439]': GetSquareColors(RowIndex)
           }">{{ String.fromCharCode(RowIndex + 9).toLowerCase() }}</div>
-          <div v-else class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]" :class="{
-            'text-[#D0C27A]': GetSquareColors(RowIndex),
-            'text-[#AA8439]': !GetSquareColors(RowIndex)
-          }">1</div>
+          <div v-else class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">&nbsp;</div>
         </div>
       </template>
     </template>
@@ -43,7 +37,7 @@
 import axios from 'axios';
 export default {
   props: {
-    board: Array 
+    board: Array
   },
   data() {
     return {
@@ -82,6 +76,9 @@ export default {
     this.CreateDict();
   },
   methods: {
+    test() {
+      console.log('test');
+    },
     CreateDict() {
       for (let i = 0; i < this.whitePieces.length; i++) {
         for (let j = 0; j < this.whitePieces[i].length; j++) {

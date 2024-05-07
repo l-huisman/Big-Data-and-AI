@@ -131,19 +131,19 @@ export default {
                 case 6:
                     return 0;
                 case 1:
-                    return 1; 
+                    return 1;
                 case 2:
                 case 3:
                 case 8:
-                    return 3; 
+                    return 3;
                 case 4:
                 case 7:
                 case 9:
-                    return 5; 
+                    return 5;
                 case 5:
-                    return 9; 
+                    return 9;
                 default:
-                    return 0; 
+                    return 0;
             }
         },
         calculateBoardPoints(board) {

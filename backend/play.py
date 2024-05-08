@@ -13,7 +13,7 @@ from learnings.ppo import PPO
 sys.setrecursionlimit(300)
 env = Chess(window_size=800)
 
-# Paths to your trained apimodels
+# Paths to your trained api
 white_ppo_path = 'results/DoubleAgentsPPO/white_dict.pt'
 black_ppo_path = 'results/DoubleAgentsPPO/black_dict.pt'
 

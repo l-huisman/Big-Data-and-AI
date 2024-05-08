@@ -103,7 +103,8 @@ This project includes a FastAPI to interact with the trained AI models.
 3. Start the API using Uvicorn:
 
    ```bash
-   uvicorn api:app --reload
+    cd backend # Navigate to the backend directory
+    uvicorn api.main:app --reload
    ```
 
 4. The API will be available at [`http://127.0.0.1:8000/`](http://127.0.0.1:8000/).

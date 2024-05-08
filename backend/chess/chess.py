@@ -761,7 +761,7 @@ class Chess(gym.Env):
         if (self.board[turn, row, col] == Pieces.PAWN or self.board[turn, row, col] == Pieces.HOPLITE) and row == 7:
             self.board[turn, row, col] = Pieces.QUEEN
 
-    def step(self, action: int):
+    def step(self, action: int) -> tuple[list[int], bool, list[set]]:
         assert not self.is_game_done(), "the game is finished reset"
         assert action < self.action_space_length, f"action number must be less than {self.action_space_length}."
 

@@ -14,7 +14,7 @@ sys.setrecursionlimit(300)
 env = Chess(window_size=800)
 env.render()
 
-# Paths to your trained apimodels
+# Paths to your trained api
 white_ppo_path = 'results/DoubleAgentsPPO/white_dict.pt'
 black_ppo_path = 'results/DoubleAgentsPPO/black_dict.pt'
 

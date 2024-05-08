@@ -1,6 +1,7 @@
 import numpy as np
 import torch as T
 import torch.nn as nn
+import re
 import cv2
 from fastapi import HTTPException
 
@@ -63,7 +64,7 @@ def raise_http_exception(status_code, detail):
     raise HTTPException(status_code=status_code, detail=detail)
 
 
-def validate_board_size(board, logger=None):
+def validate_board_size(board):
     if len(board) != BOARD_SIDES:
         raise_http_exception(400, f"Invalid board size. ({len(board)}) should be {BOARD_SIDES}.")
     if len(board[0]) != BOARD_WIDTH or len(board[1]) != BOARD_WIDTH:
@@ -78,10 +79,19 @@ def validate_board_size(board, logger=None):
 
 
 def convert_move_to_positions(action_str):
-    f1 = int(action_str[1]) - 1
-    f2 = ord(action_str[0]) - ord('a')
-    from_pos = np.array([f1, f2])
-    f1 = int(action_str[3]) - 1
-    f2 = ord(action_str[2]) - ord('a')
-    to_pos = np.array([f1, f2])
+    from_pos = convert_cell_to_position(action_str[:2])
+    to_pos = convert_cell_to_position(action_str[2:])
     return from_pos, to_pos
+
+def convert_cell_to_position(cell):
+    f1 = int(cell[1]) - 1
+    f2 = ord(cell[0]) - ord('a')
+    return np.array([f1, f2])
+
+
+def matches_regex(action_str, regex):
+    return re.match(regex, action_str) is not None
+
+
+def reverse_move(move):
+    return move[0] + "" + str(9 - int(move[1])) + "" + move[2] + "" + str(9 - int(move[3]))

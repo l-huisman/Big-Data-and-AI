@@ -50,9 +50,9 @@ across both operating systems:
       cd Big-Data-and-AI/backend  # Navigate to project directory
       pip install -r requirements.txt
       ```
-      
-    **Note:** Make sure to first start the virtual environment if you are using one. For more info on venv, see [here](https://docs.python.org/3/library/venv.html).
 
+   **Note:** Make sure to first start the virtual environment if you are using one. For more info on venv,
+   see [here](https://docs.python.org/3/library/venv.html).
 
 **Training the Models:**
 
@@ -91,10 +91,9 @@ across both operating systems:
 * Run `python3 modeltest.py <model_name>`where `<model_name>` is either `ppo` or `dqn` to observe the models compete
   against each other.
 
-
 ## FastAPI Integration
 
-This project includes a FastAPI to interact with the trained AI models. 
+This project includes a FastAPI to interact with the trained AI models.
 
 ### Starting the API
 
@@ -103,7 +102,8 @@ This project includes a FastAPI to interact with the trained AI models.
 3. Start the API using Uvicorn:
 
    ```bash
-   uvicorn api:app --reload
+    cd backend # Navigate to the backend directory
+    uvicorn api.main:app --reload
    ```
 
 4. The API will be available at [`http://127.0.0.1:8000/`](http://127.0.0.1:8000/).

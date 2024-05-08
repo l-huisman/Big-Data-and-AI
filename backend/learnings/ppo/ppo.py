@@ -17,7 +17,7 @@ class PPO(Learning):
     def __init__(
         self,
         environment: gym.Env,
-        hidden_layers: tuple[int],
+        hidden_layers: tuple[int, ...],
         epochs: int,
         buffer_size: int,
         batch_size: int,

@@ -53,23 +53,25 @@ episode = Episode()
 ppo_chess = PPOChess(env, ppo, 1, 32, "", WHITE_PPO_PATH, BLACK_PPO_PATH)
 
 
-@app.get("/initialize", status_code=201)
+@app.get(path="/initialize", status_code=201)
 def initialize():
-    route = Initialize.Initialize(env, ppo_chess, episode)
+    route = Initialize.Initialize(env=env)
     return route.execute()
 
-@app.post("/move")
+
+@app.post(path="/move")
 def move(move_request: MoveRequest):
-    route = Move.Move(env, ppo_chess, episode, move_request)
+    route = Move.Move(env=env, agent=ppo_chess, episode=episode, move_request=move_request)
     return route.execute()
 
 
-@app.get("/actions")
+@app.get(path="/actions")
 def actions(action_request: ActionRequest):
-    route = PlayableActions.PlayableActions(env, action_request)
+    route = PlayableActions.PlayableActions(env=env, action_request=action_request)
     return route.execute()
 
-@app.post("/aigame", status_code=201)
+
+@app.post(path="/aigame", status_code=201)
 def aigame(ai_game_request: AIGameRequest):
     logger.info(f"Received aigame request: {ai_game_request}")
     response = AIGameResponse(game=[], statistics=[])

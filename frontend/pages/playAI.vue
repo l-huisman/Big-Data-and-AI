@@ -17,9 +17,12 @@
           <option value="PPO">PPO</option>
           <option value="DQN">DQN</option>
         </select>
-        <button @click="fetchGameAIvsAI(fmodel, smodel), setupCharts()"
+        <Button id="start-button" type="button"  @click="fetchGameAIvsAI(fmodel, smodel), setupCharts()" 
+          class="w-full rounded-full bg-[#3B6651] p-2"><span v-if="loading"> <i class="fa fa-spinner fa-spin"></i> Loading</span><span v-else> Start AI
+          game</span></Button>
+        <!-- <button @click="fetchGameAIvsAI(fmodel, smodel), setupCharts()"
           class="w-full rounded-full bg-[#3B6651] p-2">Start AI
-          game</button>
+          game</button> -->
       </div>
       <div class="flex flex-row bg-[#afe0c8] rounded-[20px] border-[10px] border-[#5a9679]">
         <div class="w-1/2">
@@ -44,6 +47,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       fmodel: 'PPO',
       smodel: 'PPO',
       rewardChart: null,
@@ -77,6 +81,8 @@ export default {
   },
   methods: {
     async fetchGameAIvsAI(white_model, black_model) {
+      this.loading = true;
+      document.getElementById("start-button").disabled = "true"; 
       const response = await fetch(`${baseUrl}/aigame`, {
         method: 'POST',
         headers: {
@@ -90,6 +96,7 @@ export default {
       const data = await response.json();
       console.log(data);
       this.runAIvsAI(data.game, data.statistics);
+      this.loading = false;
     },
     async runAIvsAI(game, stats) {
       for (let i = 1; i < game.length; i++) {
@@ -97,6 +104,8 @@ export default {
         this.makeMove(game[i]);
         this.updateCharts(stats[i]);
       }
+      console.log("Game finished");
+      document.getElementById("start-button").removeAttribute('disabled');
     },
     makeMove(board) {
       this.board[0].reverse();

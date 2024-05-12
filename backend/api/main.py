@@ -7,9 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from agents import PPOChess
 from api.models.requests import MoveRequest, AIGameRequest, ActionRequest
 from api.models.responses import AIGameResponse
-from api.routes.initialize import initialize as initialize_action
-from api.routes.actions import get_playable_actions
-from api.routes.move import move as move_action
+from api.routes import Move, PlayableActions, Initialize
 from buffer.episode import Episode
 from chess import Chess
 from learnings.ppo import PPO
@@ -57,26 +55,28 @@ ppo_chess = PPOChess(env, ppo, 1, 32, "", WHITE_PPO_PATH, BLACK_PPO_PATH)
 
 @app.get("/initialize", status_code=201)
 def initialize():
-    return initialize_action(env)
-
+    route = Initialize.Initialize(env, ppo_chess, episode)
+    return route.execute()
 
 @app.post("/move")
 def move(move_request: MoveRequest):
-    return move_action(move_request, env, ppo_chess, episode)
+    route = Move.Move(env, ppo_chess, episode, move_request)
+    return route.execute()
 
 
 @app.get("/actions")
 def actions(action_request: ActionRequest):
-    return get_playable_actions(action_request, env)
+    route = PlayableActions.PlayableActions(env, action_request)
+    return route.execute()
 
 @app.post("/aigame", status_code=201)
-def aigame(aigame_request: AIGameRequest):
-    logger.info(f"Received aigame request: {aigame_request}")
+def aigame(ai_game_request: AIGameRequest):
+    logger.info(f"Received aigame request: {ai_game_request}")
     response = AIGameResponse(game=[], statistics=[])
     try:
         env.reset()
 
-        match aigame_request.white_model.capitalize():
+        match ai_game_request.white_model.capitalize():
             case "PPO":
                 white_model = WHITE_PPO_PATH
             case "DQN":
@@ -86,7 +86,7 @@ def aigame(aigame_request: AIGameRequest):
             case _:
                 white_model = WHITE_PPO_PATH
 
-        match aigame_request.black_model.capitalize():
+        match ai_game_request.black_model.capitalize():
             case "PPO":
                 black_model = BLACK_PPO_PATH
             case "DQN":

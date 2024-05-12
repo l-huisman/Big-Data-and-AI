@@ -1,21 +1,22 @@
-import logging
-
 from api.models.responses import InitializeResponse
-from utils import raise_http_exception
+from api.routes.base import BaseRoute
+from chess import Chess
 
-logger = logging.getLogger(__name__)
 
+class Initialize(BaseRoute):
+    def __init__(self, env: Chess):
+        super().__init__(env)
 
-def initialize(env):
-    logger.info("Received initialize request.")
-    try:
-        env.reset()
-        return InitializeResponse(board=env.board.tolist(), cards=[], resources=0, pieces=env.pieces)
-    except FileNotFoundError as e:
-        logger.error(f"Could not find model on specified location, make sure the location is correct. {e}")
-        raise raise_http_exception(status_code=500, detail="Could not find any model.")
-    except Exception as e:
-        logger.error(f"An error occurred while resetting the game. {e}")
-        raise raise_http_exception(status_code=500, detail="An error occurred while initializing the game.")
-    finally:
-        logger.info("Initialized game.")
+    def execute(self) -> InitializeResponse:
+        self.logger.info("Received initialize request.")
+        try:
+            self.env.reset()
+            return InitializeResponse(board=self.env.board.tolist(), cards=[], resources=0, pieces=self.env.pieces)
+        except FileNotFoundError as e:
+            self.logger.error(f"Could not find model on specified location, make sure the location is correct. {e}")
+            self.raise_http_exception(status_code=500, detail="Could not find any model.")
+        except Exception as e:
+            self.logger.error(f"An error occurred while resetting the game. {e}")
+            self.raise_http_exception(status_code=500, detail="An error occurred while initializing the game.")
+        finally:
+            self.logger.info("Initialized game.")

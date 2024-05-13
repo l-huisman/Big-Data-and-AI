@@ -2,6 +2,7 @@ import logging
 
 from fastapi import HTTPException
 
+from learnings.ppo import PPO
 from utils import matches_regex
 
 BOARD_LENGTH = 8
@@ -13,6 +14,11 @@ class BaseRoute:
     def __init__(self, env):
         self.logger = logging.getLogger(__name__)
         self.env = env
+
+    WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
+    BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
+    WHITE_DQN_PATH = 'results/DoubleAgentsDQN/white_dict.pt'
+    BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
 
     def execute(self):
         raise NotImplementedError()
@@ -45,3 +51,12 @@ class BaseRoute:
         except Exception as e:
             logger.error(f"An error occurred while resetting the game. {e}")
             raise raise_http_exception(500, detail="An error occurred while resetting the game.")
+
+    def get_ppo(self):
+        return PPO(
+            self.env,
+            hidden_layers=(2048,) * 4,
+            epochs=100,
+            buffer_size=32 * 2,
+            batch_size=128,
+        )

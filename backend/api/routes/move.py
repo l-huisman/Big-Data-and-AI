@@ -21,6 +21,7 @@ class Move(BaseRoute):
 
     def execute(self) -> MoveResponse:
         self.logger.info(f"Received move request: {self.move_request}")
+        self.reset_environment()
 
         if self.agent is None:
             self.logger.error("No game has been initialized yet.")
@@ -29,6 +30,7 @@ class Move(BaseRoute):
         board = self.convert_board(self.move_request.board)
         self.validate_board_size(board)
 
+        self.env.resources = self.move_request.resources
         self.env.set_board(board)
         self.env.turn = self.move_request.turn
         action_str = self.move_request.move
@@ -42,13 +44,13 @@ class Move(BaseRoute):
                 playerMoveBoard=player_move_board,
                 CombinedMoveBoard=player_move_board,
                 cards=[],
-                resources=0, has_game_ended=done
+                resources=self.env.resources, has_game_ended=done
             )
 
         self.process_ai_move(turn=self.env.turn, episode=self.episode)
         self.logger.info("Move processed successfully.")
         return MoveResponse(playerMoveBoard=player_move_board, CombinedMoveBoard=self.env.board.tolist(), cards=[],
-                            resources=0,
+                            resources=self.env.resources,
                             has_game_ended=self.env.done)
 
     def process_ai_move(self, turn, episode):

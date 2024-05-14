@@ -8,7 +8,7 @@ class AIGameResponse(BaseModel):
 
 class MoveResponse(BaseModel):
     playerMoveBoard: list
-    CombinedMoveBoard: list
+    combinedMoveBoard: list
     cards: list
     resources: int
     has_game_ended: bool

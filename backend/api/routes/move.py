@@ -29,6 +29,7 @@ class Move(BaseRoute):
 
         board = self.convert_board(self.move_request.board)
         self.validate_board_size(board)
+        self.validate_resources(self.move_request.resources)
 
         self.env.resources = self.move_request.resources
         self.env.set_board(board)
@@ -42,14 +43,14 @@ class Move(BaseRoute):
         if done:
             return MoveResponse(
                 playerMoveBoard=player_move_board,
-                CombinedMoveBoard=player_move_board,
+                combinedMoveBoard=player_move_board,
                 cards=[],
                 resources=self.env.resources, has_game_ended=done
             )
 
         self.process_ai_move(turn=self.env.turn, episode=self.episode)
         self.logger.info("Move processed successfully.")
-        return MoveResponse(playerMoveBoard=player_move_board, CombinedMoveBoard=self.env.board.tolist(), cards=[],
+        return MoveResponse(playerMoveBoard=player_move_board, combinedMoveBoard=self.env.board.tolist(), cards=[],
                             resources=self.env.resources,
                             has_game_ended=self.env.done)
 
@@ -94,3 +95,10 @@ class Move(BaseRoute):
         except Exception as e:
             self.logger.error("Something went wrong while processing the move. " + str(e))
             self.raise_http_exception(400, "Invalid move")
+
+    def validate_resources(self, resources):
+        if len(resources) != 2:
+            self.raise_http_exception(400, "Invalid resources. Please provide resources in the format of [n, n].")
+        if not all(isinstance(i, int) for i in resources):
+            self.raise_http_exception(400, "Invalid resources. Please provide resources in the format of [n, n].")
+

@@ -55,7 +55,7 @@ while running:
     done, _ = chess_game.take_action(chess_game.env.turn, episode)
     # print("turn: ", chess_game.env.turn)
     env.render()
-    sleep(1)  # Pause for a short time to make the game viewable
+    sleep(.5)  # Pause for a short time to make the game viewable
     counter += 1
     if done:
         print("Game Over")

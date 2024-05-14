@@ -16,7 +16,7 @@
             <div>
                 <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row justify-end">
                     <div v-for="(image, imageIndex) in row" :key="imageIndex" class="ml-[10px] ">
-                        <img :src="getImageUrl(image)" alt="not working" class="h-[165px] mb-[10px]" id="card" />
+                        <img :src="getImageUrl(image)" alt="not working" class="h-[165px] mb-[10px] card" :class="{ 'selected': selectedImageIndex === index + (imageIndex * 3) }" id="card" @click="handleImageClick(index + (imageIndex * 3))"/>
                     </div>
                 </div>
             </div>
@@ -51,6 +51,7 @@ export default {
                 ['hoplite', 'hoplite', 'hoplite'],
                 ['winged knight', 'dutch waterline', 'war elefant']
             ],
+            selectedImageIndex: null,
             boardKey: 0,
             gameEnded: false,
             move_request: {
@@ -121,7 +122,7 @@ export default {
                     setTimeout(() => {
                         this.move_request.board = response.data.combinedMoveBoard;
                         this.boardKey++;
-                    }, 200);
+                    }, 1000);
 
                 })
                 .catch(error => {
@@ -169,6 +170,13 @@ export default {
         getImageUrl(imageName) {
             return `/_nuxt/assets/images/cards/${imageName}.png`;
         },
+        handleImageClick(index) {
+            if (this.selectedImageIndex === index) {
+                this.selectedImageIndex = null;
+            } else {
+                this.selectedImageIndex = index;
+            }
+        },
     }
 };
 
@@ -180,6 +188,7 @@ body {
     background-color: #3B6651;
 }
 
+.selected,
 #card:hover {
     border-radius: 5px;
     border-color: rgb(216, 90, 90);
@@ -187,4 +196,5 @@ body {
     border-style: solid;
     height: 163px
 }
+
 </style>

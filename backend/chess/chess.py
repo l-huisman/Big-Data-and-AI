@@ -181,6 +181,7 @@ class Chess(gym.Env):
         self.pieces = self.init_pieces()
         self.pieces_names = self.get_pieces_names()
         self.checked = [False, False]
+        self.resources = [0, 0]
 
     def get_pieces_names(self) -> tuple:
         zero = list(self.pieces[0].keys())

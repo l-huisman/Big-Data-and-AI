@@ -10,6 +10,7 @@ class MoveRequest(BaseModel):
     move: str
     turn: int
     board: list
+    resources: int
 
 
 class ActionRequest(BaseModel):

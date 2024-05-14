@@ -26,7 +26,7 @@ class Chess(gym.Env):
             render_mode: str = "human",
             window_size: int = 800,
     ) -> None:
-        self.action_space_length = 1200 # 3584
+        self.action_space_length = 1200  # 3584
         self.action_space = spaces.Discrete(self.action_space_length)  # standard chess board has 1000 possible moves.
         self.observation_space = spaces.Box(0, 7, (128,), dtype=np.int32)
 
@@ -325,7 +325,6 @@ class Chess(gym.Env):
 
     def get_actions_for_dutchwaterline(self, turn: int) -> tuple:
 
-
         rows = [2, 3, 4, 5]
         all_possibles = []
         all_actions_mask = []
@@ -337,12 +336,12 @@ class Chess(gym.Env):
                 if not self.is_enemy_king((row, col), turn):
                     count += 1
 
-                if(count == 8):
+                if (count == 8):
                     all_possibles.append([row, 0])
                     all_actions_mask.append(1)
                     all_source_pos.append([row, 0])
 
-                if(col == 7):
+                if (col == 7):
                     count = 0
 
         return all_possibles, all_actions_mask, all_source_pos
@@ -545,7 +544,6 @@ class Chess(gym.Env):
         all_actions_mask.append(actions_mask1)
         all_source_pos.append(all_source_pos1)
         length += len(actions_mask1)
-
 
         all_actions_mask.append(np.zeros(self.action_space_length - length, dtype=bool))
         return (
@@ -814,7 +812,6 @@ class Chess(gym.Env):
 
         for (key, value) in self.pieces[turn].items():
             if value == tuple(current_pos):
-
                 # # Update the location of the piece in the pieces array
                 self.pieces[turn][key] = tuple(next_pos)
 
@@ -887,13 +884,17 @@ class Chess(gym.Env):
         rewards[1 - turn] = 0
         new_piece = Pieces.get_upgraded_variant(piece_to_upgrade)
 
-
         # get piece_name from position
         piece_name = None
         for key, value in self.pieces[turn].items():
             if value == (row, col):
                 piece_name = key
                 break
+
+        # return rewards if the piece is empty (This happens because of dutch waterline,
+        # which can be activated on an empty space)
+        if new_piece == Pieces.EMPTY or piece_name is None:
+            return [0, 0], [set(), set()]
 
         # update the piece
         self.pieces[turn][f"{Pieces.get_piece_name(new_piece).lower()}_{piece_name.split('_')[1]}"] = self.pieces[
@@ -925,20 +926,24 @@ class Chess(gym.Env):
         if from_pos == next_pos:
             source_pos_piece = self.board[self.turn, from_pos[0], from_pos[1]]
             rewards, infos = self.upgrade_piece(from_pos, self.turn, source_pos_piece)
+            end_turn = False
         else:
             rewards, infos = self.move_piece(
                 from_pos, next_pos, self.turn
             )
+            end_turn = True
 
-        if ((tuple(source_pos[action]) == (2, 0) or tuple(source_pos[action]) == (3, 0) or tuple(source_pos[action]) == (4, 0) or tuple(source_pos[action]) == (5, 0)) and tuple(source_pos[action]) == tuple(possibles[action])):
-                self.dutchwaterline(source_pos[action])
+        if (from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0)
+                and from_pos == next_pos):
+            self.dutchwaterline(from_pos)
+            end_turn = True  # since no limit is applied yet, I've turned it to True
 
         rewards, infos = self.update_checks(rewards, infos)
         rewards, infos = self.update_check_mates(rewards, infos)
         rewards, infos = self.update_draw(rewards, infos)
 
-        self.resources[self.turn] += 1
-        if from_pos != next_pos:
+        if from_pos != next_pos or end_turn:
+            self.resources[self.turn] += 1
             self.turn = 1 - self.turn
         self.steps += 1
         return rewards, self.is_game_done(), infos

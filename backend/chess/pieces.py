@@ -1,5 +1,3 @@
-from chess.types import Cell
-
 EMPTY = 0
 PAWN = 1
 BISHOP = 2
@@ -35,7 +33,22 @@ def get_piece_name(piece: int) -> str:
         ROOK: "rook",
         QUEEN: "queen",
         KING: "king",
-        WINGED_KNIGHT: "winged_knight",
+        WINGED_KNIGHT: "wingedknight",
         HOPLITE: "hoplite",
         WARELEFANT: "warelefant",
+    }[piece]
+
+
+def get_upgraded_variant(piece: int) -> int:
+    return {
+        EMPTY: EMPTY,
+        PAWN: HOPLITE,
+        BISHOP: BISHOP,
+        KNIGHT: WINGED_KNIGHT,
+        ROOK: WARELEFANT,
+        QUEEN: QUEEN,
+        KING: KING,
+        WINGED_KNIGHT: WINGED_KNIGHT,
+        HOPLITE: HOPLITE,
+        WARELEFANT: WARELEFANT,
     }[piece]

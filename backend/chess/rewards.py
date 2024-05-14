@@ -1,5 +1,6 @@
 MOVE = -1
 UPGRADE_PIECE = 1
+DUTCH_WATERLINE = 2
 
 CHECK_WIN = 10
 CHECK_LOSE = -CHECK_WIN
@@ -9,7 +10,6 @@ CHECK_MATE_LOSE = -CHECK_MATE_WIN
 
 DRAW = -50
 
-UPGRADE_PIECE_CARD = 2
 
 # pieces
 # These names should be a Capitalized representation of the piece name in the pieces array, e.g. "PAWN" for "pawn_1"

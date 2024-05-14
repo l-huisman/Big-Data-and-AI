@@ -536,14 +536,15 @@ class Chess(gym.Env):
             all_actions_mask.append(actions_mask)
             length += len(actions_mask)
 
-        possibles1, actions_mask1, all_source_pos1 = self.get_actions_for_dutchwaterline(
-            turn
-        )
+        if(self.resources[turn] > 4):
+            possibles, actions_mask, source_pos = self.get_actions_for_dutchwaterline(
+                turn
+            )
 
-        all_possibles.append(possibles1)
-        all_actions_mask.append(actions_mask1)
-        all_source_pos.append(all_source_pos1)
-        length += len(actions_mask1)
+            all_possibles.append(possibles)
+            all_actions_mask.append(actions_mask)
+            all_source_pos.append(source_pos)
+            length += len(actions_mask)
 
         all_actions_mask.append(np.zeros(self.action_space_length - length, dtype=bool))
         return (
@@ -936,7 +937,8 @@ class Chess(gym.Env):
         if (from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0)
                 and from_pos == next_pos):
             self.dutchwaterline(from_pos)
-            end_turn = True  # since no limit is applied yet, I've turned it to True
+            rewards = self.add_reward(None, Rewards.DUTCH_WATERLINE, self.turn)
+            end_turn = False  
 
         rewards, infos = self.update_checks(rewards, infos)
         rewards, infos = self.update_check_mates(rewards, infos)

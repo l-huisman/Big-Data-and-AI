@@ -26,7 +26,7 @@ class Chess(gym.Env):
             render_mode: str = "human",
             window_size: int = 800,
     ) -> None:
-        self.action_space_length = 3584
+        self.action_space_length = 1200 # 3584
         self.action_space = spaces.Discrete(self.action_space_length)  # standard chess board has 1000 possible moves.
         self.observation_space = spaces.Box(0, 7, (128,), dtype=np.int32)
 
@@ -39,6 +39,7 @@ class Chess(gym.Env):
         self.steps: int = 0
         self.checked: list[bool] = [False, False]
         self.max_steps: int = max_steps
+        self.resources: list[int] = [0, 0]
 
         self.font: Font | None = None
         self.cell_size: int = window_size // 8
@@ -186,6 +187,9 @@ class Chess(gym.Env):
         one = list(self.pieces[1].keys())
         return zero, one
 
+    def refresh_pieces_names(self):
+        self.pieces_names = self.get_pieces_names()
+
     @staticmethod
     def is_in_range(pos: Cell) -> bool:
         row, col = pos
@@ -318,14 +322,13 @@ class Chess(gym.Env):
         actions_mask = np.concatenate([actions_mask_bishop, actions_mask_rook])
 
         return possibles, actions_mask
-    
 
     def get_actions_for_dutchwaterline(self, turn: int) -> tuple:
-        
+
 
         rows = [2, 3, 4, 5]
-        all_possibles = []  
-        all_actions_mask = []  
+        all_possibles = []
+        all_actions_mask = []
         all_source_pos = []
         count = 0
 
@@ -333,12 +336,12 @@ class Chess(gym.Env):
             for col in range(8):
                 if not self.is_enemy_king((row, col), turn):
                     count += 1
-                
+
                 if(count == 8):
                     all_possibles.append([row, 0])
                     all_actions_mask.append(1)
                     all_source_pos.append([row, 0])
-                
+
                 if(col == 7):
                     count = 0
 
@@ -520,6 +523,15 @@ class Chess(gym.Env):
             source_pos, possibles, actions_mask = self.get_actions_for(
                 name, turn, deny_enemy_king
             )
+
+            all_source_pos.append(source_pos)
+            all_possibles.append(possibles)
+            all_actions_mask.append(actions_mask)
+            length += len(actions_mask)
+
+        for i in range(3):
+            source_pos, possibles, actions_mask = self.get_card_upgrade_actions(turn, i)
+
             all_source_pos.append(source_pos)
             all_possibles.append(possibles)
             all_actions_mask.append(actions_mask)
@@ -541,6 +553,67 @@ class Chess(gym.Env):
             np.concatenate(all_possibles),
             np.concatenate(all_actions_mask),
         )
+
+    def get_card_upgrade_actions(self, turn: int, card_id: int):
+        match card_id:
+            case 0:
+                return self.get_pawn_upgrade_actions(turn)
+            case 1:
+                return self.get_knight_upgrade_actions(turn)
+            case 2:
+                return self.get_rook_upgrade_actions(turn)
+            case _:
+                assert False, f"Invalid card id {card_id}"
+
+    def get_pawn_upgrade_actions(self, turn: int):
+        source_pos, possibles, actions_mask, pieces = self.get_empty_upgrade_actions(turn, Pieces.PAWN)
+        if self.resources[turn] >= 2:
+            for i, piece in enumerate(pieces):
+                if self.pieces[turn][piece] is None:
+                    continue
+
+                possibles[i] = self.pieces[turn][piece]
+                actions_mask[i] = 1
+
+        return source_pos, possibles, actions_mask
+
+    def get_knight_upgrade_actions(self, turn: int):
+        source_pos, possibles, actions_mask, pieces = self.get_empty_upgrade_actions(turn, Pieces.KNIGHT)
+        if self.resources[turn] >= 3:
+            for i, piece in enumerate(pieces):
+                if self.pieces[turn][piece] is None:
+                    continue
+
+                possibles[i] = self.pieces[turn][piece]
+                actions_mask[i] = 1
+
+        return source_pos, possibles, actions_mask
+
+    def get_rook_upgrade_actions(self, turn: int):
+        source_pos, possibles, actions_mask, pieces = self.get_empty_upgrade_actions(turn, Pieces.ROOK)
+        if self.resources[turn] >= 5:
+            for i, piece in enumerate(pieces):
+                if self.pieces[turn][piece] is None:
+                    continue
+
+                possibles[i] = self.pieces[turn][piece]
+                actions_mask[i] = 1
+
+        return source_pos, possibles, actions_mask
+
+    def get_empty_upgrade_actions(self, turn: int, piece: Pieces):
+        # get all pieces with the same type
+        pieces = [key for key in self.pieces[turn].keys() if key.split("_")[0] == Pieces.get_piece_name(piece).lower()]
+        possibles = np.zeros((len(pieces), 2), dtype=np.int32)
+        actions_mask = np.zeros(len(pieces), dtype=np.int32)
+        source_pos = np.zeros((len(pieces), 2), dtype=np.int32)
+        for i, piece in enumerate(pieces):
+            if self.pieces[turn][piece] is None:
+                continue
+
+            possibles[i] = [0, 0]
+            source_pos[i] = self.pieces[turn][piece]
+        return source_pos, possibles, actions_mask, pieces
 
     def check_for_enemy(self, pos: Cell, turn: int) -> bool:
         r, c = pos
@@ -714,7 +787,7 @@ class Chess(gym.Env):
             infos[1].add(InfoKeys.DRAW)
 
         return rewards, infos
-    
+
     def dutchwaterline(self, row: Cell):
         row = row[0]
         row_turn1 = 7 - row
@@ -732,7 +805,7 @@ class Chess(gym.Env):
         ]
         # Set default rewards, [-1, -2], -1 for the player who moved the piece, -2 for the other player
         rewards = [Rewards.MOVE, Rewards.MOVE]
-        rewards[1 - turn] *= 2
+        rewards[1 - turn] *= 0
 
         self.capture_pawn_by_warelefant(next_row, next_col, current_row, current_col, turn)
         self.promote_pawn_or_hoplite(next_pos, turn)
@@ -741,7 +814,7 @@ class Chess(gym.Env):
 
         for (key, value) in self.pieces[turn].items():
             if value == tuple(current_pos):
-                
+
                 # # Update the location of the piece in the pieces array
                 self.pieces[turn][key] = tuple(next_pos)
 
@@ -806,15 +879,56 @@ class Chess(gym.Env):
         if (self.board[turn, row, col] == Pieces.PAWN or self.board[turn, row, col] == Pieces.HOPLITE) and row == 7:
             self.board[turn, row, col] = Pieces.QUEEN
 
+    def upgrade_piece(self, pos: Cell, turn: int, piece_to_upgrade: Pieces):
+        self.refresh_pieces_names()
+        row, col = pos
+        rewards = [0, 0]
+        rewards[turn] = Rewards.UPGRADE_PIECE
+        rewards[1 - turn] = 0
+        new_piece = Pieces.get_upgraded_variant(piece_to_upgrade)
+
+
+        # get piece_name from position
+        piece_name = None
+        for key, value in self.pieces[turn].items():
+            if value == (row, col):
+                piece_name = key
+                break
+
+        # update the piece
+        self.pieces[turn][f"{Pieces.get_piece_name(new_piece).lower()}_{piece_name.split('_')[1]}"] = self.pieces[
+            turn].pop(piece_name)
+        self.refresh_pieces_names()
+        self.board[turn, row, col] = new_piece
+        self.remove_resources(turn, new_piece)
+        return rewards, [set(), set()]
+
+    def remove_resources(self, turn: int, piece: Pieces):
+        match piece:
+            case Pieces.HOPLITE:
+                self.resources[turn] -= 2
+            case Pieces.WINGED_KNIGHT:
+                self.resources[turn] -= 3
+            case Pieces.WARELEFANT:
+                self.resources[turn] -= 5
+
     def step(self, action: int) -> tuple[list[int], bool, list[set]]:
         assert not self.is_game_done(), "the game is finished reset"
         assert action < self.action_space_length, f"action number must be less than {self.action_space_length}."
 
         source_pos, possibles, actions_mask = self.get_all_actions(self.turn)
-        assert actions_mask[action], f"Cannot Take This Action = {action}"
-        rewards, infos = self.move_piece(
-            source_pos[action], possibles[action], self.turn
-        )
+        assert actions_mask[action], f"Cannot Take This Action = {action}, {source_pos[action]} -> {possibles[action]}"
+
+        from_pos = Cell((source_pos[action][0], source_pos[action][1]))
+        next_pos = Cell((possibles[action][0], possibles[action][1]))
+
+        if from_pos == next_pos:
+            source_pos_piece = self.board[self.turn, from_pos[0], from_pos[1]]
+            rewards, infos = self.upgrade_piece(from_pos, self.turn, source_pos_piece)
+        else:
+            rewards, infos = self.move_piece(
+                from_pos, next_pos, self.turn
+            )
 
         if ((tuple(source_pos[action]) == (2, 0) or tuple(source_pos[action]) == (3, 0) or tuple(source_pos[action]) == (4, 0) or tuple(source_pos[action]) == (5, 0)) and tuple(source_pos[action]) == tuple(possibles[action])):
                 self.dutchwaterline(source_pos[action])
@@ -823,65 +937,10 @@ class Chess(gym.Env):
         rewards, infos = self.update_check_mates(rewards, infos)
         rewards, infos = self.update_draw(rewards, infos)
 
-        self.turn = 1 - self.turn
+        self.resources[self.turn] += 1
+        if from_pos != next_pos:
+            self.turn = 1 - self.turn
         self.steps += 1
-
-        # hoplites on turn 3
-        if self.steps == 6:
-            for turn in range(2):
-                for pawn_num in range(1, 9):  # Assuming pawns are named pawn_1, pawn_2, ..., pawn_8
-                    pawn_key = f"pawn_{pawn_num}"
-                    hoplite_key = f"hoplite_{pawn_num}"
-
-                    if pawn_key in self.pieces[turn]:
-                        self.pieces[turn][hoplite_key] = self.pieces[turn].pop(pawn_key)
-
-                    if pawn_key in self.pieces_names[turn]:
-                        self.pieces_names[turn].append(hoplite_key)
-                        self.pieces_names[turn].remove(pawn_key)
-                for row in range(8):
-                    for col in range(8):
-                        if self.board[turn, row, col] == Pieces.PAWN:
-                            self.board[turn, row, col] = Pieces.HOPLITE
-
-        
-
-        # if step 14 has been reached, turn all knights into winged knights on turn 7
-        if self.steps == 14:
-            for turn in range(2):
-                if 'knight_1' in self.pieces[turn]:
-                    self.pieces[turn]["wingedknight_1"] = self.pieces[turn].pop('knight_1')
-                if 'knight_2' in self.pieces[turn]:
-                    self.pieces[turn]["wingedknight_2"] = self.pieces[turn].pop('knight_2')
-                if 'knight_1' in self.pieces_names[turn]:
-                    self.pieces_names[turn].append('wingedknight_1')
-                    self.pieces_names[turn].pop(self.pieces_names[turn].index('knight_1'))
-                if 'knight_2' in self.pieces_names[turn]:
-                    self.pieces_names[turn].append('wingedknight_2')
-                    self.pieces_names[turn].pop(self.pieces_names[turn].index('knight_2'))
-                for row in range(8):
-                    for col in range(8):
-                        if self.board[turn, row, col] == Pieces.KNIGHT:
-                            self.board[turn, row, col] = Pieces.WINGED_KNIGHT
-
-                            # if step 20 has been reached, turn all rooks into war elephants on turn 10
-        if self.steps == 20:
-            for turn in range(2):
-                if 'rook_1' in self.pieces[turn]:
-                    self.pieces[turn]["warelefant_1"] = self.pieces[turn].pop('rook_1')
-                if 'rook_2' in self.pieces[turn]:
-                    self.pieces[turn]["warelefant_2"] = self.pieces[turn].pop('rook_2')
-                if 'rook_1' in self.pieces_names[turn]:
-                    self.pieces_names[turn].append('warelefant_1')
-                    self.pieces_names[turn].pop(self.pieces_names[turn].index('rook_1'))
-                if 'rook_2' in self.pieces_names[turn]:
-                    self.pieces_names[turn].append('warelefant_2')
-                    self.pieces_names[turn].pop(self.pieces_names[turn].index('rook_2'))
-                for row in range(8):
-                    for col in range(8):
-                        if self.board[turn, row, col] == Pieces.ROOK:
-                            self.board[turn, row, col] = Pieces.WARELEFANT
-
         return rewards, self.is_game_done(), infos
 
     def can_castle(self, turn):

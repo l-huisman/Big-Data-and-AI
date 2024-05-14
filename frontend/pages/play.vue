@@ -11,7 +11,7 @@
             </div>
 
             <div class="bla ml-[20px] flex flex-row  right-0 ml-auto mb-[12px] text-lg justify-end">
-                resource points: {{ this.recoursePoints }}
+                resource points: {{ this.move_request.resources }}
             </div>
             <div>
                 <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row justify-end">
@@ -52,11 +52,11 @@ export default {
                 ['winged knight', 'dutch waterline', 'war elefant']
             ],
             boardKey: 0,
-            recoursePoints: 0,
             gameEnded: false,
             move_request: {
                 move: '',
                 turn: 1,
+                resources: 0,
                 board: [[
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -122,7 +122,6 @@ export default {
                         this.boardKey++;
                     }, 200);
 
-                    this.recoursePoints += 1;
                 })
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);

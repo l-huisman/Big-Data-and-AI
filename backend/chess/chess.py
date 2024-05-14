@@ -318,6 +318,31 @@ class Chess(gym.Env):
         actions_mask = np.concatenate([actions_mask_bishop, actions_mask_rook])
 
         return possibles, actions_mask
+    
+
+    def get_actions_for_dutchwaterline(self, turn: int) -> tuple:
+        
+
+        rows = [2, 3, 4, 5]
+        all_possibles = []  
+        all_actions_mask = []  
+        all_source_pos = []
+        count = 0
+
+        for row in rows:
+            for col in range(8):
+                if not self.is_enemy_king((row, col), turn):
+                    count += 1
+                
+                if(count == 8):
+                    all_possibles.append([row, 0])
+                    all_actions_mask.append(1)
+                    all_source_pos.append([row, 0])
+                
+                if(col == 7):
+                    count = 0
+
+        return all_possibles, all_actions_mask, all_source_pos
 
     def get_actions_for_pawn(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
         possibles, actions_mask = self.get_empty_actions("pawn")
@@ -500,6 +525,16 @@ class Chess(gym.Env):
             all_actions_mask.append(actions_mask)
             length += len(actions_mask)
 
+        possibles1, actions_mask1, all_source_pos1 = self.get_actions_for_dutchwaterline(
+            turn
+        )
+
+        all_possibles.append(possibles1)
+        all_actions_mask.append(actions_mask1)
+        all_source_pos.append(all_source_pos1)
+        length += len(actions_mask1)
+
+
         all_actions_mask.append(np.zeros(self.action_space_length - length, dtype=bool))
         return (
             np.concatenate(all_source_pos),
@@ -679,6 +714,15 @@ class Chess(gym.Env):
             infos[1].add(InfoKeys.DRAW)
 
         return rewards, infos
+    
+    def dutchwaterline(self, row: Cell):
+        row = row[0]
+        row_turn1 = 7 - row
+        for turn in range(2):
+            for col in range(8):
+                # Check if the piece is a king before removing it
+                if self.board[turn, row if turn == 0 else row_turn1, col] != Pieces.KING:
+                    self.board[turn, row if turn == 0 else row_turn1, col] = Pieces.EMPTY
 
     def move_piece(self, current_pos: Cell, next_pos: Cell, turn: int):
         next_row, next_col = next_pos
@@ -697,7 +741,8 @@ class Chess(gym.Env):
 
         for (key, value) in self.pieces[turn].items():
             if value == tuple(current_pos):
-                # Update the location of the piece in the pieces array
+                
+                # # Update the location of the piece in the pieces array
                 self.pieces[turn][key] = tuple(next_pos)
 
         for (key, value) in self.pieces[1 - turn].items():
@@ -771,6 +816,9 @@ class Chess(gym.Env):
             source_pos[action], possibles[action], self.turn
         )
 
+        if ((tuple(source_pos[action]) == (2, 0) or tuple(source_pos[action]) == (3, 0) or tuple(source_pos[action]) == (4, 0) or tuple(source_pos[action]) == (5, 0)) and tuple(source_pos[action]) == tuple(possibles[action])):
+                self.dutchwaterline(source_pos[action])
+
         rewards, infos = self.update_checks(rewards, infos)
         rewards, infos = self.update_check_mates(rewards, infos)
         rewards, infos = self.update_draw(rewards, infos)
@@ -796,16 +844,7 @@ class Chess(gym.Env):
                         if self.board[turn, row, col] == Pieces.PAWN:
                             self.board[turn, row, col] = Pieces.HOPLITE
 
-        # Dutch waterline: if step 10 has been reached, destroy a random row of pieces between 2 and 6 row of pieces
-        # on turn 5
-        if self.steps == 10:
-            random_row_turn_1 = np.random.default_rng(641).integers(2, 6)
-            random_row_turn_2 = 7 - random_row_turn_1
-            for turn in range(2):
-                for col in range(8):
-                    # Check if the piece is a king before removing it
-                    if self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] != Pieces.KING:
-                        self.board[turn, random_row_turn_1 if turn == 0 else random_row_turn_2, col] = Pieces.EMPTY
+        
 
         # if step 14 has been reached, turn all knights into winged knights on turn 7
         if self.steps == 14:

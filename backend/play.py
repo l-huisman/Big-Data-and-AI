@@ -33,6 +33,24 @@ except FileNotFoundError:
           " If you have not trained a model yet, train one first.")
     sys.exit()
 
+# def execute_dutch_waterline(self, row: int, turn: int) -> tuple:
+#     # Check if the specified row is valid for the Dutch Waterline move
+#     if row < 2 or row > 5:
+#         return False, "Invalid row for Dutch Waterline move"
+
+#     # Iterate over the columns in the specified row
+#     for col in range(8):
+#         # Get the position of the current square
+#         pos = (row, col)
+#         piece = self.board[turn, row, col]
+
+#         # Check if the square contains a piece of the player's color
+#         if piece != Pieces.EMPTY and Pieces.get_color(piece) == turn:
+#             # Remove the piece from the board
+#             self.board[turn, row, col] = Pieces.EMPTY
+
+#     return True, "Dutch Waterline move executed successfully"
+
 env.render()
 ep = Episode()
 running = True
@@ -52,6 +70,24 @@ while running:
 
         if action_str == 'q':
             break
+
+        # if action_str.startswith("dutch waterline"):
+        #     # Parse the input to extract the row number
+        #     try:
+        #         row = int(action_str.split()[-1])
+        #     except ValueError:
+        #         print("Invalid input format for Dutch Waterline move")
+        #         continue
+
+        #     # Execute the Dutch Waterline move
+        #     success, message = env.execute_dutch_waterline(row, turn)
+        #     if success:
+        #         print("Dutch Waterline move executed successfully")
+        #     else:
+        #         print(f"Error: {message}")
+
+        #     env.render()
+        #     continue
 
         # Convert human-readable action to chess move object
         try:

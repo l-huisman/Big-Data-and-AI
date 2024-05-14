@@ -11,7 +11,7 @@
             </div>
 
             <div class="bla ml-[20px] flex flex-row  right-0 ml-auto mb-[12px] text-lg justify-end">
-                resource points: {{ this.move_request.resources }}
+                resource points: {{ this.move_request.resources[1] }}
             </div>
             <div>
                 <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row justify-end">
@@ -56,7 +56,7 @@ export default {
             move_request: {
                 move: '',
                 turn: 1,
-                resources: 0,
+                resources: [],
                 board: [[
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -96,7 +96,9 @@ export default {
             this.gameEnded = false;
             axios.get(`${baseUrl}/initialize`)
                 .then(response => {
+                    console.log(response.data);
                     this.move_request.board = response.data.board;
+                    this.move_request.resources = response.data.resources;
                     this.boardKey++;
                 })
                 .catch(error => {
@@ -108,17 +110,16 @@ export default {
 
             axios.post(`${baseUrl}/move`, this.move_request)
                 .then(response => {
-                    console.log(response.data)
                     this.errorMessage = '';
                     this.move_request.move = '';
 
                     this.gameEnded = response.data.has_game_ended;
-                    console.log('Game ended:', this.gameEnded);
+                    this.move_request.resources = response.data.resources;
                     this.move_request.board = response.data.playerMoveBoard;
                     this.boardKey++;
 
                     setTimeout(() => {
-                        this.move_request.board = response.data.CombinedMoveBoard;
+                        this.move_request.board = response.data.combinedMoveBoard;
                         this.boardKey++;
                     }, 200);
 

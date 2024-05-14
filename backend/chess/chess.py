@@ -557,7 +557,7 @@ class Chess(gym.Env):
 
     def get_rook_upgrade_actions(self, turn: int):
         source_pos, possibles, actions_mask, pieces = self.get_empty_upgrade_actions(turn, Pieces.ROOK)
-        if self.resources[turn] >= 4:
+        if self.resources[turn] >= 5:
             for i, piece in enumerate(pieces):
                 if self.pieces[turn][piece] is None:
                     continue

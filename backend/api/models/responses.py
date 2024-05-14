@@ -10,7 +10,7 @@ class MoveResponse(BaseModel):
     playerMoveBoard: list
     combinedMoveBoard: list
     cards: list
-    resources: int
+    resources: list
     has_game_ended: bool
 
 class ActionResponse(BaseModel):
@@ -19,4 +19,4 @@ class ActionResponse(BaseModel):
 class InitializeResponse(BaseModel):
     board: list
     cards: list
-    resources: int
+    resources: list

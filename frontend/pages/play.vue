@@ -104,29 +104,30 @@ export default {
                 });
         },
         makeMove() {
-            this.move_request.board[0].reverse();
+            this.move_request.board[1].reverse();
 
             axios.post(`${baseUrl}/move`, this.move_request)
                 .then(response => {
+                    console.log(response.data)
                     this.errorMessage = '';
                     this.move_request.move = '';
 
                     this.gameEnded = response.data.has_game_ended;
                     console.log('Game ended:', this.gameEnded);
-                    this.move_request.board[1] = response.data.board[1];
+                    this.move_request.board = response.data.playerMoveBoard;
                     this.boardKey++;
 
                     setTimeout(() => {
-                        this.move_request.board[0] = response.data.board[0];
+                        this.move_request.board = response.data.CombinedMoveBoard;
                         this.boardKey++;
-                    }, 2000);
+                    }, 200);
 
                     this.recoursePoints += 1;
                 })
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);
                     this.errorMessage = error.response.data.detail;
-                    this.move_request.board[0].reverse();
+                    this.move_request.board[1].reverse();
                 });
         },
         handlePositionClicked(position) {

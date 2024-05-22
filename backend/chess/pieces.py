@@ -41,6 +41,7 @@ def get_piece_name(piece: int) -> str:
 
 def get_upgraded_variant(piece: int) -> int:
     return {
+        EMPTY: EMPTY,
         PAWN: HOPLITE,
         BISHOP: BISHOP,
         KNIGHT: WINGED_KNIGHT,

@@ -11,7 +11,7 @@ from learnings.dqn import DQNLearner
 from learnings.ppo import PPO
 
 sys.setrecursionlimit(300)
-env = Chess(window_size=800)
+env = Chess(window_size=800, max_steps=256)
 env.render()
 
 # Paths to your trained api
@@ -23,7 +23,7 @@ ppo = PPO(
     hidden_layers=(2048,) * 4,
     epochs=100,
     buffer_size=32 * 2,
-    batch_size=128,
+    batch_size=256,
 )
 
 # dqn = DQNLearner(
@@ -55,7 +55,7 @@ while running:
     done, _ = chess_game.take_action(chess_game.env.turn, episode)
     # print("turn: ", chess_game.env.turn)
     env.render()
-    sleep(.5)  # Pause for a short time to make the game viewable
+    sleep(.1)  # Pause for a short time to make the game viewable
     counter += 1
     if done:
         print("Game Over")

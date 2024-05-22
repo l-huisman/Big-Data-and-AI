@@ -11,7 +11,7 @@ import sys
 from learnings.ppo import PPO
 
 sys.setrecursionlimit(300)
-env = Chess(window_size=800)
+env = Chess(window_size=800, max_steps=256)
 
 # Paths to your trained api
 white_ppo_path = 'results/DoubleAgentsPPO/white_dict.pt'
@@ -22,7 +22,7 @@ ppo = PPO(
     hidden_layers=(2048,) * 4,
     epochs=100,
     buffer_size=32 * 2,
-    batch_size=128,
+    batch_size=256,
 )
 
 # Create an instance of PPOChess
@@ -52,6 +52,7 @@ while running:
 
         if action_str == 'q':
             break
+
 
         # Convert human-readable action to chess move object
         try:

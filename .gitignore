@@ -245,3 +245,4 @@ node_modules/
 .idea
 
 # Mac OSX
+.DS_Store

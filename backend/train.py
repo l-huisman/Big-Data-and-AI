@@ -56,7 +56,7 @@ if __name__ == "__main__":
     possible_models = ["dqn", "ppo", "a2c"]
     sys_args = sys.argv
     if len(sys_args) <= 1 or sys_args[1] not in possible_models:
-        print("Please provide a model (dqn or ppo or a2c) to train.")
+        print("Please provide a model (dqn, ppo or a2c) to train.")
         sys.exit()
 
     agent = None

@@ -241,4 +241,7 @@ fabric.properties
 # Node.js
 node_modules/
 
+# Intellij
 .idea
+
+# Mac OSX

@@ -39,18 +39,24 @@ app.add_middleware(
 )
 
 sys.setrecursionlimit(300)
-env = Chess(window_size=800)
+env = Chess(window_size=800, max_steps=256)
 
 ppo = PPO(
     env,
     hidden_layers=(2048,) * 4,
     epochs=100,
     buffer_size=32 * 2,
-    batch_size=128,
+    batch_size=256,
 )
 
 episode = Episode()
-ppo_chess = PPOChess(env, ppo, 1, 32, "", WHITE_PPO_PATH, BLACK_PPO_PATH)
+ppo_chess = None
+try:
+    ppo_chess = PPOChess(env, ppo, 1, 32, "", WHITE_PPO_PATH, BLACK_PPO_PATH)
+except Exception as e:
+    logger.error(e)
+    raise Exception("Failed to initialize Chess agent. Try training (or retraining) the model.")
+
 
 
 @app.get(path="/initialize", response_model=InitializeResponse)

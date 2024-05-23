@@ -48,7 +48,9 @@ class Move(BaseRoute):
                 resources=self.env.resources, has_game_ended=done
             )
 
-        self.process_ai_move(turn=self.env.turn, episode=self.episode)
+        if self.env.turn == 1:
+            self.process_ai_move(turn=self.env.turn, episode=self.episode)
+
         self.logger.info("Move processed successfully.")
         return MoveResponse(playerMoveBoard=player_move_board, combinedMoveBoard=self.env.board.tolist(), cards=[],
                             resources=self.env.resources,

@@ -11,12 +11,12 @@
             </div>
 
             <div class="bla ml-[20px] flex flex-row  right-0 ml-auto mb-[12px] text-lg justify-end">
-                resource points: {{ this.recoursePoints }}
+                resource points: {{ this.move_request.resources[1] }}
             </div>
             <div>
                 <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row justify-end">
                     <div v-for="(image, imageIndex) in row" :key="imageIndex" class="ml-[10px] ">
-                        <img :src="getImageUrl(image)" alt="not working" class="h-[165px] mb-[10px]" id="card" />
+                        <img :src="getImageUrl(image)" alt="not working" class="h-[165px] mb-[10px] card" :class="{ 'selected': selectedImageIndex === index + (imageIndex * 3) }" id="card" @click="handleImageClick(index + (imageIndex * 3))"/>
                     </div>
                 </div>
             </div>
@@ -51,12 +51,13 @@ export default {
                 ['hoplite', 'hoplite', 'hoplite'],
                 ['winged knight', 'dutch waterline', 'war elefant']
             ],
+            selectedImageIndex: null,
             boardKey: 0,
-            recoursePoints: 0,
             gameEnded: false,
             move_request: {
                 move: '',
                 turn: 1,
+                resources: [],
                 board: [[
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -96,7 +97,9 @@ export default {
             this.gameEnded = false;
             axios.get(`${baseUrl}/initialize`)
                 .then(response => {
+                    console.log(response.data);
                     this.move_request.board = response.data.board;
+                    this.move_request.resources = response.data.resources;
                     this.boardKey++;
                 })
                 .catch(error => {
@@ -104,7 +107,7 @@ export default {
                 });
         },
         makeMove() {
-            this.move_request.board[0].reverse();
+            this.move_request.board[1].reverse();
 
             axios.post(`${baseUrl}/move`, this.move_request)
                 .then(response => {
@@ -112,21 +115,20 @@ export default {
                     this.move_request.move = '';
 
                     this.gameEnded = response.data.has_game_ended;
-                    console.log('Game ended:', this.gameEnded);
-                    this.move_request.board[1] = response.data.board[1];
+                    this.move_request.resources = response.data.resources;
+                    this.move_request.board = response.data.playerMoveBoard;
                     this.boardKey++;
 
                     setTimeout(() => {
-                        this.move_request.board[0] = response.data.board[0];
+                        this.move_request.board = response.data.combinedMoveBoard;
                         this.boardKey++;
-                    }, 2000);
+                    }, 1000);
 
-                    this.recoursePoints += 1;
                 })
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);
                     this.errorMessage = error.response.data.detail;
-                    this.move_request.board[0].reverse();
+                    this.move_request.board[1].reverse();
                 });
         },
         handlePositionClicked(position) {
@@ -168,6 +170,13 @@ export default {
         getImageUrl(imageName) {
             return `/_nuxt/assets/images/cards/${imageName}.png`;
         },
+        handleImageClick(index) {
+            if (this.selectedImageIndex === index) {
+                this.selectedImageIndex = null;
+            } else {
+                this.selectedImageIndex = index;
+            }
+        },
     }
 };
 
@@ -179,6 +188,7 @@ body {
     background-color: #3B6651;
 }
 
+.selected,
 #card:hover {
     border-radius: 5px;
     border-color: rgb(216, 90, 90);
@@ -186,4 +196,5 @@ body {
     border-style: solid;
     height: 163px
 }
+
 </style>

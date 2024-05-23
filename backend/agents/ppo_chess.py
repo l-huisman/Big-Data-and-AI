@@ -12,11 +12,11 @@ class PPOChess(SingleAgentChess):
         self.white_learner = learner
         self.black_learner = learner
 
-        # Load the trained apimodels
+        # Load the trained api
         self.white_learner.load_state_dict(torch.load(white_ppo_path))
         self.black_learner.load_state_dict(torch.load(black_ppo_path))
 
-        # Set the apimodels to evaluation mode
+        # Set the api to evaluation mode
         self.white_learner.eval()
         self.black_learner.eval()
 

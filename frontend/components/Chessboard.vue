@@ -73,8 +73,8 @@ export default {
     };
   },
   mounted() {
-    this.whitePieces = this.gameBoard[1];
-    this.blackPieces = this.gameBoard[0].reverse();
+    this.blackPieces = this.gameBoard[0];
+    this.whitePieces = this.gameBoard[1].reverse();
     this.CreateDict();
   },
   methods: {

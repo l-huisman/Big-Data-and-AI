@@ -48,7 +48,7 @@ class Move(BaseRoute):
                 resources=self.env.resources, has_game_ended=done
             )
 
-        if self.env.turn == 1:
+        if self.env.turn != self.move_request.turn:
             self.process_ai_move(turn=self.env.turn, episode=self.episode)
 
         self.logger.info("Move processed successfully.")

@@ -898,6 +898,12 @@ class Chess(gym.Env):
         if new_piece == Pieces.EMPTY or piece_name is None:
             return [0, 0], [set(), set()]
 
+        split_piece_name = piece_name.split("_")
+
+        if len(split_piece_name) < 2:
+            print(piece_name)
+            return [0, 0], [set(), set()]
+
         # update the piece
         self.pieces[turn][f"{Pieces.get_piece_name(new_piece).lower()}_{piece_name.split('_')[1]}"] = self.pieces[
             turn].pop(piece_name)

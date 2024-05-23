@@ -7,7 +7,7 @@ from learnings.ppo import PPO
 from learnings.a2c import A2C
 
 args = dict({
-    "episodes": 10,
+    "episodes": 100,
     "render_each": 20,
     "save_on_learn": True,
     "chess": dict({

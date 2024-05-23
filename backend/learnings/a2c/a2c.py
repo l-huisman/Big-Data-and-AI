@@ -5,73 +5,101 @@ import torch as T
 import torch.optim as optim
 
 from tqdm import tqdm
-from buffer.a2c import BufferPPO
+from buffer.ppo import BufferPPO
 from buffer.episode import Episode
 
 from learnings.base import Learning
-from learnings.a2c.actor import Actor
-from learnings.a2c.critic import Critic
+from learnings.actor import Actor
+from learnings.critic import Critic
 
 
 class A2C(Learning):
-    def __init__(self, config):
-        super(A2C, self).__init__(config)
+    def __init__(
+            self,
+            environment: gym.Env,
+            hidden_layers: tuple[int, ...],
+            epochs: int,
+            buffer_size: int,
+            batch_size: int,
+            gamma: float = 0.99,
+            gae_lambda: float = 0.95,
+            learning_rate: float = 0.003,
+    ) -> None:
+        super().__init__(environment, epochs, gamma, learning_rate)
 
-        self.env = gym.make(config.env_name)
-        self.env.seed(config.seed)
-        self.config = config
+        self.gae_lambda = gae_lambda
+        self.buffer = BufferPPO(
+            gamma=gamma,
+            max_size=buffer_size,
+            batch_size=batch_size,
+            gae_lambda=gae_lambda,
+        )
 
-        self.actor = Actor(config)
-        self.critic = Critic(config)
+        self.hidden_layers = hidden_layers
+        self.actor = Actor(self.state_dim, self.action_dim, hidden_layers)
+        self.critic = Critic(self.state_dim, hidden_layers)
+        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=learning_rate)
+        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=learning_rate)
 
-        self.buffer = BufferPPO(config)
+        self.to(self.device)
 
-        self.actor_optim = optim.Adam(self.actor.parameters(), lr=config.actor_lr)
-        self.critic_optim = optim.Adam(self.critic.parameters(), lr=config.critic_lr)
+    def take_action(self, state: np.ndarray, action_mask: np.ndarray):
+        self.action_dim = len(action_mask)
+        state = T.Tensor(state).unsqueeze(0).to(self.device)
+        action_mask = T.Tensor(action_mask).unsqueeze(0).to(self.device)
+        dist = self.actor(state, action_mask)
+        action = dist.sample()
+        probs = T.squeeze(dist.log_prob(action)).item()
+        value = T.squeeze(self.critic(state)).item()
+        action = T.squeeze(action).item()
+        return action, probs, value
 
-        self.total_steps = 0
-        self.total_episodes = 0
-        self.total_updates = 0
+    def epoch(self):
+        (
+            states_arr,
+            actions_arr,
+            rewards_arr,
+            goals_arr,
+            old_probs_arr,
+            values_arr,
+            masks_arr,
+            advantages_arr,
+            batches,
+        ) = self.buffer.sample()
+
+        for batch in batches:
+            masks = T.Tensor(masks_arr[batch]).to(self.device)
+            values = T.Tensor(values_arr[batch]).to(self.device)
+            states = T.Tensor(states_arr[batch]).to(self.device)
+            actions = T.Tensor(actions_arr[batch]).to(self.device)
+            old_probs = T.Tensor(old_probs_arr[batch]).to(self.device)
+            advantages = T.Tensor(advantages_arr[batch]).to(self.device)
+
+            dist = self.actor(states, masks)
+            critic_value = T.squeeze(self.critic(states))
+
+            new_probs = dist.log_prob(actions)
+            prob_ratio = (new_probs - old_probs).exp()
+
+            weighted_probs = advantages * prob_ratio
+
+            actor_loss = -weighted_probs.mean()
+            critic_loss = ((advantages + values - critic_value) ** 2).mean()
+            total_loss = actor_loss + 0.5 * critic_loss
+
+            self.actor_optimizer.zero_grad()
+            self.critic_optimizer.zero_grad()
+            total_loss.backward()
+            self.actor_optimizer.step()
+            self.critic_optimizer.step()
 
     def learn(self):
-        while self.total_steps < self.config.max_steps:
-            self.learn_episode()
-            self.total_episodes += 1
-
-    def learn_episode(self):
-        episode = Episode(self.env, self.actor, self.critic, self.buffer, self.config)
-        episode.learn()
-
-        self.total_steps += episode.total_steps
-        self.total_updates += episode.total_updates
-
-        self.actor_optim.zero_grad()
-        self.critic_optim.zero_grad()
-
-        self.buffer.compute_returns(self.critic)
-        self.buffer.compute_advantages(self.critic)
-
-        self.actor_loss = self.buffer.compute_actor_loss(self.actor)
-        self.critic_loss = self.buffer.compute_critic_loss(self.critic)
-
-        self.actor_loss.backward()
-        self.critic_loss.backward()
-
-        self.actor_optim.step()
-        self.critic_optim.step()
-
+        for epoch in tqdm(range(self.epochs), desc="A2C Learning...", ncols=64, leave=False):
+            self.epoch()
         self.buffer.clear()
 
-        self.log()
+    def remember(self, episode: Episode):
+        self.buffer.add(episode)
 
-    def log(self):
-        if self.total_episodes % self.config.log_interval == 0:
-            print(f"Episode: {self.total_episodes}, Total Steps: {self.total_steps}, Total Updates: {self.total_updates}, Actor Loss: {self.actor_loss.item()}, Critic Loss: {self.critic_loss.item()}")
-
-    def save(self):
-        T.save(self.actor.state_dict(), os.path.join(self.config.save_dir, "actor.pth"))
-        T.save(self.critic.state_dict(), os.path.join(self.config.save_dir, "critic.pth"))
-
-    def load(self):
-        self.actor.load_state_dict(T.load(os.path.join(self.config.save_dir, "actor.pth")))
-        self.critic.load_state_dict(T.load(os.path.join(self.config.save_dir, "critic.pth")))
+    def save(self, folder: str, name: str):
+        T.save(self, os.path.join(folder, f"{name}.pt"))

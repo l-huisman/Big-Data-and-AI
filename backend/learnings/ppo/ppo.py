@@ -9,8 +9,8 @@ from buffer.ppo import BufferPPO
 from buffer.episode import Episode
 
 from learnings.base import Learning
-from learnings.ppo.actor import Actor
-from learnings.ppo.critic import Critic
+from learnings.actor import Actor
+from learnings.critic import Critic
 
 
 class PPO(Learning):

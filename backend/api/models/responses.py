@@ -4,6 +4,10 @@ from pydantic import BaseModel
 class AIGameResponse(BaseModel):
     game: list
     statistics: list
+    source_pos: list
+    possibles: list
+    action_mask: list
+    
 
 
 class MoveResponse(BaseModel):

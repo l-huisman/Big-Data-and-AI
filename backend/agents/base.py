@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import os
 import numpy as np
 import chess.pieces as Pieces
-import chess.info_keys as InfoKeys
+import chess.constants.info_keys as InfoKeys
 
 from buffer.episode import Episode
 from learnings.base import Learning

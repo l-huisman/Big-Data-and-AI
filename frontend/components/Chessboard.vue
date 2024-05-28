@@ -1,5 +1,6 @@
 <template>
-  <div class="grid grid-cols-8 ml-30">
+  <div class="chessboard-container">
+  <div class="chessboard grid grid-cols-8 ml-30">
     <template v-for="(row, RowIndex) in this.dict" :key="'row-' + RowIndex">
       <template v-for="(square, colIndex) in row" :key="'square-' + colIndex">
         <div @click="changeClickToMove(RowIndex)"
@@ -31,6 +32,7 @@
       </template>
     </template>
   </div>
+</div>
 </template>
 
 
@@ -84,8 +86,10 @@ export default {
       const position = column + row;
       this.position = this.position + position;
 
+      this.$emit('position-clicked', this.position);
+
       if (this.position.length == 4) {
-        this.$emit('position-clicked', this.position);
+        this.$emit('position-confirmed', this.position);
         this.position = '';
       }
     },
@@ -130,5 +134,14 @@ export default {
 <style scoped>
 body {
   background-color: #3B6651;
+}
+
+.chessboard-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/_nuxt/assets/images/other/chessboardbackground.png');
+  background-size: cover;
+  padding: 20px; /* Resetting padding */
 }
 </style>

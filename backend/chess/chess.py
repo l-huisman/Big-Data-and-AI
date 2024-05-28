@@ -57,6 +57,15 @@ class Chess(gym.Env):
         board[:, 0, (1, 6)] = Pieces.KNIGHT
         board[:, 0, (2, 5)] = Pieces.BISHOP
         return board
+    
+    @staticmethod
+    def init_resource_tiles() -> dict:
+        resource_tiles = {
+            1: [(2, 0), (2, 1), (2, 6), (2, 7), (5, 0), (5, 1), (5, 6), (5, 7)],
+            2: [(3, 0), (3, 1), (3, 6), (3, 7), (4, 0), (4, 1), (4, 6), (4, 7)],
+            3: [(3, 3), (3, 4), (4, 3), (4, 4)]
+        }
+        return resource_tiles
 
     @staticmethod
     def init_pieces():
@@ -178,6 +187,7 @@ class Chess(gym.Env):
         self.turn = Pieces.WHITE
         self.steps = 0
         self.board = self.init_board()
+        self.resource_tiles = self.init_resource_tiles()
         self.pieces = self.init_pieces()
         self.pieces_names = self.get_pieces_names()
         self.checked = [False, False]
@@ -952,11 +962,24 @@ class Chess(gym.Env):
         rewards, infos = self.update_draw(rewards, infos)
 
         if from_pos != next_pos or end_turn:
-            self.resources[self.turn] += 1
+            self.reward_resource_startturn()
             self.turn = 1 - self.turn
         self.steps += 1
         return rewards, self.is_game_done(), infos
+    
+    def reward_resource_startturn(self):
+        self.check_pieces_on_resource_tiles()
 
+    def check_pieces_on_resource_tiles(self):
+        pieces = self.get_pieces_from_board_side(self.board[self.turn])
+        for key, value in pieces.items():
+            for tilekey, tilevalue in self.resource_tiles.items():
+                for pos in tilevalue:
+                    if value == pos:
+                        self.resources[self.turn] += tilekey
+        return
+
+    
     def can_castle(self, turn):
         # Check if the king is in check
         if self.is_check(self.get_pos_king(turn), turn):

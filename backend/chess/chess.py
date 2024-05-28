@@ -1,14 +1,14 @@
 from typing import Union
 
-import constants.colors as Colors
-import constants.info_keys as InfoKeys
-import constants.rewards as Rewards
-import constants.moves as Moves
-import pieces as Pieces
+import chess.constants.colors as Colors
+import chess.constants.info_keys as InfoKeys
+import chess.constants.rewards as Rewards
+import chess.constants.moves as Moves
+import chess.pieces as Pieces
 import gym
 import numpy as np
 import pygame
-from models.types import Cell, Action, Trajectory
+from chess.models.types import Cell, Action, Trajectory
 from gym import spaces
 from pygame.font import Font
 from pygame.surface import Surface

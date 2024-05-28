@@ -1,7 +1,7 @@
 import torch
 from agents import SingleAgentChess
 from learnings.ppo import PPO
-from chess import info_keys as InfoKeys
+from chess.constants import info_keys as InfoKeys
 
 from buffer.episode import Episode
 

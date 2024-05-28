@@ -52,7 +52,7 @@ class BaseAgent(ABC):
 
     def take_action(self, turn: int, episode: Episode):
         mask = self.env.get_all_actions(turn)[-1]
-        state = self.env.get_state(turn)
+        state = self.env.aow_board.get_state(turn)
 
         action, prob, value = self.learner.take_action(state, mask)
         rewards, done, infos = self.env.step(action)
@@ -74,8 +74,8 @@ class BaseAgent(ABC):
         renders = []
 
         def render_fn():
-            if self.env.render_mode != "human":
-                renders.append(self.env.render())
+            if self.env.pygame_utils.render_mode != "human":
+                renders.append(self.env.pygame_utils.render(self.env.aow_board))
 
         self.env.reset()
         episode_white = Episode()
@@ -102,7 +102,7 @@ class BaseAgent(ABC):
         self.rewards[Pieces.BLACK, self.current_ep] = episode_black.total_reward()
         self.rewards[Pieces.WHITE, self.current_ep] = episode_white.total_reward()
 
-        if (render or self.env.done) and self.env.render_mode != "human":
+        if (render or self.env.done) and self.env.pygame_utils.render_mode != "human":
             path = os.path.join(self.result_folder, "renders", f"episode_{self.current_ep}.mp4")
             save_to_video(path, np.array(renders))
 

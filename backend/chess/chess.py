@@ -1,9 +1,9 @@
 from typing import Union
 
-import contants.colors as Colors
-import contants.info_keys as InfoKeys
-import contants.rewards as Rewards
-import contants.moves as Moves
+import constants.colors as Colors
+import constants.info_keys as InfoKeys
+import constants.rewards as Rewards
+import constants.moves as Moves
 import pieces as Pieces
 import gym
 import numpy as np

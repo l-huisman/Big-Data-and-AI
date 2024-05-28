@@ -2,13 +2,13 @@ from typing import Union
 
 import chess.constants.colors as Colors
 import chess.constants.info_keys as InfoKeys
-import chess.constants.rewards as Rewards
 import chess.constants.moves as Moves
+import chess.constants.rewards as Rewards
 import chess.pieces as Pieces
 import gym
 import numpy as np
 import pygame
-from chess.models.types import Cell, Action, Trajectory
+from chess.models.types import Cell
 from gym import spaces
 from pygame.font import Font
 from pygame.surface import Surface
@@ -335,10 +335,44 @@ class Chess(gym.Env):
                 if self.is_empty((row, col), 1 - turn):
                     continue
                 piece = self.get_piece((row, col), 1 - turn)
-                possibles, _, _ = self.get_all_actions(turn=1 - turn, deny_enemy_king=True)
+                possibles, _ = self.get_all_actions_for_piece(cell=(row, col), turn=1 - turn, piece=piece)
                 if king_position in possibles:
                     return True
         return False
+
+    def get_all_actions_for_piece(self, cell: Cell, turn: int, piece: int) -> tuple:
+        """
+        Get all possible actions for a given piece at a given cell
+        :param cell: The cell where the piece is located
+        :param turn: The current turn number
+        :param piece: The piece to get the actions for
+        :return: A tuple containing the source positions, possible actions and the action mask
+        """
+        possibles, actions_mask = self.get_empty_actions(Pieces.get_piece_name(piece))
+        row, column = cell
+
+        match piece:
+            case Pieces.PAWN:
+                return self.get_actions_for_pawn((row, column), turn)
+            case Pieces.HOPLITE:
+                return self.get_actions_for_hoplite((row, column), turn)
+            case Pieces.KNIGHT:
+                return self.get_actions_for_knight((row, column), turn)
+            case Pieces.WINGED_KNIGHT:
+                return self.get_actions_for_winged_knight((row, column), turn)
+            case Pieces.ROOK:
+                return self.get_actions_for_rook((row, column), turn)
+            case Pieces.WARELEFANT:
+                return self.get_actions_for_war_elefant((row, column), turn)
+            case Pieces.BISHOP:
+                return self.get_actions_for_bishop((row, column), turn)
+            case Pieces.QUEEN:
+                return self.get_action_for_queen((row, column), turn)
+            case Pieces.KING:
+                return self.get_actions_for_king((row, column), turn)
+            case _:
+                raise ValueError(f"Invalid piece: {piece}")
+
 
     def get_actions_for_piece(self, pos: Cell, turn: int, piece: str, moves: list[tuple[int, int]],
                               deny_enemy_king: bool = False):

@@ -1,18 +1,17 @@
 from typing import Union
 
-import gym
-import numpy as np
-import pygame
-from gym import spaces
-from pygame.font import Font
-from pygame.surface import Surface
-
-import chess.colors as Colors
-import chess.info_keys as InfoKeys
+import contants.colors as Colors
+import contants.info_keys as InfoKeys
 import chess.moves as Moves
 import chess.pieces as Pieces
 import chess.rewards as Rewards
+import gym
+import numpy as np
+import pygame
 from chess.types import Cell
+from gym import spaces
+from pygame.font import Font
+from pygame.surface import Surface
 
 
 class Chess(gym.Env):
@@ -285,6 +284,61 @@ class Chess(gym.Env):
         temp.move_piece(current_pos, next_pos, turn)
         return temp.is_check(temp.get_pos_king(turn), turn)
 
+    def get_piece(self, pos: Cell, turn: int) -> int:
+        """
+       Get the piece from the board at the given position and turn
+       :param pos: position of the board where the piece is to be fetched from
+       :param turn: turn of the player
+       :return: Returns the index of the piece at the given location and turn
+        """
+        return int(self.board[turn, pos[0], pos[1]])
+
+    def check_king_flank(self, king_position: Cell, direction: tuple[int, int], turn: int) -> bool:
+        """
+        Checks if the king's flank is under attack in a given direction.
+        :param king_position: The position of the king on the chessboard.
+        :param direction: The direction to check for the flank attack.
+        :param turn: The current turn number.
+        :return: True if the king's flank is under attack, False otherwise.
+        """
+        r, c = direction
+        row, col = king_position
+        while self.is_in_range((row, col)):
+            if not self.is_empty((row, col), turn):
+                piece = self.get_piece((row, col), turn)
+                possibles, _ = self.get_empty_actions(Pieces.get_piece_name(piece))
+                return king_position in possibles
+            row += r
+            col += c
+        return False
+
+    def check_king_flanks(self, king_position: Cell, turn: int) -> bool:
+        """
+        Check if the king is under attack from any of the 8 directions
+        :param king_position: The position of the king on the chessboard.
+        :param turn: The current turn number.
+        :return: True if the king is under attack from any of the 8 directions, False otherwise
+        """
+        for direction in [(1, 1), (1, -1), (-1, 1), (-1, -1), (1, 0), (-1, 0), (0, 1), (0, -1)]:
+            return self.check_king_flank(king_position, direction, turn)
+
+    def check_all_pieces_check(self, king_position: Cell, turn: int) -> bool:
+        """
+        Check for all the pieces of the opponent if they can attack the king
+        :param king_position: The position of the king on the chessboard.
+        :param turn: The current turn number.
+        :return: True if any of the pieces can attack the king, False otherwise.
+        """
+        for row in range(8):
+            for col in range(8):
+                if self.is_empty((row, col), 1 - turn):
+                    continue
+                piece = self.get_piece((row, col), 1 - turn)
+                possibles, _, _ = self.get_all_actions(Pieces.get_piece_name(piece))
+                if king_position in possibles:
+                    return True
+        return False
+
     def get_actions_for_piece(self, pos: Cell, turn: int, piece: str, moves: list[tuple[int, int]],
                               deny_enemy_king: bool = False):
         possibles, actions_mask = self.get_empty_actions(piece)
@@ -325,7 +379,6 @@ class Chess(gym.Env):
         return possibles, actions_mask
 
     def get_actions_for_dutchwaterline(self, turn: int) -> tuple:
-
         rows = [2, 3, 4, 5]
         all_possibles = []
         all_actions_mask = []
@@ -537,7 +590,7 @@ class Chess(gym.Env):
             all_actions_mask.append(actions_mask)
             length += len(actions_mask)
 
-        if(self.resources[turn] > 4):
+        if (self.resources[turn] > 4):
             possibles, actions_mask, source_pos = self.get_actions_for_dutchwaterline(
                 turn
             )
@@ -945,7 +998,7 @@ class Chess(gym.Env):
                 and from_pos == next_pos):
             self.dutchwaterline(from_pos)
             rewards = self.add_reward(None, Rewards.DUTCH_WATERLINE, self.turn)
-            end_turn = False  
+            end_turn = False
 
         rewards, infos = self.update_checks(rewards, infos)
         rewards, infos = self.update_check_mates(rewards, infos)

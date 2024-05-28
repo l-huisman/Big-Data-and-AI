@@ -335,7 +335,7 @@ class Chess(gym.Env):
                 if self.is_empty((row, col), 1 - turn):
                     continue
                 piece = self.get_piece((row, col), 1 - turn)
-                possibles, _, _ = self.get_all_actions(Pieces.get_piece_name(piece))
+                possibles, _, _ = self.get_all_actions(turn=1 - turn, deny_enemy_king=True)
                 if king_position in possibles:
                     return True
         return False

@@ -7,6 +7,7 @@ from pygame.surface import Surface
 
 import chess.constants.colors as Colors
 import chess.pieces as Pieces
+from chess.models import Cell
 from chess.models.board import AoWBoard
 
 
@@ -38,7 +39,7 @@ class PyGameUtils:
         """
         for y in range(8):
             for x in range(8):
-                self.draw_piece(x, y, board.get_piece(x, y))
+                self.draw_piece(x, y, board.get_piece(Cell(x, y)))
 
     def draw_axis(self) -> None:
         """

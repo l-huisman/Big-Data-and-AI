@@ -1,25 +1,25 @@
-from abc import ABC, abstractmethod
 import os
-import numpy as np
-import chess.pieces as Pieces
-import chess.constants.info_keys as InfoKeys
+from abc import ABC, abstractmethod
 
-from buffer.episode import Episode
-from learnings.base import Learning
+import numpy as np
 from tqdm import tqdm
+
+import chess.constants.info_keys as InfoKeys
+import chess.pieces as Pieces
+from buffer.episode import Episode
 from chess import Chess
-import torch as T
+from learnings.base import Learning
 from utils import save_to_video
 
 
 class BaseAgent(ABC):
     def __init__(
-        self,
-        env: Chess,
-        learner: Learning,
-        episodes: int,
-        train_on: int,
-        result_folder: str,
+            self,
+            env: Chess,
+            learner: Learning,
+            episodes: int,
+            train_on: int,
+            result_folder: str,
     ) -> None:
         super().__init__()
         self.env = env

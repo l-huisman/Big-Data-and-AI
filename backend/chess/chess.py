@@ -88,7 +88,7 @@ class Chess(gym.Env):
 
     def piece_can_jump(self, pos: Cell, turn: int) -> bool:
         jumps = {Pieces.KNIGHT, Pieces.KING, Pieces.WINGED_KNIGHT, Pieces.WARELEFANT}
-        piece = self.aow_board.get_piece(pos[0], pos[1], turn)
+        piece = self.aow_board.get_piece(pos, turn)
         return piece in jumps
 
     def is_path_empty_for_piece(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
@@ -134,8 +134,8 @@ class Chess(gym.Env):
         temp = Chess(render_mode="rgb_array")
         temp.aow_board.board = self.aow_board.copy_board()
         temp.move_piece(current_pos, next_pos, turn)
-        # return temp.check_all_pieces_check(temp.get_pos_king(turn), turn)
-        return temp.is_check(temp.get_pos_king(turn), turn)
+        # return temp.check_all_pieces_check(temp.aow_board.get_pos_king(turn), turn)
+        return temp.is_check(temp.aow_board.get_pos_king(turn), turn)
 
     def check_king_flank(self, king_position: Cell, direction: tuple[int, int], turn: int) -> bool:
         """
@@ -147,9 +147,9 @@ class Chess(gym.Env):
         """
         r, c = direction
         row, col = king_position
-        while self.is_in_range((row, col)):
-            if not self.is_empty((row, col), turn):
-                piece = self.aow_board.get_piece(row, col, turn)
+        while self.is_in_range(Cell(row, col)):
+            if not self.is_empty(Cell(row, col), turn):
+                piece = self.aow_board.get_piece(Cell(row, col), turn)
                 possibles, _ = self.get_empty_actions(Pieces.get_piece_name(piece))
                 return king_position in possibles
             row += r
@@ -175,10 +175,10 @@ class Chess(gym.Env):
         """
         for row in range(8):
             for col in range(8):
-                if self.is_empty((row, col), 1 - turn):
+                if self.is_empty(Cell(row, col), 1 - turn):
                     continue
-                piece = self.aow_board.get_piece(row, col, 1 - turn)
-                possibles, _ = self.get_all_actions_for_piece(cell=(row, col), turn=1 - turn, piece=piece)
+                piece = self.aow_board.get_piece(Cell(row, col), 1 - turn)
+                possibles, _ = self.get_all_actions_for_piece(Cell(row, col), 1 - turn, piece)
                 if king_position in possibles:
                     return True
         return False
@@ -222,9 +222,9 @@ class Chess(gym.Env):
 
         row, col = pos
         for i, (r, c) in enumerate(moves):
-            next_pos = (row + r, col + c)
+            next_pos = Cell(row + r, col + c)
 
-            if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
+            if not self.is_valid_move(Cell(row, col), next_pos, turn, deny_enemy_king):
                 continue
 
             possibles[i] = next_pos
@@ -262,32 +262,32 @@ class Chess(gym.Env):
 
         for row in rows:
             for col in range(8):
-                if not self.is_enemy_king((row, col), turn):
+                if not self.is_enemy_king(Cell(row, col), turn):
                     count += 1
 
-                if (count == 8):
+                if count == 8:
                     all_possibles.append([row, 0])
                     all_actions_mask.append(1)
                     all_source_pos.append([row, 0])
 
-                if (col == 7):
+                if col == 7:
                     count = 0
 
         return all_possibles, all_actions_mask, all_source_pos
 
-    def get_actions_for_pawn(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
+    def get_actions_for_pawn(self, pos: Cell | None, turn: int, deny_enemy_king: bool = False):
         possibles, actions_mask = self.get_empty_actions("pawn")
         if pos is None:
             return possibles, actions_mask
 
         row, col = pos
-        if self.aow_board.is_piece(turn, row, col, Pieces.QUEEN):
-            return self.get_action_for_queen(pos, turn)
+        if self.aow_board.is_piece(turn, Cell(row, col), Pieces.QUEEN):
+            return self.get_action_for_queen(Cell(row, col), turn)
 
         for i, (r, c) in enumerate(Moves.PAWN[:4]):
-            next_pos = (row + r, col + c)
+            next_pos = Cell(row + r, col + c)
 
-            if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
+            if not self.is_valid_move(Cell(row, col), next_pos, turn, deny_enemy_king):
                 continue
 
             can_moves = (
@@ -303,22 +303,22 @@ class Chess(gym.Env):
 
         return possibles, actions_mask
 
-    def get_actions_for_knight(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
+    def get_actions_for_knight(self, pos: Cell | None, turn: int, deny_enemy_king: bool = False):
         return self.get_actions_for_piece(pos, turn, "knight", Moves.KNIGHT, deny_enemy_king)
 
-    def get_actions_for_hoplite(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
+    def get_actions_for_hoplite(self, pos: Cell | None, turn: int, deny_enemy_king: bool = False):
         possibles, actions_mask = self.get_empty_actions("hoplite")
         if pos is None:
             return possibles, actions_mask
 
         row, col = pos
-        if self.aow_board.is_piece(turn, row, col, Pieces.QUEEN):
-            return self.get_action_for_queen(pos, turn)
+        if self.aow_board.is_piece(turn, Cell(row, col), Pieces.QUEEN):
+            return self.get_action_for_queen(Cell(row, col), turn)
 
         for i, (r, c) in enumerate(Moves.HOPLITE[:4]):
-            next_pos = (row + r, col + c)
+            next_pos = Cell(row + r, col + c)
 
-            if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
+            if not self.is_valid_move(Cell(row, col), next_pos, turn, deny_enemy_king):
                 continue
 
             can_moves = (
@@ -335,7 +335,7 @@ class Chess(gym.Env):
         return possibles, actions_mask
 
     def get_actions_for_winged_knight(
-            self, pos: Cell, turn: int, deny_enemy_king: bool = False
+            self, pos: Cell | None, turn: int, deny_enemy_king: bool = False
     ):
         possibles, actions_mask = self.get_empty_actions("wingedknight")
 
@@ -344,8 +344,8 @@ class Chess(gym.Env):
 
         row, col = pos
         for i, (r, c) in enumerate(Moves.WINGED_KNIGHT):
-            next_pos = (row + r, col + c)
-            if not self.is_valid_move(pos, next_pos, turn, deny_enemy_king):
+            next_pos = Cell(row + r, col + c)
+            if not self.is_valid_move(Cell(row, col), next_pos, turn, deny_enemy_king):
                 continue
 
             possibles[i] = next_pos
@@ -358,9 +358,9 @@ class Chess(gym.Env):
         possibles, actions_mask = self.get_empty_actions("king")
 
         for i, (r, c) in enumerate(Moves.KING):
-            next_pos = (row + r, col + c)
+            next_pos = Cell(row + r, col + c)
 
-            if not self.is_valid_move(pos, next_pos, turn, False):
+            if not self.is_valid_move(Cell(row, col), next_pos, turn, False):
                 continue
 
             if self.is_neighbor_enemy_king(next_pos, turn):
@@ -379,7 +379,8 @@ class Chess(gym.Env):
         return np.array([pos] * size)
 
     def get_actions_for(self, name: str, turn: int, deny_enemy_king: bool = False) -> tuple:
-        assert name in self.aow_board.pieces_names[turn], f"{name} not in {self.aow_board.pieces_names[turn]}"
+        assert name in self.aow_board.get_pieces_names()[
+            turn], f"{name} not in {self.aow_board.get_pieces_names()[turn]}"
         piece_cat = name.split("_")[0]
         piece_pos = self.aow_board.pieces[turn][name]
         src_poses = self.get_source_pos(name, turn)
@@ -546,36 +547,30 @@ class Chess(gym.Env):
 
     def check_for_enemy(self, pos: Cell, turn: int) -> bool:
         r, c = pos
-        return not self.is_empty((7 - r, c), 1 - turn)
+        return not self.is_empty(Cell(7 - r, c), 1 - turn)
 
     def is_empty(self, pos: Cell, turn: int) -> bool:
-        return not self.aow_board.is_piece(turn, pos[0], pos[1])
+        return not self.aow_board.is_piece(turn, pos)
 
     def is_empty_pawn(self, pos: Cell, turn: int) -> bool:
-        return self.is_empty(pos, turn) or self.aow_board.is_piece(turn, pos[0], pos[1], Pieces.PAWN) or \
-            self.aow_board.is_piece(turn, pos[0], pos[1], Pieces.HOPLITE)
+        return self.is_empty(pos, turn) or self.aow_board.is_piece(turn, pos, Pieces.PAWN) or \
+            self.aow_board.is_piece(turn, pos, Pieces.HOPLITE)
 
     def is_enemy_king(self, pos: Cell, turn: int) -> bool:
         r, c = pos
-        return self.aow_board.is_piece(1 - turn, 7 - r, c, Pieces.KING)
+        return self.aow_board.is_piece(1 - turn, Cell(7 - r, c), Pieces.KING)
 
     def both_side_empty(self, pos: Cell, turn: int) -> bool:
         r, c = pos
-        return self.is_empty(pos, turn) and self.is_empty((7 - r, c), 1 - turn)
+        return self.is_empty(Cell(r,c), turn) and self.is_empty(Cell(7 - r, c), 1 - turn)
 
     def both_side_empty_pawn(self, pos: Cell, turn: int) -> bool:
         r, c = pos
-        return self.is_empty_pawn(pos, turn) and self.is_empty_pawn((7 - r, c), 1 - turn)
-
-    def get_pos_king(self, turn: int) -> Cell:
-        row, col = np.nonzero(self.aow_board.get_board()[turn] == Pieces.KING)
-        if len(row) == 0 or len(col) == 0:
-            assert False, f"King not found for player {turn}"
-        return Cell((row[0], col[0]))
+        return self.is_empty_pawn(pos, turn) and self.is_empty_pawn(Cell(7 - r, c), 1 - turn)
 
     def is_neighbor_enemy_king(self, pos: Cell, turn: int) -> bool:
         row, col = pos
-        row_enemy_king, col_enemy_king = self.get_pos_king(1 - turn)
+        row_enemy_king, col_enemy_king = self.aow_board.get_pos_king(1 - turn)
         row_enemy_king = 7 - row_enemy_king
         diff_row = abs(row - row_enemy_king)
         diff_col = abs(col - col_enemy_king)
@@ -589,33 +584,33 @@ class Chess(gym.Env):
 
         # GO TO UP ROW
         for r in range(rk + 1, 8):
-            if not self.is_empty((r, ck), turn):
+            if not self.is_empty(Cell(r, ck), turn):
                 break
-            p = self.aow_board.get_piece(7 - r, ck, 1 - turn)
+            p = self.aow_board.get_piece(Cell(7 - r, ck), 1 - turn)
             if p in straight_pieces:
                 return True
 
         # GO TO DOWN ROW
         for r in range(rk - 1, -1, -1):
-            if not self.is_empty((r, ck), turn):
+            if not self.is_empty(Cell(r, ck), turn):
                 break
-            p = self.aow_board.get_piece(7 - r, ck, 1 - turn)
+            p = self.aow_board.get_piece(Cell(7 - r, ck), 1 - turn)
             if p in straight_pieces:
                 return True
 
         # GO TO RIGHT COL
         for c in range(ck + 1, 8):
-            if not self.is_empty((rk, c), turn):
+            if not self.is_empty(Cell(rk, c), turn):
                 break
-            p = self.aow_board.get_piece(7 - rk, c, 1 - turn)
+            p = self.aow_board.get_piece(Cell(7 - rk, c), 1 - turn)
             if p in straight_pieces:
                 return True
 
         # GOT TO LEFT COL
         for c in range(ck - 1, -1, -1):
-            if not self.is_empty((rk, c), turn):
+            if not self.is_empty(Cell(rk, c), turn):
                 break
-            p = self.aow_board.get_piece(7 - rk, c, 1 - turn)
+            p = self.aow_board.get_piece(Cell(7 - rk, c), 1 - turn)
             if p in straight_pieces:
                 return True
 
@@ -624,13 +619,13 @@ class Chess(gym.Env):
             # RIGHT
             d = r - rk
             for c in [ck + d, ck - d]:
-                if not self.is_in_range((r, c)):
+                if not self.is_in_range(Cell(r, c)):
                     continue
 
-                if not self.is_empty((r, c), turn):
+                if not self.is_empty(Cell(r, c), turn):
                     break
 
-                p = self.aow_board.get_piece(7 - r, c, 1 - turn)
+                p = self.aow_board.get_piece(Cell(7 - r, c), 1 - turn)
 
                 if p in diagonal_pieces:
                     return True
@@ -642,13 +637,13 @@ class Chess(gym.Env):
         for r in range(rk - 1, -1, -1):
             d = r - rk
             for c in [ck + d, ck - d]:
-                if not self.is_in_range((r, c)):
+                if not self.is_in_range(Cell(r, c)):
                     continue
 
-                if not self.is_empty((r, c), turn):
+                if not self.is_empty(Cell(r, c), turn):
                     break
 
-                p = self.aow_board.get_piece(7 - r, c, 1 - turn)
+                p = self.aow_board.get_piece(Cell(7 - r, c), 1 - turn)
                 if p in diagonal_pieces:
                     return True
 
@@ -658,17 +653,17 @@ class Chess(gym.Env):
         # KNIGHTS
         for r, c in Moves.KNIGHT:
             nr, nc = rk + r, ck + c
-            if not self.is_in_range((nr, nc)):
+            if not self.is_in_range(Cell(nr, nc)):
                 continue
-            if self.aow_board.is_piece(1 - turn, 7 - nr, nc, Pieces.KNIGHT):
+            if self.aow_board.is_piece(1 - turn, Cell(7 - nr, nc), Pieces.KNIGHT):
                 return True
 
         # WINGED KNIGHTS
         for r, c in Moves.WINGED_KNIGHT:
             nr, nc = rk + r, ck + c
-            if not self.is_in_range((nr, nc)):
+            if not self.is_in_range(Cell(nr, nc)):
                 continue
-            if self.aow_board.is_piece(1 - turn, 7 - nr, nc, Pieces.WINGED_KNIGHT):
+            if self.aow_board.is_piece(1 - turn, Cell(7 - nr, nc), Pieces.WINGED_KNIGHT):
                 return True
         return False
 
@@ -677,7 +672,7 @@ class Chess(gym.Env):
         infos = [set(), set()] if infos is None else infos
 
         for turn in range(2):
-            king_pos = self.get_pos_king(turn)
+            king_pos = self.aow_board.get_pos_king(turn)
             is_check = self.is_check(king_pos, turn)
             self.checked[turn] = is_check
             if is_check:
@@ -719,35 +714,40 @@ class Chess(gym.Env):
 
         return rewards, infos
 
-    def dutchwaterline(self, row: Cell):
-        row = row[0]
+    def dutchwaterline(self, pos: Cell):
+        row = pos.row
         row_turn1 = 7 - row
         for turn in range(2):
             for col in range(8):
                 # Check if the piece is a king before removing it
-                if not self.aow_board.is_piece(turn, row if turn == 0 else row_turn1, col, Pieces.KING):
-                    self.aow_board.set_piece(turn, row if turn == 0 else row_turn1, col, Pieces.EMPTY)
+                row = row if turn == 0 else row_turn1
+                if not self.aow_board.is_piece(turn, Cell(row, col), Pieces.KING):
+                    self.aow_board.set_piece(turn, Cell(row, col), Pieces.EMPTY)
 
-    def move_piece(self, current_pos: Cell, next_pos: Cell, turn: int):
-        next_row, next_col = next_pos
-        current_row, current_col = current_pos
-        self.aow_board.set_piece(turn, next_row, next_col, self.aow_board.get_piece(current_row, current_col, turn))
+    def move_piece(self, src: Cell, dst: Cell, turn: int):
+        piece = self.aow_board.get_piece(src, turn)
+
+        # move piece
+        self.aow_board.set_piece(turn, src, Pieces.EMPTY)
+        self.aow_board.set_piece(turn, dst, piece)
+
+        # remove enemy piece in position
+        self.aow_board.set_piece(1 - turn, dst, Pieces.EMPTY)
+
         # Set default rewards, [-1, -2], -1 for the player who moved the piece, -2 for the other player
         rewards = [Rewards.MOVE, Rewards.MOVE]
         rewards[1 - turn] *= 0
 
-        self.capture_pawn_by_warelefant(next_row, next_col, current_row, current_col, turn)
-        self.promote_pawn_or_hoplite(next_pos, turn)
-        self.aow_board.set_piece(turn, current_row, current_col, Pieces.EMPTY)
-        self.aow_board.set_piece(1 - turn, 7 - next_row, next_col, Pieces.EMPTY)
+        self.capture_pawn_by_warelefant(dst.row, dst.col, src.row, src.col, turn)
+        self.promote_pawn_or_hoplite(dst, turn)
 
         for (key, value) in self.aow_board.pieces[turn].items():
-            if value == tuple(current_pos):
+            if value == tuple(src):
                 # # Update the location of the piece in the pieces array
-                self.aow_board.pieces[turn][key] = tuple(next_pos)
+                self.aow_board.pieces[turn][key] = tuple(dst)
 
         for (key, value) in self.aow_board.pieces[1 - turn].items():
-            if value == (7 - next_pos[0], next_pos[1]):
+            if value == (7 - dst[0], dst[1]):
                 # Remove the location from the piece that was removed in the pieces array
                 self.aow_board.pieces[1 - turn][key] = None
 
@@ -769,14 +769,14 @@ class Chess(gym.Env):
         return rewards
 
     def capture_pawn_by_warelefant(self, next_row: int, next_col: int, current_row: int, current_col: int, turn: int):
-        if self.aow_board.is_piece(turn, current_row, current_col, Pieces.WARELEFANT):
+        if self.aow_board.is_piece(turn, Cell(current_row, current_col), Pieces.WARELEFANT):
             if current_row == next_row:
                 start_col = min(current_col, next_col) + 1
                 end_col = max(current_col, next_col)
                 for col in range(start_col, end_col):
-                    if self.aow_board.get_piece(current_row, col, turn) in [Pieces.PAWN, Pieces.HOPLITE]:
-                        self.aow_board.set_piece(turn, current_row, col, Pieces.EMPTY)
-                        self.aow_board.set_piece(1 - turn, 7 - current_row, col, Pieces.EMPTY)
+                    if self.aow_board.get_piece(Cell(current_row, col), turn) in [Pieces.PAWN, Pieces.HOPLITE]:
+                        self.aow_board.set_piece(turn, Cell(current_row, col), Pieces.EMPTY)
+                        self.aow_board.set_piece(1 - turn, Cell(7 - current_row, col), Pieces.EMPTY)
                         for key, value in self.aow_board.pieces[turn].items():
                             if value == (current_row, col):
                                 self.aow_board.pieces[turn][key] = None
@@ -788,10 +788,10 @@ class Chess(gym.Env):
                 start_row = min(current_row, next_row) + 1
                 end_row = max(current_row, next_row)
                 for row in range(start_row, end_row):
-                    if (self.aow_board.get_piece(row, current_col, turn) in [Pieces.PAWN, Pieces.HOPLITE] or
-                            self.aow_board.get_piece(7 - row, current_col, 1 - turn) in [Pieces.PAWN, Pieces.HOPLITE]):
-                        self.aow_board.set_piece(turn, row, current_col, Pieces.EMPTY)
-                        self.aow_board.set_piece(1 - turn, 7 - row, current_col, Pieces.EMPTY)
+                    if (self.aow_board.get_piece(Cell(row, current_col), turn) in [Pieces.PAWN, Pieces.HOPLITE] or
+                            self.aow_board.get_piece(Cell(7 - row, current_col), 1 - turn) in [Pieces.PAWN, Pieces.HOPLITE]):
+                        self.aow_board.set_piece(turn, Cell(row, current_col), Pieces.EMPTY)
+                        self.aow_board.set_piece(1 - turn, Cell(7 - row, current_col), Pieces.EMPTY)
                         for key, value in self.aow_board.pieces[turn].items():
                             if value == (row, current_col):
                                 self.aow_board.pieces[turn][key] = None
@@ -803,14 +803,11 @@ class Chess(gym.Env):
         return self.done or (self.steps >= self.max_steps)
 
     def promote_pawn_or_hoplite(self, pos: Cell, turn: int):
-        row, col = pos
-        if (self.aow_board.is_piece(turn, row, col, Pieces.PAWN) or self.aow_board.is_piece(turn, row, col,
-                                                                                            Pieces.HOPLITE)) and row == 7:
-            self.aow_board.set_piece(turn, row, col, Pieces.QUEEN)
+        if (self.aow_board.is_piece(turn, pos, Pieces.PAWN) or
+            self.aow_board.is_piece(turn, pos, Pieces.HOPLITE)) and pos.row == 7:
+            self.aow_board.set_piece(turn, pos, Pieces.QUEEN)
 
     def upgrade_piece(self, pos: Cell, turn: int, piece_to_upgrade: Pieces):
-        self.aow_board.refresh_pieces_names()
-        row, col = pos
         rewards = [0, 0]
         rewards[turn] = Rewards.UPGRADE_PIECE
         rewards[1 - turn] = 0
@@ -819,7 +816,7 @@ class Chess(gym.Env):
         # get piece_name from position
         piece_name = None
         for key, value in self.aow_board.pieces[turn].items():
-            if value == (row, col):
+            if value == (pos.row, pos.col):
                 piece_name = key
                 break
 
@@ -837,8 +834,7 @@ class Chess(gym.Env):
         self.aow_board.pieces[turn][f"{Pieces.get_piece_name(new_piece).lower()}_{piece_name.split('_')[1]}"] = \
             self.aow_board.pieces[
                 turn].pop(piece_name)
-        self.aow_board.refresh_pieces_names()
-        self.aow_board.set_piece(turn, row, col, new_piece)
+        self.aow_board.set_piece(turn, pos, new_piece)
         self.remove_resources(turn, new_piece)
         return rewards, [set(), set()]
 
@@ -858,23 +854,25 @@ class Chess(gym.Env):
         source_pos, possibles, actions_mask = self.get_all_actions(self.turn)
         assert actions_mask[action], f"Cannot Take This Action = {action}, {source_pos[action]} -> {possibles[action]}"
 
-        from_pos = Cell((source_pos[action][0], source_pos[action][1]))
-        next_pos = Cell((possibles[action][0], possibles[action][1]))
+        from_pos = Cell(int(source_pos[action][0]), int(source_pos[action][1]))
+        next_pos = Cell(int(possibles[action][0]), int(possibles[action][1]))
 
         if from_pos == next_pos:
-            source_pos_piece = self.aow_board.get_piece(from_pos[0], from_pos[1], self.turn)
+            source_pos_piece = self.aow_board.get_piece(Cell(from_pos[0], from_pos[1]), self.turn)
             rewards, infos = self.upgrade_piece(from_pos, self.turn, source_pos_piece)
             end_turn = False
         else:
+            print(f"board before move: {self.aow_board.board}")
             rewards, infos = self.move_piece(
                 from_pos, next_pos, self.turn
             )
             end_turn = True
+            print(f"board after move: {self.aow_board.board}")
 
         if (from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0)
                 and from_pos == next_pos):
             self.dutchwaterline(from_pos)
-            rewards = self.add_reward(None, Rewards.DUTCH_WATERLINE, self.turn)
+            rewards = self.add_reward(reward=Rewards.DUTCH_WATERLINE, turn=self.turn)
             end_turn = False
 
         rewards, infos = self.update_checks(rewards, infos)

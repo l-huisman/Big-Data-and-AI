@@ -1,6 +1,7 @@
 import numpy as np
 
 import chess.pieces as Pieces
+from chess.models import Cell
 
 
 class AoWBoard:
@@ -10,7 +11,6 @@ class AoWBoard:
         """
         self.board: np.ndarray = self.init_board()
         self.pieces: list[dict] = self.init_pieces()
-        self.pieces_names: tuple = self.get_pieces_names()
         self.resources: list[int] = self.init_resources()
 
     def reset(self):
@@ -19,7 +19,6 @@ class AoWBoard:
         """
         self.board = self.init_board()
         self.pieces = self.init_pieces()
-        self.pieces_names = self.get_pieces_names()
         self.resources = self.init_resources()
 
     def get_resources(self, turn: int) -> int:
@@ -62,43 +61,42 @@ class AoWBoard:
         """
         return self.pieces[turn]
 
-    def is_piece(self, turn: int, x: int, y: int, piece: Pieces = None) -> bool:
+    def is_piece(self, turn: int, pos: Cell, piece: Pieces = None) -> bool:
         """
         Check if the piece is in the Art of War board
         :param turn: int: The player (Can be 0 or 1)
-        :param x: int: The x coordinate
-        :param y: int: The y coordinate
+        :param pos: Cell: The position to check the piece (row, col)
         :param piece: Pieces: The piece to check, if None check for any piece
         :return: bool: If the piece is in the cell
         """
+        if pos.__class__ is not Cell:
+            pos = Cell(pos[0], pos[1])
         if piece is None:
-            return self.board[turn, x, y] != 0
-        return self.board[turn, x, y] == piece
+            return self.board[turn, pos.row, pos.col] != 0
+        return self.board[turn, pos.row, pos.col] == piece
 
-    def get_piece(self, x: int, y: int, turn: int = None) -> Pieces:
+    def get_piece(self, pos: Cell, turn: int = None) -> Pieces:
         """
         Get the piece of the Art of War board
-        :param x: int: The x coordinate
-        :param y: int: The y coordinate
+        :param pos: Cell: The position to get the piece (row, col)
         :param turn: int: The player (Can be 0 or 1). If None gets the piece that is not 0 if any
         :return: Pieces: The piece in the cell
         """
         if turn is None:
             for i in range(2):
-                if self.board[i, x, y] != 0:
-                    return self.board[i, x, y]
+                if self.board[i, pos.row, pos.col] != 0:
+                    return self.board[i, pos.row, pos.col]
             return Pieces.EMPTY
-        return self.board[turn, x, y]
+        return self.board[turn, pos.row, pos.col]
 
-    def set_piece(self, turn: int, x: int, y: int, piece: Pieces) -> None:
+    def set_piece(self, turn: int, pos: Cell, piece: Pieces) -> None:
         """
         Set the piece of the Art of War board
         :param turn: int: The player (Can be 0 or 1)
-        :param x: int: The x coordinate
-        :param y: int: The y coordinate
+        :param pos: Cell: The position to set the piece (row, col)
         :param piece: Pieces: The piece to set
         """
-        self.board[turn, x, y] = piece
+        self.board[turn, pos.row, pos.col] = piece
 
     def get_board(self) -> np.ndarray:
         """
@@ -157,24 +155,18 @@ class AoWBoard:
     def get_pieces_names(self) -> tuple:
         """
         Get the names of the pieces in the Art of War board
-        :return: tuple: The names of the pieces
+        :return: tuple: The names of the pieces for both sides
         """
         zero = list(self.pieces[0].keys())
         one = list(self.pieces[1].keys())
         return zero, one
-
-    def refresh_pieces_names(self) -> None:
-        """
-        Refresh the names of the pieces in the Art of War board
-        """
-        self.pieces_names = self.get_pieces_names()
 
     def set_board(self, board: np.array) -> None:
         """
         Set the Art of War board, pieces and pieces names
         :param board: np.array: The Art of War board
         """
-        # TODO: Fix this, when entering a board not wih all complete pieces,
+        # TODO: Fix this, when entering a board not with all pieces,
         #  the action mask will be different resulting in a confused AI
         self.board = board
         self.pieces = self.get_pieces_from_board(board)
@@ -214,3 +206,14 @@ class AoWBoard:
         :return: AoWBoard: The copy of the Art of War board
         """
         return np.copy(self.board)
+
+    def get_pos_king(self, turn: int) -> Cell:
+        """
+        Get the position of the king in the Art of War board
+        :param turn: int: The player (Can be 0 or 1)
+        :return: Cell: The position of the king
+        """
+        row, col = np.nonzero(self.board[turn] == Pieces.KING)
+        if len(row) == 0 or len(col) == 0:
+            assert False, f"King not found for player {turn}"
+        return Cell(int(row[0]), int(col[0]))

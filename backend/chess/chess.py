@@ -282,7 +282,8 @@ class Chess(gym.Env):
         temp = Chess(render_mode="rgb_array")
         temp.board = np.copy(self.board)
         temp.move_piece(current_pos, next_pos, turn)
-        return temp.is_check(temp.get_pos_king(turn), turn)
+        return temp.check_all_pieces_check(temp.get_pos_king(turn), turn)
+        # return temp.is_check(temp.get_pos_king(turn), turn)
 
     def get_piece(self, pos: Cell, turn: int) -> int:
         """

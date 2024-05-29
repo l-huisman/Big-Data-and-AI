@@ -33,9 +33,7 @@ class AiGame(BaseRoute):
             case "PPO":
                 white_model = self.WHITE_PPO_PATH
             case "DQN":
-                # white_model = self.WHITE_DQN_PATH
-                self.logger.info("DQN not implemented yet, using PPO instead.")
-                white_model = self.WHITE_PPO_PATH
+                white_model = self.WHITE_DQN_PATH
             case _:
                 white_model = self.WHITE_PPO_PATH
 
@@ -43,24 +41,30 @@ class AiGame(BaseRoute):
             case "PPO":
                 black_model = self.BLACK_PPO_PATH
             case "DQN":
-                # black_model = BLACK_DQN_PATH
-                self.logger.info("DQN not implemented yet, using PPO instead.")
-                black_model = self.BLACK_PPO_PATH
+                black_model = self.BLACK_DQN_PATH
             case _:
                 black_model = self.BLACK_PPO_PATH
 
         return PPOChess(self.env, self.get_ppo(), 1, 32, "", white_model, black_model)
 
     def play_game(self, agent, episode) -> AIGameResponse:
-        response = AIGameResponse(game=[], statistics=[])
+        response = AIGameResponse(game=[], statistics=[], possibles=[], source_pos=[], action_mask=[])
 
         response.game.append(agent.env.board.tolist())
         response.statistics.append({"rewards": [0, 0], "infos": [[], []], "end": False})
 
         done = False
         while not done:
+            
+            #extra info not working yet to check for game state stuck
+            
             done, _ = agent.take_action(agent.env.turn, episode)
-            response.statistics.append({"rewards": _[1], "infos": _[7], "end": done})
+            #state 0, rewards 1, action 2, goal 3, prob 4, value 5, mask 6, infos 7
+            value = agent.env.get_all_actions(agent.env.turn)
+            # response.source_pos.append(value[0].tolist())
+            # response.possibles.append(value[1].tolist())
+            # response.action_mask.append(value[2].tolist())
+            response.statistics.append({"rewards": _[1], "action": _[2], "infos": _[7], "end": done})
             response.game.append(agent.env.board.tolist())
 
         self.logger.info("AI game completed.")

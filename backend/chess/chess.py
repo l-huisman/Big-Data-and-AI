@@ -732,7 +732,7 @@ class Chess(gym.Env):
         self.aow_board.set_piece(turn, dst, piece)
 
         # remove enemy piece in position
-        self.aow_board.set_piece(1 - turn, dst, Pieces.EMPTY)
+        self.aow_board.set_piece(1 - turn, Cell(7 - dst.row, dst.col), Pieces.EMPTY)
 
         # Set default rewards, [-1, -2], -1 for the player who moved the piece, -2 for the other player
         rewards = [Rewards.MOVE, Rewards.MOVE]
@@ -862,12 +862,10 @@ class Chess(gym.Env):
             rewards, infos = self.upgrade_piece(from_pos, self.turn, source_pos_piece)
             end_turn = False
         else:
-            print(f"board before move: {self.aow_board.board}")
             rewards, infos = self.move_piece(
                 from_pos, next_pos, self.turn
             )
             end_turn = True
-            print(f"board after move: {self.aow_board.board}")
 
         if (from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0)
                 and from_pos == next_pos):

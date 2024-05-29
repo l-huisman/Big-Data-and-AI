@@ -9,9 +9,6 @@ export default defineNuxtConfig({
     },
     
   },
-  plugins: [
-    {src: '~/plugins/chart.js', mode: 'client'}
-  ],
 })
 
 

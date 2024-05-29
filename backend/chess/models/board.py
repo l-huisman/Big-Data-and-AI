@@ -5,13 +5,15 @@ from chess.models import Cell
 
 
 class AoWBoard:
-    def __init__(self):
+    def __init__(self, length: int = 8, width: int = 8):
         """
         Initialize the Art of War board
         """
         self.board: np.ndarray = self.init_board()
         self.pieces: list[dict] = self.init_pieces()
         self.resources: list[int] = self.init_resources()
+        self.length: int = length
+        self.width: int = width
 
     def reset(self):
         """
@@ -20,6 +22,14 @@ class AoWBoard:
         self.board = self.init_board()
         self.pieces = self.init_pieces()
         self.resources = self.init_resources()
+
+    def is_in_range(self, pos: Cell) -> bool:
+        """
+        Check if the position is in range of the Art of War board
+        :param pos: Cell: The position to check
+        :return: bool: If the position is in range
+        """
+        return 0 <= pos.row < self.length and 0 <= pos.col < self.width
 
     def get_resources(self, turn: int) -> int:
         """

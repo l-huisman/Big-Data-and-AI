@@ -42,21 +42,6 @@ class Chess(gym.Env):
         self.checked = [False, False]
         self.aow_board.reset()
 
-    @staticmethod
-    def is_in_range(pos: Cell) -> bool:
-        row, col = pos
-        return 0 <= row <= 7 and 0 <= col <= 7
-
-    @staticmethod
-    def get_size(name: str) -> int:
-        return Moves.POSSIBLE_MOVES[name]
-
-    def get_empty_actions(self, name: str) -> tuple[np.ndarray, np.ndarray]:
-        size = self.get_size(name)
-        possibles = np.zeros((size, 2), dtype=np.int32)
-        actions_mask = np.zeros(size, dtype=np.int32)
-        return possibles, actions_mask
-
     def is_path_empty(self, current_pos: Cell, next_pos: Cell, turn: int, except_pawn: bool = False) -> bool:
         next_row, next_col = next_pos
         current_row, current_col = current_pos
@@ -104,7 +89,7 @@ class Chess(gym.Env):
             return (self.piece_can_jump(current_pos, turn)) or (self.is_path_empty(current_pos, next_pos, turn))
 
     def general_validation(self, current_pos: Cell, next_pos: Cell, turn: int, deny_enemy_king: bool) -> bool:
-        if not self.is_in_range(next_pos):
+        if not self.aow_board.is_in_range(next_pos):
             return False
 
         if not self.is_empty(next_pos, turn):
@@ -147,7 +132,7 @@ class Chess(gym.Env):
         """
         r, c = direction
         row, col = king_position
-        while self.is_in_range(Cell(row, col)):
+        while self.aow_board.is_in_range(Cell(row, col)):
             if not self.is_empty(Cell(row, col), turn):
                 piece = self.aow_board.get_piece(Cell(row, col), turn)
                 possibles, _ = self.get_empty_actions(Pieces.get_piece_name(piece))
@@ -375,7 +360,7 @@ class Chess(gym.Env):
         pos = self.aow_board.pieces[turn][name]
         if pos is None:
             pos = (0, 0)
-        size = self.get_size(cat)
+        size = self.get_possibles_size(cat)
         return np.array([pos] * size)
 
     def get_actions_for(self, name: str, turn: int, deny_enemy_king: bool = False) -> tuple:
@@ -562,7 +547,7 @@ class Chess(gym.Env):
 
     def both_side_empty(self, pos: Cell, turn: int) -> bool:
         r, c = pos
-        return self.is_empty(Cell(r,c), turn) and self.is_empty(Cell(7 - r, c), 1 - turn)
+        return self.is_empty(Cell(r, c), turn) and self.is_empty(Cell(7 - r, c), 1 - turn)
 
     def both_side_empty_pawn(self, pos: Cell, turn: int) -> bool:
         r, c = pos
@@ -619,7 +604,7 @@ class Chess(gym.Env):
             # RIGHT
             d = r - rk
             for c in [ck + d, ck - d]:
-                if not self.is_in_range(Cell(r, c)):
+                if not self.aow_board.is_in_range(Cell(r, c)):
                     continue
 
                 if not self.is_empty(Cell(r, c), turn):
@@ -637,7 +622,7 @@ class Chess(gym.Env):
         for r in range(rk - 1, -1, -1):
             d = r - rk
             for c in [ck + d, ck - d]:
-                if not self.is_in_range(Cell(r, c)):
+                if not self.aow_board.is_in_range(Cell(r, c)):
                     continue
 
                 if not self.is_empty(Cell(r, c), turn):
@@ -653,7 +638,7 @@ class Chess(gym.Env):
         # KNIGHTS
         for r, c in Moves.KNIGHT:
             nr, nc = rk + r, ck + c
-            if not self.is_in_range(Cell(nr, nc)):
+            if not self.aow_board.is_in_range(Cell(nr, nc)):
                 continue
             if self.aow_board.is_piece(1 - turn, Cell(7 - nr, nc), Pieces.KNIGHT):
                 return True
@@ -661,7 +646,7 @@ class Chess(gym.Env):
         # WINGED KNIGHTS
         for r, c in Moves.WINGED_KNIGHT:
             nr, nc = rk + r, ck + c
-            if not self.is_in_range(Cell(nr, nc)):
+            if not self.aow_board.is_in_range(Cell(nr, nc)):
                 continue
             if self.aow_board.is_piece(1 - turn, Cell(7 - nr, nc), Pieces.WINGED_KNIGHT):
                 return True
@@ -804,7 +789,7 @@ class Chess(gym.Env):
 
     def promote_pawn_or_hoplite(self, pos: Cell, turn: int):
         if (self.aow_board.is_piece(turn, pos, Pieces.PAWN) or
-            self.aow_board.is_piece(turn, pos, Pieces.HOPLITE)) and pos.row == 7:
+                self.aow_board.is_piece(turn, pos, Pieces.HOPLITE)) and pos.row == 7:
             self.aow_board.set_piece(turn, pos, Pieces.QUEEN)
 
     def upgrade_piece(self, pos: Cell, turn: int, piece_to_upgrade: Pieces):

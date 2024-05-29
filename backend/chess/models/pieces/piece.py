@@ -5,7 +5,7 @@ from chess.models.types import Cell
 
 
 class Piece:
-    def __init__(self, position: Cell, possibles_length: int, piece_number: int = -1,
+    def __init__(self, possibles_length: int, position: Cell | None = None,  piece_number: int = -1,
                  can_jump: bool = False):
         """
         Initialize the Piece class
@@ -18,6 +18,7 @@ class Piece:
         self.possibles_length: int = possibles_length
         self.can_jump: bool = can_jump
         self.piece_number = piece_number
+        self.is_on_board = True
 
     def get_piece_number(self) -> int:
         """
@@ -69,6 +70,13 @@ class Piece:
         possibles = self.get_possibles()
         actions_mask = np.zeros(self.get_possibles_size(), dtype=np.int32)
         return possibles, actions_mask
+
+    def get_name(self):
+        """
+        Get the name of the piece
+        :return: str: The name of the piece
+        """
+        return f"{self.__class__.__name__}"
 
     def __str__(self) -> str:
         """

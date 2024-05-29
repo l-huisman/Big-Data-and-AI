@@ -135,7 +135,7 @@ class PyGameUtils:
 
             yy = abs((color * 7) - y)
             text = self.font.render(
-                Pieces.get_ascii(color, int(piece)),
+                Pieces.get_ascii(color, int(piece.get_piece_number())),
                 True,
                 Colors.WHITE,
                 self.get_cell_color(x, yy),

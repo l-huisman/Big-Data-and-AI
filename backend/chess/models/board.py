@@ -1,8 +1,8 @@
 import numpy as np
 
-import chess.pieces as Pieces
+from chess.models.pieces import *
 from chess.models import Cell
-
+import chess.pieces as Pieces
 
 class AoWBoard:
     def __init__(self, length: int = 8, width: int = 8):
@@ -71,7 +71,7 @@ class AoWBoard:
         """
         return self.pieces[turn]
 
-    def is_piece(self, turn: int, pos: Cell, piece: Pieces = None) -> bool:
+    def is_piece(self, turn: int, pos: Cell, piece: Piece = None) -> bool:
         """
         Check if the piece is in the Art of War board
         :param turn: int: The player (Can be 0 or 1)
@@ -82,10 +82,10 @@ class AoWBoard:
         if pos.__class__ is not Cell:
             pos = Cell(pos[0], pos[1])
         if piece is None:
-            return self.board[turn, pos.row, pos.col] != 0
-        return self.board[turn, pos.row, pos.col] == piece
+            return not isinstance(self.board[turn, pos.row, pos.col], Empty)
+        return isinstance(self.board[turn, pos.row, pos.col], piece.__class__)
 
-    def get_piece(self, pos: Cell, turn: int = None) -> Pieces:
+    def get_piece(self, pos: Cell, turn: int = None) -> Piece:
         """
         Get the piece of the Art of War board
         :param pos: Cell: The position to get the piece (row, col)
@@ -94,12 +94,12 @@ class AoWBoard:
         """
         if turn is None:
             for i in range(2):
-                if self.board[i, pos.row, pos.col] != 0:
+                if not isinstance(self.board[i, pos.row, pos.col], Empty):
                     return self.board[i, pos.row, pos.col]
-            return Pieces.EMPTY
+            return Empty()
         return self.board[turn, pos.row, pos.col]
 
-    def set_piece(self, turn: int, pos: Cell, piece: Pieces) -> None:
+    def set_piece(self, turn: int, pos: Cell, piece: Piece) -> None:
         """
         Set the piece of the Art of War board
         :param turn: int: The player (Can be 0 or 1)
@@ -129,13 +129,14 @@ class AoWBoard:
         Initialize the Art of War board
         :return: np.ndarray: The Art of War board
         """
-        board = np.zeros((2, 8, 8), dtype=np.uint8)
-        board[:, 0, 3] = Pieces.QUEEN
-        board[:, 0, 4] = Pieces.KING
-        board[:, 1, :] = Pieces.PAWN
-        board[:, 0, (0, 7)] = Pieces.ROOK
-        board[:, 0, (1, 6)] = Pieces.KNIGHT
-        board[:, 0, (2, 5)] = Pieces.BISHOP
+        board = np.zeros((2, 8, 8), dtype=Piece)
+        board[:, :, :] = Empty()
+        board[:, 0, 3] = Queen()
+        board[:, 0, 4] = King()
+        board[:, 1, :] = Pawn()
+        board[:, 0, (0, 7)] = Rook()
+        board[:, 0, (1, 6)] = Knight()
+        board[:, 0, (2, 5)] = Bishop()
         return board
 
     @staticmethod
@@ -157,10 +158,22 @@ class AoWBoard:
         :param turn: int: The player (Can be 0 or 1)
         :return: np.ndarray: The state of the player
         """
-        arr = self.board.copy()
+        arr = self.get_numeric_board()
         if turn == Pieces.WHITE:
             arr[[0, 1]] = arr[[1, 0]]
         return arr.flatten()
+
+    def get_numeric_board(self) -> np.ndarray:
+        """
+        Get the numeric board of the Art of War board
+        :return: np.ndarray: The numeric board of the Art of War board
+        """
+        numeric_board = np.zeros((2, 8, 8), dtype=int)
+        for i in range(2):
+            for j in range(8):
+                for k in range(8):
+                    numeric_board[i, j, k] = self.board[i, j, k].get_piece_number()
+        return numeric_board
 
     def get_pieces_names(self) -> tuple:
         """
@@ -203,8 +216,8 @@ class AoWBoard:
         counter = 1
         for i, row in enumerate(board_side):
             for j, piece in enumerate(row):
-                if piece != 0:
-                    name = Pieces.get_piece_name(piece)
+                if piece.get_piece_number() != 0:
+                    name = piece.get_name()
 
                     pieces[name + "_" + str(counter)] = (i, j)
                     counter += 1
@@ -223,7 +236,7 @@ class AoWBoard:
         :param turn: int: The player (Can be 0 or 1)
         :return: Cell: The position of the king
         """
-        row, col = np.nonzero(self.board[turn] == Pieces.KING)
-        if len(row) == 0 or len(col) == 0:
+        pos = self.pieces[turn]["king_1"]
+        if self.is_piece(turn, Cell(pos[0], pos[1]), King):
             assert False, f"King not found for player {turn}"
-        return Cell(int(row[0]), int(col[0]))
+        return Cell(int(pos[0]), int(pos[1]))

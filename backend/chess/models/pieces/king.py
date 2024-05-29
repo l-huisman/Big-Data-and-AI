@@ -1,7 +1,7 @@
-import chess.models.pieces.piece as Piece
+from chess.models.pieces.piece import Piece
 from chess.models.types import Cell
 
 
 class King(Piece):
-    def __init__(self, position: Cell):
-        super().__init__(position, piece_number=6, possibles_length=8)
+    def __init__(self, position: Cell | None = None):
+        super().__init__(position=position, piece_number=6, possibles_length=8)

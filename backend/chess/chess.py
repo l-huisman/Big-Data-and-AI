@@ -9,6 +9,8 @@ import chess.pieces as Pieces
 from chess.models.board import AoWBoard
 from chess.models.types import Cell
 from chess.utils.pygame import PyGameUtils
+from chess.models.pieces import *
+import chess.models.pieces as pieces_module
 
 
 class Chess(gym.Env):
@@ -72,7 +74,7 @@ class Chess(gym.Env):
         return True
 
     def piece_can_jump(self, pos: Cell, turn: int) -> bool:
-        jumps = {Pieces.KNIGHT, Pieces.KING, Pieces.WINGED_KNIGHT, Pieces.WARELEFANT}
+        jumps = {Pieces.KNIGHT, Pieces.KING, Pieces.WINGED_KNIGHT, Pieces.WARELEPHANT}
         piece = self.aow_board.get_piece(pos, turn)
         return piece in jumps
 
@@ -188,7 +190,7 @@ class Chess(gym.Env):
                 return self.get_actions_for_winged_knight(cell, turn)
             case Pieces.ROOK:
                 return self.get_actions_for_rook(cell, turn)
-            case Pieces.WARELEFANT:
+            case Pieces.WARELEPHANT:
                 return self.get_actions_for_war_elefant(cell, turn)
             case Pieces.BISHOP:
                 return self.get_actions_for_bishop(cell, turn)
@@ -201,7 +203,8 @@ class Chess(gym.Env):
 
     def get_actions_for_piece(self, pos: Cell, turn: int, piece: str, moves: list[tuple[int, int]],
                               deny_enemy_king: bool = False):
-        possibles, actions_mask = self.get_empty_actions(piece)
+        _class = getattr(pieces_module, piece.capitalize())
+        possibles, actions_mask = _class().get_empty_actions()
         if pos is None:
             return possibles, actions_mask
 
@@ -261,7 +264,7 @@ class Chess(gym.Env):
         return all_possibles, all_actions_mask, all_source_pos
 
     def get_actions_for_pawn(self, pos: Cell | None, turn: int, deny_enemy_king: bool = False):
-        possibles, actions_mask = self.get_empty_actions("pawn")
+        possibles, actions_mask = Pawn().get_empty_actions()
         if pos is None:
             return possibles, actions_mask
 
@@ -340,7 +343,7 @@ class Chess(gym.Env):
 
     def get_actions_for_king(self, pos: Cell, turn: int):
         row, col = pos
-        possibles, actions_mask = self.get_empty_actions("king")
+        possibles, actions_mask = King().get_empty_actions()
 
         for i, (r, c) in enumerate(Moves.KING):
             next_pos = Cell(row + r, col + c)
@@ -360,7 +363,8 @@ class Chess(gym.Env):
         pos = self.aow_board.pieces[turn][name]
         if pos is None:
             pos = (0, 0)
-        size = self.get_possibles_size(cat)
+        _class = getattr(pieces_module, cat.capitalize())
+        size = _class().get_possibles_size()
         return np.array([pos] * size)
 
     def get_actions_for(self, name: str, turn: int, deny_enemy_king: bool = False) -> tuple:
@@ -565,7 +569,7 @@ class Chess(gym.Env):
         rk, ck = king_pos
 
         diagonal_pieces = [Pieces.BISHOP, Pieces.QUEEN]
-        straight_pieces = [Pieces.ROOK, Pieces.QUEEN, Pieces.WARELEFANT]
+        straight_pieces = [Pieces.ROOK, Pieces.QUEEN, Pieces.WARELEPHANT]
 
         # GO TO UP ROW
         for r in range(rk + 1, 8):
@@ -754,7 +758,7 @@ class Chess(gym.Env):
         return rewards
 
     def capture_pawn_by_warelefant(self, next_row: int, next_col: int, current_row: int, current_col: int, turn: int):
-        if self.aow_board.is_piece(turn, Cell(current_row, current_col), Pieces.WARELEFANT):
+        if self.aow_board.is_piece(turn, Cell(current_row, current_col), Pieces.WARELEPHANT):
             if current_row == next_row:
                 start_col = min(current_col, next_col) + 1
                 end_col = max(current_col, next_col)
@@ -829,7 +833,7 @@ class Chess(gym.Env):
                 self.aow_board.remove_resources(turn, 2)
             case Pieces.WINGED_KNIGHT:
                 self.aow_board.remove_resources(turn, 3)
-            case Pieces.WARELEFANT:
+            case Pieces.WARELEPHANT:
                 self.aow_board.remove_resources(turn, 5)
 
     def step(self, action: int) -> tuple[list[int], bool, list[set]]:

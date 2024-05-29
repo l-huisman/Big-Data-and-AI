@@ -37,7 +37,6 @@
 import Chessboard from '../components/Chessboard.vue';
 import * as echarts from 'echarts';
 import { baseUrl } from '../base-url.js';
-import { Title } from 'chart.js';
 
 export default {
   components: {

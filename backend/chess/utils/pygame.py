@@ -56,6 +56,7 @@ class PyGameUtils:
     def render(self, board: np.ndarray) -> Union[None, np.ndarray]:
         """
         Render the Art of War board
+        :param board: np.ndarray: The Art of War board
         :return: Union[None, np.ndarray]: The rendered Art of War board
         """
         self.init_pygame()

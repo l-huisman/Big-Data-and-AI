@@ -71,7 +71,7 @@ def move(move_request: MoveRequest):
     return route.execute()
 
 
-@app.get(path="/actions", response_model=ActionResponse)
+@app.post(path="/actions", response_model=ActionResponse)
 def actions(action_request: ActionRequest):
     route = PlayableActions.PlayableActions(env=env, action_request=action_request)
     return route.execute()

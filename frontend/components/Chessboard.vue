@@ -2,19 +2,19 @@
   <div class="grid grid-cols-8 ml-30">
     <template v-for="(row, RowIndex) in this.dict" :key="'row-' + RowIndex">
       <template v-for="(square, colIndex) in row" :key="'square-' + colIndex">
-        <div @click="changeClickToMove(RowIndex)"
-          :class="{ 'hover:bg-[#b0a468] bg-[#D0C27A]': GetSquareColors(RowIndex), 'hover:bg-[#8a6b2d] bg-[#AA8439]': !GetSquareColors(RowIndex) }"
+        <div :id="RowIndex" @click="changeClickToMove(RowIndex)"
+          :class="{ 'hover:bg-[#b0a468] bg-[#D0C27A]': getSquareColors(RowIndex), 'hover:bg-[#8a6b2d] bg-[#AA8439]': !getSquareColors(RowIndex) }"
           class="w-[60px] h-[60px] pt-[10px] pb-[10px] flex justify-center items-center">
 
           <!-- show the numbers on the left side of the chessboard -->
           <div v-if="RowIndex % 8 == 0" class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
-            'text-[#D0C27A]': !GetSquareColors(RowIndex), 'text-[#AA8439]': GetSquareColors(RowIndex)
+            'text-[#D0C27A]': !getSquareColors(RowIndex), 'text-[#AA8439]': getSquareColors(RowIndex)
           }">{{ (RowIndex /
             8) + 1 }}</div>
           <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">&nbsp;</div>
 
           <!-- show the chessboard + pieces -->
-          <span>
+          <span @click="clickedPiece(RowIndex, colIndex)">
             <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')"
               :src="getPieceImagePath(square, 'black')">
             <img v-else-if="square !== 0 && dict[RowIndex].hasOwnProperty('white')"
@@ -23,8 +23,8 @@
 
           <!-- show the letters on the bottom of the chessboard -->
           <div v-if="RowIndex >= 56" class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]" :class="{
-            'text-[#D0C27A]': !GetSquareColors(RowIndex),
-            'text-[#AA8439]': GetSquareColors(RowIndex)
+            'text-[#D0C27A]': !getSquareColors(RowIndex),
+            'text-[#AA8439]': getSquareColors(RowIndex)
           }">{{ String.fromCharCode(RowIndex + 9).toLowerCase() }}</div>
           <div v-else class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">&nbsp;</div>
         </div>
@@ -36,6 +36,9 @@
 
 <script>
 import axios from 'axios';
+import { baseUrl } from '../base-url.js';
+import { color } from 'chart.js/helpers';
+
 export default {
   props: {
     board: Array
@@ -75,7 +78,7 @@ export default {
   mounted() {
     this.blackPieces = this.gameBoard[0];
     this.whitePieces = this.gameBoard[1].reverse();
-    this.CreateDict();
+    this.createDict();
   },
   methods: {
     changeClickToMove(index) {
@@ -89,7 +92,7 @@ export default {
         this.position = '';
       }
     },
-    CreateDict() {
+    createDict() {
       for (let i = 0; i < this.whitePieces.length; i++) {
         for (let j = 0; j < this.whitePieces[i].length; j++) {
           if (this.whitePieces[i][j] != 0) {
@@ -119,9 +122,41 @@ export default {
         return this.pieceImagesBlack[pieceNumber];
       }
     },
-    GetSquareColors(num) {
+    getSquareColors(num) {
       const specialNumbers = [0, 2, 4, 6, 9, 11, 13, 15, 16, 18, 20, 22, 25, 27, 29, 31, 32, 34, 36, 38, 41, 43, 45, 47, 48, 50, 52, 54, 57, 59, 61, 63];
       return specialNumbers.includes(num);
+    },
+    async clickedPiece(rowIndex) {
+      const row = 8 - Math.floor(rowIndex / 8);
+      const column = String.fromCharCode(97 + (rowIndex % 8));
+      const position = column + row;
+
+      console.log(position);
+
+      const response = await fetch(`${baseUrl}/actions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          board: [this.gameBoard],
+          turn: 1,
+          pieceLocation: position
+        })
+      });
+      const data = await response.json();
+      console.log(data);
+      for (let move of data.possibleMoves) {
+        this.colorPossibleMoves(move);
+      }
+      
+    },
+    colorPossibleMoves(move) {
+      console.log(move);
+      const column = move.charAt(2);
+      const row = parseInt(move.charAt(3)) - 1;
+      const index = (8 - row - 1) * 8 + (column.charCodeAt(0) - 97);
+      document.getElementById(index).style.backgroundColor = 'red';
     }
   }
 };

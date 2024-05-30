@@ -41,7 +41,8 @@ import { color } from 'chart.js/helpers';
 
 export default {
   props: {
-    board: Array
+    board: Array,
+    isAIGame: Boolean
   },
   data() {
     return {
@@ -127,6 +128,9 @@ export default {
       return specialNumbers.includes(num);
     },
     async clickedPiece(rowIndex) {
+      if (this.isAIGame) {
+        return;
+      }
       const row = 8 - Math.floor(rowIndex / 8);
       const column = String.fromCharCode(97 + (rowIndex % 8));
       const position = column + row;

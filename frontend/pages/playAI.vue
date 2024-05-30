@@ -4,7 +4,7 @@
   </div>
   <div class="flex h-full w-full mt-[155px] text-white">
     <div class="ml-[10%] text-2xl">
-      <Chessboard :board="board" :key="boardKey" />
+      <Chessboard :board="board" :key="boardKey" :isAIGame="true" />
       <!-- <Chessboard :board="board" @update:board="newState" /> -->
     </div>
     <div class="ml-[50px] flex flex-col w-[45%]">

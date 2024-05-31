@@ -131,6 +131,9 @@ export default {
       if (this.isAIGame) {
         return;
       }
+
+      this.colorSquares();
+
       const row = 8 - Math.floor(rowIndex / 8);
       const column = String.fromCharCode(97 + (rowIndex % 8));
       const position = column + row;
@@ -153,14 +156,27 @@ export default {
       for (let move of data.possibleMoves) {
         this.colorPossibleMoves(move);
       }
-      
+      if (this.position.length == 4) {
+        if (!data.possibleMoves.includes(position)) {
+          this.position = "";
+          this.colorSquares();
+        }
+      }
     },
     colorPossibleMoves(move) {
       console.log(move);
       const column = move.charAt(2);
       const row = parseInt(move.charAt(3)) - 1;
       const index = (8 - row - 1) * 8 + (column.charCodeAt(0) - 97);
-      document.getElementById(index).style.backgroundColor = 'red';
+      document.getElementById(index).style.border = '#000 2px solid';
+    },
+    colorSquares() {
+      for (let i = 0; i < 64; i++) {
+        this.colorSquare(i);
+      }
+    },
+    colorSquare(rowIndex) {
+      document.getElementById(rowIndex).style.border = '#000 0px solid';
     }
   }
 };

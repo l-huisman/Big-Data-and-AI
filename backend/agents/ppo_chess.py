@@ -22,7 +22,7 @@ class PPOChess(SingleAgentChess):
 
     def take_action(self, turn: int, episode: Episode):
         mask = self.env.get_all_actions(turn)[-1]
-        state = self.env.get_state(turn)
+        state = self.env.aow_board.get_state(turn)
 
         # Use the appropriate learner based on the current turn
         if turn == 0:

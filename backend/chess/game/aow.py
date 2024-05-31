@@ -1,0 +1,79 @@
+from typing import Union, Optional, List
+
+from gym.core import RenderFrame
+
+import chess.constants.rewards as Rewards
+from chess.models.types import Cell
+from chess.models.board import AoWBoard
+from chess.game.aow_logic import AoWLogic
+from chess.utils.pygame import PyGameUtils
+
+
+class ArtOfWar:
+    def __init__(self, config: dict = None, window_size: int = 800, render_mode: str = 'human'):
+        self.config = config
+        self.aow_board = AoWBoard()
+        self.turn = 0  # 0 or 1, 0 means white, 1 means black
+        self.steps = 0
+        self.action_space_length = 0
+        self.pygame_utils = PyGameUtils(window_size=window_size, render_mode=render_mode)
+        self.aow_logic = AoWLogic()
+
+    def step(self, action: int) -> tuple[list[int], bool, list[set]]:
+        """
+        Take a step in the environment
+        :param action: int: The action to take
+        :return: tuple[list[int], bool, list[set]]: The rewards, if the game is done, and the info
+        """
+        assert not self.aow_logic.is_game_done(), "the game is finished reset"
+        assert action < self.action_space_length, f"action number must be less than {self.action_space_length}."
+
+        source_pos, possibles, actions_mask = self.aow_logic.get_all_actions(self.turn)
+        assert actions_mask[action], f"Cannot Take This Action = {action}, {source_pos[action]} -> {possibles[action]}"
+
+        from_pos = Cell(int(source_pos[action][0]), int(source_pos[action][1]))
+        next_pos = Cell(int(possibles[action][0]), int(possibles[action][1]))
+
+        if from_pos == next_pos and self.aow_board.get_piece(from_pos, self.turn).is_upgradable():
+            source_pos_piece = self.aow_board.get_piece(Cell(from_pos[0], from_pos[1]), self.turn)
+            rewards, infos = self.aow_logic.upgrade_piece(from_pos, self.turn, source_pos_piece)
+            end_turn = False
+        else:
+            rewards, infos = self.aow_logic.move_piece(
+                from_pos, next_pos, self.turn
+            )
+            end_turn = True
+
+        if (from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0)
+                and from_pos == next_pos):
+            self.aow_logic.dutch_waterline(from_pos)
+            rewards = self.aow_logic.add_reward(reward=Rewards.DUTCH_WATERLINE, turn=self.turn)
+            end_turn = False
+
+        rewards, infos = self.aow_logic.update_checks(rewards, infos)
+        rewards, infos = self.aow_logic.update_check_mates(rewards, infos)
+        rewards, infos = self.aow_logic.update_draw(rewards, infos)
+
+        if from_pos != next_pos or end_turn:
+            self.aow_board.add_resources(self.turn, 1)
+            self.turn = 1 - self.turn
+        self.steps += 1
+        return rewards, self.aow_logic.is_game_done(), infos
+
+    def render(self) -> Optional[Union[RenderFrame, List[RenderFrame]]]:
+        """
+        Render the environment
+        :return: Optional[Union[RenderFrame, List[RenderFrame]]]: The rendered frame
+        """
+        return self.pygame_utils.render(self.aow_board.get_numeric_board())
+
+    def reset(self, **kwargs) -> None:
+        """
+        Reset the environment
+        :param kwargs: dict: The arguments to reset the environment
+        """
+        self.done = False
+        self.turn = 0  # 0 or 1, 0 means white, 1 means black
+        self.steps = 0
+        self.aow_logic.checked = [False, False]
+        self.aow_board.reset()

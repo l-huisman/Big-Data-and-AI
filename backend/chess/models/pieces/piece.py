@@ -6,7 +6,7 @@ from chess.models.types import Cell
 
 class Piece:
     def __init__(self, possibles_length: int, position: Cell | None = None,  piece_number: int = -1,
-                 can_jump: bool = False):
+                 can_jump: bool = False, upgradable: bool = False, upgrade_options: list['Piece'] = None):
         """
         Initialize the Piece class
         :param color: Colors: The color of the piece
@@ -14,11 +14,17 @@ class Piece:
         :param possibles_length: int: The length of the possible moves array
         :param can_jump: bool: If the piece can jump over other pieces
         """
+        if upgrade_options is None:
+            upgrade_options = []
+
         self.position: Cell = position
         self.possibles_length: int = possibles_length
-        self.can_jump: bool = can_jump
+        self.jump: bool = can_jump
         self.piece_number = piece_number
         self.is_on_board = True
+        self.upgradable = upgradable
+        self.upgrade_options = upgrade_options
+        self.moved = False
 
     def get_piece_number(self) -> int:
         """
@@ -26,6 +32,41 @@ class Piece:
         :return:
         """
         return self.piece_number
+
+    def has_moved(self) -> bool:
+        """
+        Get if the piece has moved
+        :return: bool: If the piece has moved
+        """
+        return self.moved
+
+    def is_on_board(self) -> bool:
+        """
+        Get if the piece is on the board
+        :return: bool: If the piece is on the board
+        """
+        return self.is_on_board
+
+    def set_is_on_board(self, is_on_board: bool) -> None:
+        """
+        Set if the piece is on the board
+        :param is_on_board: bool: If the piece is on the board
+        """
+        self.is_on_board = is_on_board
+
+    def set_has_moved(self, has_moved: bool = True) -> None:
+        """
+        Set if the piece has moved
+        :param has_moved: bool: If the piece has moved
+        """
+        self.moved = has_moved
+
+    def get_upgrade_options(self) -> list['Piece']:
+        """
+        Get the upgrade options of the piece
+        :return: list: The upgrade options of the piece
+        """
+        return self.upgrade_options
 
     def get_position(self) -> Cell:
         """
@@ -48,12 +89,19 @@ class Piece:
         """
         return self.possibles_length
 
+    def is_upgradable(self) -> bool:
+        """
+        Get if the piece can be upgraded
+        :return: bool: If the piece can be upgraded
+        """
+        return self.upgradable
+
     def can_jump(self) -> bool:
         """
         Get if the piece can jump over other pieces
         :return: bool: If the piece can jump over other pieces
         """
-        return self.can_jump
+        return self.jump
 
     def get_possibles(self) -> np.ndarray:
         """
@@ -77,6 +125,37 @@ class Piece:
         :return: str: The name of the piece
         """
         return f"{self.__class__.__name__}"
+
+    def get_actions(self, board: 'AoWBoard', pos: Cell | None, turn: int, deny_enemy_king: bool = False) -> tuple:
+        """
+        Get the actions of the piece
+        :param board: np.ndarray: The Art of War board
+        :return: tuple: The actions of the piece
+        """
+        possibles, actions_mask = self.get_empty_actions()
+
+        if pos is None and self.position is None:
+            return possibles, actions_mask
+
+        if pos is None:
+            pos = self.position
+
+        for i, (r, c) in enumerate(self.get_moves()):
+
+            if not board.is_valid_move(pos, Cell(r, c), turn, deny_enemy_king):
+                continue
+
+            next_pos = Cell(pos[0] + r, pos[1] + c)
+            possibles[i] = next_pos
+
+        return possibles, actions_mask
+
+    def get_moves(self) -> tuple:
+        """
+        Get the moves of the piece
+        :return: list: The moves of the piece
+        """
+        pass
 
     def __str__(self) -> str:
         """

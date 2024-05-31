@@ -75,7 +75,7 @@ class BaseAgent(ABC):
 
         def render_fn():
             if self.env.pygame_utils.render_mode != "human":
-                renders.append(self.env.pygame_utils.render(self.env.aow_board))
+                renders.append(self.env.pygame_utils.render(self.env.aow_board.get_numeric_board()))
 
         self.env.reset()
         episode_white = Episode()

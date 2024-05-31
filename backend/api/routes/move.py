@@ -32,7 +32,7 @@ class Move(BaseRoute):
         self.validate_resources(self.move_request.resources)
 
         self.env.resources = self.move_request.resources
-        self.env.set_board(board)
+        self.env.aow_board.set_board(board)
         self.env.turn = self.move_request.turn
         action_str = self.move_request.move
 
@@ -45,15 +45,15 @@ class Move(BaseRoute):
                 playerMoveBoard=player_move_board,
                 combinedMoveBoard=player_move_board,
                 cards=[],
-                resources=self.env.resources, has_game_ended=done
+                resources=self.env.aow_board.resources, has_game_ended=done
             )
 
         if self.env.turn != self.move_request.turn:
             self.process_ai_move(turn=self.env.turn, episode=self.episode)
 
         self.logger.info("Move processed successfully.")
-        return MoveResponse(playerMoveBoard=player_move_board, combinedMoveBoard=self.env.board.tolist(), cards=[],
-                            resources=self.env.resources,
+        return MoveResponse(playerMoveBoard=player_move_board, combinedMoveBoard=self.env.aow_board.get_numeric_board().tolist(), cards=[],
+                            resources=self.env.aow_board.resources,
                             has_game_ended=self.env.done)
 
     def process_ai_move(self, turn, episode):
@@ -90,7 +90,7 @@ class Move(BaseRoute):
                 self.raise_http_exception(400, "Invalid move.")
             _, done, _ = self.env.step(int(action[0]))
 
-            player_move_board = self.env.board.tolist()
+            player_move_board = self.env.aow_board.get_numeric_board().tolist()
             return player_move_board, done
         except HTTPException as e:
             raise e

@@ -4,6 +4,7 @@ from chess.models.pieces import *
 from chess.models import Cell
 import chess.pieces as Pieces
 
+
 class AoWBoard:
     def __init__(self, length: int = 8, width: int = 8):
         """
@@ -172,7 +173,7 @@ class AoWBoard:
         for i in range(2):
             for j in range(8):
                 for k in range(8):
-                    numeric_board[i, j, k] = self.board[i, j, k].get_piece_number()
+                    numeric_board[i, j, k] = self.board[i, j, k].__str__()
         return numeric_board
 
     def get_pieces_names(self) -> tuple:
@@ -191,9 +192,31 @@ class AoWBoard:
         """
         # TODO: Fix this, when entering a board not with all pieces,
         #  the action mask will be different resulting in a confused AI
-        self.board = board
+        for i in range(2):
+            for j in range(8):
+                for k in range(8):
+                    self.board[i, j, k] = self.get_piece_from_number(board[i, j, k])
         self.pieces = self.get_pieces_from_board(board)
         self.pieces_names = self.get_pieces_names()
+
+    def get_piece_from_number(self, number: int) -> Piece:
+        """
+        Get the piece from the Art of War board
+        :param number: int: The number of the piece
+        :return: Pieces: The piece of the Art of War board
+        """
+        return {
+            0: Empty(),
+            1: Pawn(),
+            2: Bishop(),
+            3: Knight(),
+            4: Rook(),
+            5: Queen(),
+            6: King(),
+            7: Wingedknight(),
+            8: Hoplite(),
+            9: Warelephant(),
+        }[number]
 
     def get_pieces_from_board(self, board: np.array) -> list[dict]:
         """
@@ -205,8 +228,7 @@ class AoWBoard:
         pieces_1 = self.get_pieces_from_board_side(board[1])
         return [pieces_0, pieces_1]
 
-    @staticmethod
-    def get_pieces_from_board_side(board_side: np.array) -> dict:
+    def get_pieces_from_board_side(self, board_side: np.array) -> dict:
         """
         Get the pieces from one side of the Art of War board
         :param board_side: np.array: The side of the Art of War board
@@ -216,8 +238,8 @@ class AoWBoard:
         counter = 1
         for i, row in enumerate(board_side):
             for j, piece in enumerate(row):
-                if piece.get_piece_number() != 0:
-                    name = piece.get_name()
+                if piece != 0:
+                    name = self.get_piece_from_number(piece).__class__.__name__.lower()
 
                     pieces[name + "_" + str(counter)] = (i, j)
                     counter += 1
@@ -230,13 +252,198 @@ class AoWBoard:
         """
         return np.copy(self.board)
 
-    def get_pos_king(self, turn: int) -> Cell:
+    def get_king_position(self, turn: int) -> Cell:
         """
         Get the position of the king in the Art of War board
         :param turn: int: The player (Can be 0 or 1)
         :return: Cell: The position of the king
         """
-        pos = self.pieces[turn]["king_1"]
-        if self.is_piece(turn, Cell(pos[0], pos[1]), King):
-            assert False, f"King not found for player {turn}"
-        return Cell(int(pos[0]), int(pos[1]))
+        for i in range(8):
+            for j in range(8):
+                if self.is_piece(turn, Cell(i, j), King()):
+                    return Cell(i, j)
+        print(self.get_numeric_board())
+        assert False, f"King not found for {turn}"
+
+    def is_enemy_piece(self, pos: Cell, turn: int) -> bool:
+        """
+        Check if the piece is an enemy piece
+        :param pos: Cell: The position to check
+        :param turn: int: The player (Can be 0 or 1)
+        :return: bool: If the piece is an enemy piece
+        """
+        r, c = pos
+        return not self.is_empty(Cell(7 - r, c), 1 - turn)
+
+    def is_empty(self, pos: Cell, turn: int) -> bool:
+        """
+        Check if the cell is empty
+        :param pos: Cell: The position to check
+        :param turn: int: The player (Can be 0 or 1)
+        :return: bool: If the cell is empty
+        """
+        return not self.is_piece(turn, pos)
+
+    def is_empty_or_pawn(self, pos: Cell, turn: int) -> bool:
+        """
+        Check if the cell is empty or a pawn
+        :param pos: Cell: The position to check
+        :param turn: int: The player (Can be 0 or 1)
+        :return: bool: If the cell is empty or a pawn
+        """
+        return self.is_empty(pos, turn) or self.is_piece(turn, pos, Pieces.PAWN) or \
+            self.is_piece(turn, pos, Pieces.HOPLITE)
+
+    def is_enemy_king(self, pos: Cell, turn: int) -> bool:
+        """
+        Check if the piece is an enemy king
+        :param pos: Cell: The position to check
+        :param turn: int: The player (Can be 0 or 1)
+        :return: bool: If the piece is an enemy king
+        """
+        r, c = pos
+        return self.is_piece(1 - turn, Cell(7 - r, c), Pieces.KING)
+
+    def is_tile_empty_on_both_side(self, pos: Cell, turn: int) -> bool:
+        """
+        Check if the tile is empty on both sides of the board
+        :param pos: Cell: The position to check
+        :param turn: int: The player (Can be 0 or 1)
+        :return: bool: If the tile is empty on both sides
+        """
+        r, c = pos
+        return self.is_empty(Cell(r, c), turn) and self.is_empty(Cell(7 - r, c), 1 - turn)
+
+    def is_tile_empty_or_pawn_on_both_side(self, pos: Cell, turn: int) -> bool:
+        """
+        Check if the tile is empty or a pawn on both sides of the board
+        :param pos: Cell: The position to check
+        :param turn: int: The player (Can be 0 or 1)
+        :return: bool: If the tile is empty or a pawn on both sides
+        """
+        r, c = pos
+        return self.is_empty_or_pawn(pos, turn) and self.is_empty_or_pawn(Cell(7 - r, c), 1 - turn)
+
+    def general_validation(self, current_pos: Cell, next_pos: Cell, turn: int, deny_enemy_king: bool) -> bool:
+        """
+        General validation for the move
+        :param current_pos: Cell: The current position
+        :param next_pos: Cell: The next position
+        :param turn: int: The player (Can be 0 or 1)
+        :param deny_enemy_king: bool: If the enemy king should be denied
+        :return bool: If the move is valid
+        """
+        if not self.is_in_range(next_pos):
+            return False
+
+        if not self.is_empty(next_pos, turn):
+            return False
+
+        if (self.is_enemy_king(next_pos, turn) or self.is_piece(pos=next_pos, turn=turn, piece=King())) and (not deny_enemy_king):
+            return False
+
+        if not self.is_path_empty_for_piece(current_pos, next_pos, turn):
+            return False
+        return True
+
+    def is_valid_move(
+            self,
+            current_pos: Cell,
+            next_pos: Cell,
+            turn: int,
+            deny_enemy_king: bool,
+    ) -> bool:
+        """
+        Check if the move is valid
+        :param current_pos: Cell: The current position
+        :param next_pos: Cell: The next position
+        :param turn: int: The player (Can be 0 or 1)
+        :param deny_enemy_king: bool: If the enemy king should be denied
+        :return: bool: If the move is valid
+        """
+        if not self.general_validation(current_pos, next_pos, turn, deny_enemy_king):
+            return False
+        if self.is_lead_to_check(current_pos, next_pos, turn):
+            return False
+        return True
+
+    def is_lead_to_check(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
+        """
+        Check if the move leads to a check
+        :param current_pos: Cell: The current position
+        :param next_pos: Cell: The next position
+        :param turn: int: The player (Can be 0 or 1)
+        :return: bool: If the move leads to a check
+        """
+        # Added import here, otherwise you will get circular imports
+        from chess import Chess
+        temp = Chess(render_mode="rgb_array")
+        temp.aow_board.board = self.copy_board()
+        temp.move_piece(current_pos, next_pos, turn)
+        return temp.is_check(temp.aow_board.get_king_position(turn), turn)
+
+    def is_path_empty_for_piece(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
+        piece = self.get_piece(current_pos, turn)
+        this_piece = None
+        for dic in self.pieces:
+            for key, val in dic.items():
+                if val == current_pos:
+                    this_piece = key.split("_")[0]
+
+        if this_piece == "warelephant":
+            return self.is_path_empty(current_pos, next_pos, turn, except_pawn=True)
+        else:
+            return piece.can_jump() or (self.is_path_empty(current_pos, next_pos, turn))
+
+    def is_path_empty(self, current_pos: Cell, next_pos: Cell, turn: int, except_pawn: bool = False) -> bool:
+        """
+        Check if the path between two positions is empty
+        :param current_pos: Cell: The current position
+        :param next_pos: Cell: The next position
+        :param turn: int: The player (Can be 0 or 1)
+        :param except_pawn: bool: If the path should ignore pawns
+        :return: bool: If the path between the two positions is empty
+        """
+        path = self.get_path(current_pos, next_pos)
+
+        for pos in path:
+            if pos == current_pos:
+                continue
+
+            if not self.is_empty(pos, turn):
+                if except_pawn and self.is_piece(turn, pos, Pieces.PAWN):
+                    except_pawn = False
+                    continue
+                return False
+        return True
+
+
+
+    @staticmethod
+    def get_path(current_pos: Cell, next_pos: Cell) -> list[Cell]:
+        """
+        Get the path between two positions
+        :param current_pos: Cell: The current position
+        :param next_pos: Cell: The next position
+        :return: list[Cell]: The path between the two positions
+        """
+        diff_row = next_pos.row - current_pos.row
+        diff_col = next_pos.col - current_pos.col
+        size = max(abs(diff_row), abs(diff_col)) - 1
+
+        # Get direction +1 for positive difference, 0 for no difference and -1 for negative difference
+        sign_row = np.sign(next_pos.row - current_pos.row)
+        sign_col = np.sign(next_pos.col - current_pos.col)
+
+        # Initializing Path array
+        rows = np.zeros(size, dtype=np.int32) + next_pos.row
+        cols = np.zeros(size, dtype=np.int32) + next_pos.col
+
+        # Filling Path array
+        if diff_row:
+            rows = np.arange(current_pos.row + sign_row, next_pos.row, sign_row, dtype=np.int32)
+
+        if diff_col:
+            cols = np.arange(current_pos.col + sign_col, next_pos.col, sign_col, dtype=np.int32)
+
+        return [Cell(row, col) for row, col in zip(rows, cols)]

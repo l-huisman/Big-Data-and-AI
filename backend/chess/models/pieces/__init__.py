@@ -7,5 +7,5 @@ from chess.models.pieces.pawn import Pawn
 from chess.models.pieces.piece import Piece
 from chess.models.pieces.queen import Queen
 from chess.models.pieces.rook import Rook
-from chess.models.pieces.war_elephant import WarElephant
-from chess.models.pieces.winged_knight import WingedKnight
+from chess.models.pieces.war_elephant import Warelephant
+from chess.models.pieces.winged_knight import Wingedknight

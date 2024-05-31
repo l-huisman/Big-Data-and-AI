@@ -9,6 +9,7 @@ import chess.constants.colors as Colors
 import chess.pieces as Pieces
 from chess.models import Cell
 from chess.models.board import AoWBoard
+from chess.models.pieces import Piece
 
 
 class PyGameUtils:
@@ -33,13 +34,14 @@ class PyGameUtils:
             for x in range(8):
                 self.draw_cell(x, y)
 
-    def draw_pieces(self, board: AoWBoard) -> None:
+    def draw_pieces(self, board: np.ndarray) -> None:
         """
         Draw the Art of War pieces
+        :param board: np.ndarray: The Art of War board
         """
         for y in range(8):
             for x in range(8):
-                self.draw_piece(x, y, board.get_piece(Cell(x, y)))
+                self.draw_piece(x, y, board)
 
     def draw_axis(self) -> None:
         """
@@ -123,24 +125,26 @@ class PyGameUtils:
             pygame.Rect((*self.get_left_top(x, y), self.cell_size, self.cell_size)),
         )
 
-    def draw_piece(self, x: int, y: int, piece: Pieces) -> None:
+    def draw_piece(self, x: int, y: int, board: np.ndarray) -> None:
         """
         Draw the piece on the cell
         :param x: int: The x coordinate
         :param y: int: The y coordinate
-        :param piece: int or Pieces: The piece to draw
+        :param board: np.ndarray: The Art of War board
         """
         row, col = y, x
         for color in [Pieces.BLACK, Pieces.WHITE]:
 
+            if board[color, row, col] == Pieces.EMPTY:
+                continue
+
             yy = abs((color * 7) - y)
             text = self.font.render(
-                Pieces.get_ascii(color, int(piece.get_piece_number())),
+                Pieces.get_ascii(color, int(board[color, row, col])),
                 True,
                 Colors.WHITE,
                 self.get_cell_color(x, yy),
             )
-
             rect = text.get_rect()
             rect.center = self.get_left_top(x, yy, offset=self.cell_size // 2)
             self.screen.blit(text, rect)

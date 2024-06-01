@@ -13,6 +13,7 @@ import chess.pieces as Pieces
 from chess.models.board import AoWBoard
 from chess.models.pieces import *
 from chess.models.types import Cell
+from chess.utils.cell import CellUtils
 from chess.utils.pygame import PyGameUtils
 
 
@@ -47,46 +48,6 @@ class Chess(gym.Env):
         self.checked = [False, False]
         self.aow_board.reset()
 
-    def get_actions_for_piece(self, pos: Cell, turn: int, piece: str, moves: list[tuple[int, int]],
-                              deny_enemy_king: bool = False):
-        _class = getattr(pieces_module, piece.capitalize())
-        possibles, actions_mask = _class().get_empty_actions()
-        if pos is None:
-            return possibles, actions_mask
-
-        row, col = pos
-        for i, (r, c) in enumerate(moves):
-            next_pos = Cell(row + r, col + c)
-
-            if not self.aow_board.is_valid_move(Cell(row, col), next_pos, turn, deny_enemy_king):
-                continue
-
-            possibles[i] = next_pos
-            actions_mask[i] = 1
-
-        return possibles, actions_mask
-
-    def get_actions_for_rook(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
-        return self.get_actions_for_piece(pos, turn, "rook", Moves.ROOK, deny_enemy_king)
-
-    def get_actions_for_bishop(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
-        return self.get_actions_for_piece(pos, turn, "bishop", Moves.BISHOP, deny_enemy_king)
-
-    def get_actions_for_war_elefant(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
-        return self.get_actions_for_piece(pos, turn, "warelephant", Moves.WARELEPHANT, deny_enemy_king)
-
-    def get_action_for_queen(self, pos: Cell, turn: int, deny_enemy_king: bool = False):
-        possibles_rook, actions_mask_rook = self.get_actions_for_rook(
-            pos, turn, deny_enemy_king
-        )
-        possibles_bishop, actions_mask_bishop = self.get_actions_for_bishop(
-            pos, turn, deny_enemy_king
-        )
-        possibles = np.concatenate([possibles_bishop, possibles_rook])
-        actions_mask = np.concatenate([actions_mask_bishop, actions_mask_rook])
-
-        return possibles, actions_mask
-
     def get_actions_for_dutch_waterline(self, turn: int) -> tuple:
         rows = [2, 3, 4, 5]
         all_possibles = np.zeros((4, 2), dtype=np.int32)
@@ -103,103 +64,6 @@ class Chess(gym.Env):
 
         return all_possibles, all_actions_mask, all_source_pos
 
-    def get_actions_for_pawn(self, pos: Cell | None, turn: int, deny_enemy_king: bool = False):
-        possibles, actions_mask = Pawn().get_empty_actions()
-        if pos is None:
-            return possibles, actions_mask
-
-        row, col = pos
-        if self.aow_board.is_piece(turn, Cell(row, col), Queen()):
-            return self.get_action_for_queen(Cell(row, col), turn)
-
-        for i, (r, c) in enumerate(Moves.PAWN[:4]):
-            next_pos = Cell(row + r, col + c)
-
-            if not self.aow_board.is_valid_move(Cell(row, col), next_pos, turn, deny_enemy_king):
-                continue
-
-            can_moves = (
-                (r == 1 and c == 0 and self.aow_board.is_tile_empty_on_both_side(next_pos, turn)),
-                (r == 2 and row == 1 and self.aow_board.is_tile_empty_on_both_side(next_pos, turn)),
-                (r == 1 and abs(c) == 1 and self.aow_board.is_enemy_piece(next_pos, turn)),
-                # TODO: EN PASSANT
-            )
-
-            if True in can_moves:
-                possibles[i] = next_pos
-                actions_mask[i] = 1
-
-        return possibles, actions_mask
-
-    def get_actions_for_knight(self, pos: Cell | None, turn: int, deny_enemy_king: bool = False):
-        return self.get_actions_for_piece(pos, turn, "knight", Moves.KNIGHT, deny_enemy_king)
-
-    def get_actions_for_hoplite(self, pos: Cell | None, turn: int, deny_enemy_king: bool = False):
-        possibles, actions_mask = Hoplite().get_empty_actions()
-        if pos is None:
-            return possibles, actions_mask
-
-        row, col = pos
-        if self.aow_board.is_piece(turn, Cell(row, col), Queen()):
-            return self.get_action_for_queen(Cell(row, col), turn)
-
-        for i, (r, c) in enumerate(Moves.HOPLITE[:4]):
-            next_pos = Cell(row + r, col + c)
-
-            if not self.aow_board.is_valid_move(Cell(row, col), next_pos, turn, deny_enemy_king):
-                continue
-
-            can_moves = (
-                (r == 1 and c == 0 and (
-                            self.aow_board.is_tile_empty_on_both_side(next_pos, turn) or self.aow_board.is_enemy_piece(
-                        next_pos, turn))),
-                (r == 2 and row == 1 and self.aow_board.is_tile_empty_on_both_side(next_pos, turn)),
-                (r == 1 and abs(c) == 1 and self.aow_board.is_enemy_piece(next_pos, turn)),
-                # TODO: EN PASSANT
-            )
-
-            if True in can_moves:
-                possibles[i] = next_pos
-                actions_mask[i] = 1
-
-        return possibles, actions_mask
-
-    def get_actions_for_winged_knight(
-            self, pos: Cell | None, turn: int, deny_enemy_king: bool = False
-    ):
-        possibles, actions_mask = Wingedknight().get_empty_actions()
-
-        if pos is None:
-            return possibles, actions_mask
-
-        row, col = pos
-        for i, (r, c) in enumerate(Moves.WINGED_KNIGHT):
-            next_pos = Cell(row + r, col + c)
-            if not self.aow_board.is_valid_move(Cell(row, col), next_pos, turn, deny_enemy_king):
-                continue
-
-            possibles[i] = next_pos
-            actions_mask[i] = 1
-
-        return possibles, actions_mask
-
-    def get_actions_for_king(self, pos: Cell, turn: int):
-        row, col = pos
-        possibles, actions_mask = King().get_empty_actions()
-
-        for i, (r, c) in enumerate(Moves.KING):
-            next_pos = Cell(row + r, col + c)
-
-            if not self.aow_board.is_valid_move(Cell(row, col), next_pos, turn, False):
-                continue
-
-            if self.is_neighbor_enemy_king(next_pos, turn):
-                continue
-
-            possibles[i] = next_pos
-            actions_mask[i] = 1
-        return possibles, actions_mask
-
     def get_source_pos(self, name: str, turn: int):
         cat = name.split("_")[0]
         pos = self.aow_board.pieces[turn][name]
@@ -215,60 +79,8 @@ class Chess(gym.Env):
         piece_cat = name.split("_")[0]
         piece_pos = self.aow_board.pieces[turn][name]
         src_poses = self.get_source_pos(name, turn)
-
-        if piece_cat == "pawn":
-            return (
-                src_poses,
-                *self.get_actions_for_pawn(piece_pos, turn, deny_enemy_king),
-            )
-
-        if piece_cat == "hoplite":
-            return (
-                src_poses,
-                *self.get_actions_for_hoplite(piece_pos, turn, deny_enemy_king),
-            )
-
-        if piece_cat == "knight":
-            return (
-                src_poses,
-                *self.get_actions_for_knight(piece_pos, turn, deny_enemy_king),
-            )
-
-        if piece_cat == "wingedknight":
-            return (
-                src_poses,
-                *self.get_actions_for_winged_knight(piece_pos, turn, deny_enemy_king),
-            )
-
-        if piece_cat == "rook":
-            return (
-                src_poses,
-                *self.get_actions_for_rook(piece_pos, turn, deny_enemy_king),
-            )
-
-        if piece_cat == "warelephant":
-            return (
-                src_poses,
-                *self.get_actions_for_war_elefant(piece_pos, turn, deny_enemy_king),
-            )
-
-        if piece_cat == "bishop":
-            return (
-                src_poses,
-                *self.get_actions_for_bishop(piece_pos, turn, deny_enemy_king),
-            )
-
-        if piece_cat == "queen":
-            return (
-                src_poses,
-                *self.get_action_for_queen(piece_pos, turn, deny_enemy_king),
-            )
-
-        if piece_cat == "king":
-            return (
-                src_poses,
-                *self.get_actions_for_king(piece_pos, turn),
-            )
+        piece_class = getattr(pieces_module, piece_cat.capitalize())
+        return src_poses, *piece_class().get_actions(self.aow_board, piece_pos, turn, deny_enemy_king)
 
     def get_all_actions(self, turn: int, deny_enemy_king: bool = False):
         all_possibles = []
@@ -532,7 +344,10 @@ class Chess(gym.Env):
 
 
     def move_piece(self, src: Cell, dst: Cell, turn: int):
+        src = CellUtils.make_cell(src)
+        dst = CellUtils.make_cell(dst)
         piece = self.aow_board.get_piece(src, turn)
+        piece.set_has_moved()
 
         if self.aow_board.is_piece(1- turn, Cell(7 - dst.row, dst.col), King()):
             return [0, 0], [set(), set()]
@@ -651,6 +466,7 @@ class Chess(gym.Env):
         self.aow_board.pieces[turn][f"{new_piece.get_name().lower()}_{piece_name.split('_')[1]}"] = \
             self.aow_board.pieces[
                 turn].pop(piece_name)
+        new_piece.set_has_moved(True)
         self.aow_board.set_piece(turn, pos, new_piece)
         self.remove_resources(turn, new_piece)
         return rewards, [set(), set()]

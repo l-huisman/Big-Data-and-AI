@@ -138,8 +138,6 @@ export default {
       const column = String.fromCharCode(97 + (rowIndex % 8));
       const position = column + row;
 
-      console.log(position);
-
       const response = await fetch(`${baseUrl}/actions`, {
         method: 'POST',
         headers: {
@@ -152,19 +150,17 @@ export default {
         })
       });
       const data = await response.json();
-      console.log(data);
       for (let move of data.possibleMoves) {
         this.colorPossibleMoves(move);
       }
       if (this.position.length == 4) {
         if (!data.possibleMoves.includes(position)) {
-          this.position = "";
+          this.position = position;
           this.colorSquares();
         }
       }
     },
     colorPossibleMoves(move) {
-      console.log(move);
       const column = move.charAt(2);
       const row = parseInt(move.charAt(3)) - 1;
       const index = (8 - row - 1) * 8 + (column.charCodeAt(0) - 97);

@@ -6,11 +6,12 @@ from gym import spaces
 from gym.core import RenderFrame
 
 import chess.constants.info_keys as InfoKeys
-import chess.constants.moves as Moves
 import chess.constants.rewards as Rewards
 import chess.models.pieces as pieces_module
 import chess.pieces as Pieces
 from chess.models.board import AoWBoard
+from chess.models.cards import DutchWaterline, WarElephantUpgradeCard, WingedKnightUpgradeCard, \
+    HopliteUpgradeCard
 from chess.models.pieces import *
 from chess.models.types import Cell
 from chess.utils.cell import CellUtils
@@ -48,22 +49,6 @@ class Chess(gym.Env):
         self.checked = [False, False]
         self.aow_board.reset()
 
-    def get_actions_for_dutch_waterline(self, turn: int) -> tuple:
-        rows = [2, 3, 4, 5]
-        all_possibles = np.zeros((4, 2), dtype=np.int32)
-        all_source_pos = np.zeros((4, 2), dtype=np.int32)
-
-        for index, row in enumerate(rows):
-            all_possibles[index] = Cell(row, 0)
-            all_source_pos[index] = Cell(row, 0)
-
-        if self.aow_board.resources[turn] < 5:
-            all_actions_mask = np.zeros(4, dtype=np.int32)
-        else:
-            all_actions_mask = np.ones(4, dtype=np.int32)
-
-        return all_possibles, all_actions_mask, all_source_pos
-
     def get_source_pos(self, name: str, turn: int):
         cat = name.split("_")[0]
         pos = self.aow_board.pieces[turn][name]
@@ -76,10 +61,12 @@ class Chess(gym.Env):
     def get_actions_for(self, name: str, turn: int, deny_enemy_king: bool = False) -> tuple:
         assert name in self.aow_board.get_pieces_names()[
             turn], f"{name} not in {self.aow_board.get_pieces_names()[turn]}"
+
         piece_cat = name.split("_")[0]
         piece_pos = self.aow_board.pieces[turn][name]
         src_poses = self.get_source_pos(name, turn)
         piece_class = getattr(pieces_module, piece_cat.capitalize())
+
         return src_poses, *piece_class().get_actions(self.aow_board, piece_pos, turn, deny_enemy_king)
 
     def get_all_actions(self, turn: int, deny_enemy_king: bool = False):
@@ -109,9 +96,9 @@ class Chess(gym.Env):
             all_actions_mask.append(actions_mask)
             length += len(actions_mask)
 
-        possibles, actions_mask, source_pos = self.get_actions_for_dutch_waterline(
-            turn
-        )
+        possibles, source_pos, actions_mask = self.aow_board.get_card(turn, DutchWaterline()).get_actions(Cell(0, 0),
+                                                                                                          self.aow_board,
+                                                                                                          turn)
         all_possibles.append(possibles)
         all_actions_mask.append(actions_mask)
         all_source_pos.append(source_pos)
@@ -127,64 +114,13 @@ class Chess(gym.Env):
     def get_card_upgrade_actions(self, turn: int, card_id: int):
         match card_id:
             case 0:
-                return self.get_pawn_upgrade_actions(turn)
+                return HopliteUpgradeCard().get_actions(self.aow_board, None, turn)
             case 1:
-                return self.get_knight_upgrade_actions(turn)
+                return WingedKnightUpgradeCard().get_actions(self.aow_board, None, turn)
             case 2:
-                return self.get_rook_upgrade_actions(turn)
+                return WarElephantUpgradeCard().get_actions(self.aow_board, None, turn)
             case _:
                 assert False, f"Invalid card id {card_id}"
-
-    def get_pawn_upgrade_actions(self, turn: int):
-        source_pos, possibles, actions_mask, pieces = self.get_empty_upgrade_actions(turn, Pawn())
-        if self.aow_board.get_resources(turn) >= 2:
-            for i, piece in enumerate(pieces):
-                if self.aow_board.pieces[turn][piece] is None:
-                    continue
-
-                possibles[i] = self.aow_board.pieces[turn][piece]
-                actions_mask[i] = 1
-
-        return source_pos, possibles, actions_mask
-
-    def get_knight_upgrade_actions(self, turn: int):
-        source_pos, possibles, actions_mask, pieces = self.get_empty_upgrade_actions(turn, Knight())
-        if self.aow_board.get_resources(turn) >= 3:
-            for i, piece in enumerate(pieces):
-                if self.aow_board.pieces[turn][piece] is None:
-                    continue
-
-                possibles[i] = self.aow_board.pieces[turn][piece]
-                actions_mask[i] = 1
-
-        return source_pos, possibles, actions_mask
-
-    def get_rook_upgrade_actions(self, turn: int):
-        source_pos, possibles, actions_mask, pieces = self.get_empty_upgrade_actions(turn, Rook())
-        if self.aow_board.get_resources(turn) >= 5:
-            for i, piece in enumerate(pieces):
-                if self.aow_board.pieces[turn][piece] is None:
-                    continue
-
-                possibles[i] = self.aow_board.pieces[turn][piece]
-                actions_mask[i] = 1
-
-        return source_pos, possibles, actions_mask
-
-    def get_empty_upgrade_actions(self, turn: int, piece: Piece):
-        # get all pieces with the same type
-        pieces = [key for key in self.aow_board.pieces[turn].keys() if
-                  key.split("_")[0] == piece.get_name().lower()]
-        possibles = np.zeros((len(pieces), 2), dtype=np.int32)
-        actions_mask = np.zeros(len(pieces), dtype=np.int32)
-        source_pos = np.zeros((len(pieces), 2), dtype=np.int32)
-        for i, piece in enumerate(pieces):
-            if self.aow_board.pieces[turn][piece] is None:
-                continue
-
-            possibles[i] = [0, 0]
-            source_pos[i] = self.aow_board.pieces[turn][piece]
-        return source_pos, possibles, actions_mask, pieces
 
     def is_neighbor_enemy_king(self, pos: Cell, turn: int) -> bool:
         row, col = pos
@@ -269,7 +205,7 @@ class Chess(gym.Env):
                     return True
 
         # KNIGHTS
-        for r, c in Moves.KNIGHT:
+        for r, c in Knight().get_moves():
             nr, nc = rk + r, ck + c
             if not self.aow_board.is_in_range(Cell(nr, nc)):
                 continue
@@ -277,7 +213,7 @@ class Chess(gym.Env):
                 return True
 
         # WINGED KNIGHTS
-        for r, c in Moves.WINGED_KNIGHT:
+        for r, c in Wingedknight().get_moves():
             nr, nc = rk + r, ck + c
             if not self.aow_board.is_in_range(Cell(nr, nc)):
                 continue
@@ -332,24 +268,13 @@ class Chess(gym.Env):
 
         return rewards, infos
 
-    def dutch_waterline(self, pos: Cell):
-        row = pos.row
-        row_turn1 = 7 - row
-        for turn in range(2):
-            for col in range(8):
-                # Check if the piece is a king before removing it
-                row = row if turn == 0 else row_turn1
-                if not self.aow_board.is_piece(turn, Cell(row, col), King()):
-                    self.aow_board.set_piece(turn, Cell(row, col), Empty())
-
-
     def move_piece(self, src: Cell, dst: Cell, turn: int):
         src = CellUtils.make_cell(src)
         dst = CellUtils.make_cell(dst)
         piece = self.aow_board.get_piece(src, turn)
         piece.set_has_moved()
 
-        if self.aow_board.is_piece(1- turn, Cell(7 - dst.row, dst.col), King()):
+        if self.aow_board.is_piece(1 - turn, Cell(7 - dst.row, dst.col), King()):
             return [0, 0], [set(), set()]
 
         # move piece
@@ -417,7 +342,7 @@ class Chess(gym.Env):
                 for row in range(start_row, end_row):
                     if (self.aow_board.is_piece(pos=Cell(row, current_col), turn=turn, piece=Pawn()) or
                             self.aow_board.is_piece(pos=Cell(row, current_col), turn=turn, piece=Hoplite()) or
-                            self.aow_board.is_piece(pos=Cell(7 - row, current_col), turn=1 - turn,piece=Pawn()) or
+                            self.aow_board.is_piece(pos=Cell(7 - row, current_col), turn=1 - turn, piece=Pawn()) or
                             self.aow_board.is_piece(pos=Cell(7 - row, current_col), turn=1 - turn, piece=Hoplite())):
                         self.aow_board.set_piece(turn, Cell(row, current_col), Empty())
                         self.aow_board.set_piece(1 - turn, Cell(7 - row, current_col), Empty())
@@ -426,14 +351,14 @@ class Chess(gym.Env):
                             self.aow_board.pieces[turn][key] = None
                     for key, value in self.aow_board.pieces[1 - turn].items():
                         if value == (7 - row, current_col): \
-                    self.aow_board.pieces[1 - turn][key] = None
+                                self.aow_board.pieces[1 - turn][key] = None
 
     def is_game_done(self):
         return self.done or (self.steps >= self.max_steps)
 
     def promote_pawn_or_hoplite(self, pos: Cell, turn: int):
         if (self.aow_board.is_piece(turn, pos, Pawn()) or
-                self.aow_board.is_piece(turn, pos, Hoplite())) and pos.row == 7:
+            self.aow_board.is_piece(turn, pos, Hoplite())) and pos.row == 7:
             self.aow_board.set_piece(turn, pos, Queen())
 
     def upgrade_piece(self, pos: Cell, turn: int, piece_to_upgrade: Piece):
@@ -490,9 +415,11 @@ class Chess(gym.Env):
         from_pos = Cell(int(source_pos[action][0]), int(source_pos[action][1]))
         next_pos = Cell(int(possibles[action][0]), int(possibles[action][1]))
 
-        if self.aow_board.is_piece(self.turn, next_pos, King()) or self.aow_board.is_piece(1 - self.turn, Cell(7- next_pos.row, next_pos.col), King()):
-            print(f"King not removed at {7 - next_pos.row}, {next_pos.col} or {from_pos.row}, {from_pos.col}, turn: {self.turn}")
-
+        if (self.aow_board.is_piece(self.turn, next_pos, King()) or
+                self.aow_board.is_piece(1 - self.turn, Cell(7 - next_pos.row, next_pos.col), King())):
+            print(f"King not removed at {7 - next_pos.row}, {next_pos.col}"
+                  f" or {from_pos.row}, {from_pos.col},"
+                  f" turn: {self.turn}")
 
         if from_pos == next_pos and self.aow_board.get_piece(from_pos, self.turn).is_upgradable():
             source_pos_piece = self.aow_board.get_piece(Cell(from_pos[0], from_pos[1]), self.turn)
@@ -504,9 +431,13 @@ class Chess(gym.Env):
             )
             end_turn = True
 
-        if (from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0)
-                and from_pos == next_pos):
-            self.dutch_waterline(from_pos)
+        if ((from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0))
+                and next_pos == Cell(0, 7)):
+            # Get Dutch waterline card from array
+            card: DutchWaterline | None = self.aow_board.get_card(turn=self.turn, card=DutchWaterline())
+            assert card is not None, "Dutch Waterline card not found"
+            card.play(from_pos, self.aow_board, self.turn)
+
             rewards = self.add_reward(reward=Rewards.DUTCH_WATERLINE, turn=self.turn)
             end_turn = False
 

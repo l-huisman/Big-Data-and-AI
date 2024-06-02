@@ -1,8 +1,10 @@
 import numpy as np
 
-from chess.models.pieces import *
-from chess.models import Cell
 import chess.pieces as Pieces
+from chess.models import Cell
+from chess.models.cards import DutchWaterline, WingedKnightUpgradeCard, HopliteUpgradeCard, WarElephantUpgradeCard
+from chess.models.cards.card import Card
+from chess.models.pieces import *
 from chess.utils.cell import CellUtils
 
 
@@ -14,6 +16,7 @@ class AoWBoard:
         self.board: np.ndarray = self.init_board()
         self.pieces: list[dict] = self.init_pieces()
         self.resources: list[int] = self.init_resources()
+        self.cards: list[list[Card]] = self.init_cards()
         self.length: int = length
         self.width: int = width
 
@@ -124,7 +127,7 @@ class AoWBoard:
     def init_resources() -> list[int]:
         """
         Initialize the resources of the Art of War board
-        @return: list[int]: The resources of the players
+        @return: list[int]: The resources of the Art of War board
         """
         return [0, 0]
 
@@ -156,6 +159,16 @@ class AoWBoard:
                   "king_1": (0, 4), }
 
         return [pieces.copy(), pieces.copy()]
+
+    @staticmethod
+    def init_cards() -> list[list[Card]]:
+        """
+        Initialize the cards of the Art of War board
+        @return: list[list[Card]]: The cards of the Art of War board
+        """
+        cards = [DutchWaterline(), HopliteUpgradeCard(), HopliteUpgradeCard(), HopliteUpgradeCard(),
+                 WingedKnightUpgradeCard(), WarElephantUpgradeCard()]
+        return [cards.copy(), cards.copy()]
 
     def get_state(self, turn: int) -> np.ndarray:
         """
@@ -209,7 +222,7 @@ class AoWBoard:
         @param number: int: The number of the piece
         @return: Pieces: The piece of the Art of War board
         """
-        return { # TODO: Fix this
+        return {  # TODO: Fix this
             0: Empty(),
             1: Pawn(),
             2: Bishop(),
@@ -343,7 +356,8 @@ class AoWBoard:
         if not self.is_empty(next_pos, turn):
             return False
 
-        if (self.is_enemy_king(next_pos, turn) or self.is_piece(pos=next_pos, turn=turn, piece=King())) and (not deny_enemy_king):
+        if (self.is_enemy_king(next_pos, turn) or self.is_piece(pos=next_pos, turn=turn, piece=King())) and (
+        not deny_enemy_king):
             return False
 
         if not self.is_path_empty_for_piece(current_pos, next_pos, turn):
@@ -462,3 +476,20 @@ class AoWBoard:
 
         return [Cell(row, col) for row, col in zip(rows, cols)]
 
+    def get_card(self, turn: int, card: Card) -> Card | None:
+        """
+        Get the card from the Art of War board
+        @param card: Card: The card to get
+        @return: Card | None: The card from the Art of War board or no card
+        """
+        for c in self.cards[turn]:
+            if c.__class__ == card.__class__:
+                return c
+        return None
+
+    def get_cards(self, turn: int) -> list[Card]:
+        """
+        Get the cards from the Art of War board
+        @return: list[Card]: The cards from the Art of War board
+        """
+        return self.cards[turn]

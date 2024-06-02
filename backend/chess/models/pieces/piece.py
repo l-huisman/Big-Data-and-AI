@@ -20,7 +20,7 @@ class Piece:
         self.possibles_length: int = possibles_length
         self.jump: bool = can_jump
         self.piece_number = piece_number
-        self.is_on_board = True
+        self.on_board = True
         self.upgradable = upgradable
         self.upgrade_options = upgrade_options
         self.moved = False
@@ -44,14 +44,14 @@ class Piece:
         Get if the piece is on the board
         @return: bool: If the piece is on the board
         """
-        return self.is_on_board
+        return self.on_board
 
     def set_is_on_board(self, is_on_board: bool) -> None:
         """
         Set if the piece is on the board
         @param is_on_board: bool: If the piece is on the board
         """
-        self.is_on_board = is_on_board
+        self.on_board = is_on_board
 
     def set_has_moved(self, has_moved: bool = True) -> None:
         """
@@ -133,7 +133,7 @@ class Piece:
         """
         possibles, actions_mask = self.get_empty_actions()
 
-        if pos is None and self.position is None:
+        if pos is None and self.position is None or not self.is_on_board():
             return possibles, actions_mask
 
         if pos is None:

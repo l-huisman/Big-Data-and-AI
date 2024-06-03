@@ -31,9 +31,9 @@ class Move(BaseRoute):
         self.validate_board_size(board)
         self.validate_resources(self.move_request.resources)
 
-        self.env.resources = self.move_request.resources
+        self.env.aow_board.resources = self.move_request.resources
         self.env.aow_board.set_board(board)
-        self.env.turn = self.move_request.turn
+        self.env.aow_logic.turn = self.move_request.turn
         action_str = self.move_request.move
 
         self.validate_move_format(action_str)
@@ -48,13 +48,15 @@ class Move(BaseRoute):
                 resources=self.env.aow_board.resources, has_game_ended=done
             )
 
-        if self.env.turn != self.move_request.turn:
-            self.process_ai_move(turn=self.env.turn, episode=self.episode)
+        if self.env.aow_logic.turn != self.move_request.turn:
+            self.process_ai_move(turn=self.env.aow_logic.turn, episode=self.episode)
 
         self.logger.info("Move processed successfully.")
-        return MoveResponse(playerMoveBoard=player_move_board, combinedMoveBoard=self.env.aow_board.get_numeric_board().tolist(), cards=[],
+        return MoveResponse(playerMoveBoard=player_move_board,
+                            combinedMoveBoard=self.env.aow_board.get_numeric_board().tolist(),
+                            cards=[],
                             resources=self.env.aow_board.resources,
-                            has_game_ended=self.env.done)
+                            has_game_ended=self.env.aow_logic.done)
 
     def process_ai_move(self, turn, episode):
         try:
@@ -80,11 +82,11 @@ class Move(BaseRoute):
 
     def process_player_move(self, action_str) -> (np.ndarray, bool):
         try:
-            if self.env.turn == 1:
+            if self.env.aow_logic.turn == 1:
                 action_str = reverse_move(action_str)
 
             from_pos, to_pos = convert_move_to_positions(action_str)
-            src, dst, _ = self.env.get_all_actions(self.env.turn)
+            src, dst, _ = self.env.aow_logic.get_all_actions(self.env.aow_logic.turn)
             action = np.nonzero((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
             if len(action) == 0:
                 self.raise_http_exception(400, "Invalid move.")
@@ -103,4 +105,3 @@ class Move(BaseRoute):
             self.raise_http_exception(400, "Invalid resources. Please provide resources in the format of [n, n].")
         if not all(isinstance(i, int) for i in resources):
             self.raise_http_exception(400, "Invalid resources. Please provide resources in the format of [n, n].")
-

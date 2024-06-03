@@ -312,7 +312,7 @@ class Chess(gym.Env):
         return rewards, [set(), set()]
 
     @staticmethod
-    def add_reward(rewards: list[int] = None, reward: int = 0, turn: int = 1):
+    def add_reward(rewards: list[int] = None, reward: int = 0, turn: int = 1) -> list:
         rewards = [Rewards.MOVE, Rewards.MOVE] if rewards is None else rewards
         rewards[turn] += reward
         rewards[1 - turn] += -reward
@@ -425,13 +425,7 @@ class Chess(gym.Env):
             source_pos_piece = self.aow_board.get_piece(Cell(from_pos[0], from_pos[1]), self.turn)
             rewards, infos = self.upgrade_piece(from_pos, self.turn, source_pos_piece)
             end_turn = False
-        else:
-            rewards, infos = self.move_piece(
-                from_pos, next_pos, self.turn
-            )
-            end_turn = True
-
-        if ((from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0))
+        elif ((from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0))
                 and next_pos == Cell(0, 7)):
             # Get Dutch waterline card from array
             card: DutchWaterline | None = self.aow_board.get_card(turn=self.turn, card=DutchWaterline())
@@ -439,7 +433,13 @@ class Chess(gym.Env):
             card.play(from_pos, self.aow_board, self.turn)
 
             rewards = self.add_reward(reward=Rewards.DUTCH_WATERLINE, turn=self.turn)
+            infos = [set(), set()]
             end_turn = False
+        else:
+            rewards, infos = self.move_piece(
+                from_pos, next_pos, self.turn
+            )
+            end_turn = True
 
         rewards, infos = self.update_checks(rewards, infos)
         rewards, infos = self.update_check_mates(rewards, infos)

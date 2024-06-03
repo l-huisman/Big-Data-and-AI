@@ -3,6 +3,8 @@ from typing import Union, Optional, List
 from gym.core import RenderFrame
 
 import chess.constants.rewards as Rewards
+from chess.models.cards import DutchWaterline
+from chess.models.pieces import King
 from chess.models.types import Cell
 from chess.models.board import AoWBoard
 from chess.game.aow_logic import AoWLogic
@@ -34,21 +36,31 @@ class ArtOfWar:
         from_pos = Cell(int(source_pos[action][0]), int(source_pos[action][1]))
         next_pos = Cell(int(possibles[action][0]), int(possibles[action][1]))
 
+        if (self.aow_board.is_piece(self.turn, next_pos, King()) or
+                self.aow_board.is_piece(1 - self.turn, Cell(7 - next_pos.row, next_pos.col), King())):
+            print(f"King not removed at {7 - next_pos.row}, {next_pos.col}"
+                  f" or {from_pos.row}, {from_pos.col},"
+                  f" turn: {self.turn}")
+
         if from_pos == next_pos and self.aow_board.get_piece(from_pos, self.turn).is_upgradable():
             source_pos_piece = self.aow_board.get_piece(Cell(from_pos[0], from_pos[1]), self.turn)
             rewards, infos = self.aow_logic.upgrade_piece(from_pos, self.turn, source_pos_piece)
+            end_turn = False
+        elif ((from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0))
+              and next_pos == Cell(0, 7)):
+            # Get Dutch waterline card from array
+            card: DutchWaterline | None = self.aow_board.get_card(turn=self.turn, card=DutchWaterline())
+            assert card is not None, "Dutch Waterline card not found"
+            card.play(from_pos, self.aow_board, self.turn)
+
+            rewards = self.aow_logic.add_reward(reward=Rewards.DUTCH_WATERLINE, turn=self.turn)
+            infos = [set(), set()]
             end_turn = False
         else:
             rewards, infos = self.aow_logic.move_piece(
                 from_pos, next_pos, self.turn
             )
             end_turn = True
-
-        if (from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0)
-                and from_pos == next_pos):
-            self.aow_logic.dutch_waterline(from_pos)
-            rewards = self.aow_logic.add_reward(reward=Rewards.DUTCH_WATERLINE, turn=self.turn)
-            end_turn = False
 
         rewards, infos = self.aow_logic.update_checks(rewards, infos)
         rewards, infos = self.aow_logic.update_check_mates(rewards, infos)

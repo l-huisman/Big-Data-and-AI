@@ -35,3 +35,6 @@ class Card:
         @return: tuple: The actions of the card
         """
         raise NotImplementedError("This method must be implemented by the subclass")
+
+    def __str__(self):
+        return self.__class__.__name__

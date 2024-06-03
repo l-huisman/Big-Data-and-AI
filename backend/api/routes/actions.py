@@ -16,7 +16,7 @@ class PlayableActions(BaseRoute):
         self.logger.info(f"Received action request: {self.action_request}")
 
         try:
-            src, dst, mask = self.env.get_all_actions(self.action_request.turn)
+            src, dst, mask = self.env.aow_logic.get_all_actions(self.action_request.turn)
             from_pos = self.convert_cell_to_position()
 
             all_playable_actions_for_piece = self.get_all_playable_actions_for_piece(src, from_pos, mask)

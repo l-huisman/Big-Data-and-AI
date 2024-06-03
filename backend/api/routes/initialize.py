@@ -11,7 +11,12 @@ class Initialize(BaseRoute):
         self.logger.info("Received initialize request.")
         try:
             self.env.reset()
-            return InitializeResponse(board=self.env.aow_board.get_numeric_board().tolist(), cards=[],
+
+            cards = self.env.aow_board.get_cards(0)
+            card_names = []
+            for card in cards:
+                card_names.append(card.__str__())
+            return InitializeResponse(board=self.env.aow_board.get_numeric_board().tolist(), cards=card_names,
                                       resources=self.env.aow_board.resources, pieces=self.env.aow_board.pieces)
         except FileNotFoundError as e:
             self.logger.error(f"Could not find model on specified location, make sure the location is correct. {e}")

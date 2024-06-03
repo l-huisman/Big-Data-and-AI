@@ -4,7 +4,7 @@ from api.models.requests import ActionRequest
 from api.models.responses import ActionResponse
 from api.routes.base import BaseRoute
 from chess.game.aow import ArtOfWar
-from utils import convert_cell_to_position
+from utils import convert_cell_to_position, reverse_move
 
 
 class PlayableActions(BaseRoute):
@@ -14,6 +14,9 @@ class PlayableActions(BaseRoute):
 
     def execute(self) -> ActionResponse:
         self.logger.info(f"Received action request: {self.action_request}")
+
+        if self.action_request.turn == 1:
+            self.action_request.pieceLocation = reverse_move(f"{self.action_request.pieceLocation}a1")[:2]
 
         try:
             src, dst, mask = self.env.aow_logic.get_all_actions(self.action_request.turn)

@@ -1,6 +1,7 @@
 import sys
 
 from agents import DoubleAgentsChess
+from chess.game.aow import ArtOfWar
 from learnings.dqn import DQNLearner
 from learnings.ppo import PPO
 from learnings.a2c import A2C
@@ -45,7 +46,7 @@ args = dict({
 })
 
 if __name__ == "__main__":
-    chess = Chess(
+    chess = ArtOfWar(
         window_size=args["chess"]["window_size"],
         max_steps=args["chess"]["max_steps"],
         render_mode=args["chess"]["render_mode"]

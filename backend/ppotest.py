@@ -50,13 +50,13 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    done, _ = chess_game.take_action(chess_game.env.turn, episode)
+    done, _ = chess_game.take_action(chess_game.env.aow_logic.turn, episode)
     # print("turn: ", chess_game.env.turn)
     env.render()
     sleep(.1)  # Pause for a short time to make the game viewable
     counter += 1
     if done:
         print("Game Over")
-        print("Winner: White" if chess_game.env.turn else "Winner: Black")
+        print("Winner: White" if chess_game.env.aow_logic.turn else "Winner: Black")
         print("Game Length: ", counter)
         break

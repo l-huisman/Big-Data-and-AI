@@ -85,7 +85,7 @@ class BaseAgent(ABC):
         render_fn()
 
         while True:
-            if self.env.turn == 1:
+            if self.env.aow_logic.turn == 1:
                 done, white_data = self.take_action(Pieces.WHITE, episode_white)
                 self.update_enemy(black_data, episode_black, white_data[1][Pieces.BLACK])
                 render_fn()
@@ -102,7 +102,7 @@ class BaseAgent(ABC):
         self.rewards[Pieces.BLACK, self.current_ep] = episode_black.total_reward()
         self.rewards[Pieces.WHITE, self.current_ep] = episode_white.total_reward()
 
-        if (render or self.env.done) and self.env.pygame_utils.render_mode != "human":
+        if (render or self.env.aow_logic.done) and self.env.pygame_utils.render_mode != "human":
             path = os.path.join(self.result_folder, "renders", f"episode_{self.current_ep}.mp4")
             save_to_video(path, np.array(renders))
 

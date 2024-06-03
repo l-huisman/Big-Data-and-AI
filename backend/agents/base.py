@@ -1,5 +1,6 @@
 import os
 from abc import ABC, abstractmethod
+from chess.game.aow import ArtOfWar
 
 import numpy as np
 from tqdm import tqdm
@@ -7,7 +8,6 @@ from tqdm import tqdm
 import chess.constants.info_keys as InfoKeys
 import chess.pieces as Pieces
 from buffer.episode import Episode
-from chess import Chess
 from learnings.base import Learning
 from utils import save_to_video
 
@@ -15,7 +15,7 @@ from utils import save_to_video
 class BaseAgent(ABC):
     def __init__(
             self,
-            env: Chess,
+            env: ArtOfWar,
             learner: Learning,
             episodes: int,
             train_on: int,
@@ -51,7 +51,7 @@ class BaseAgent(ABC):
                 self.checks_lose[turn, self.current_ep] += 1
 
     def take_action(self, turn: int, episode: Episode):
-        mask = self.env.get_all_actions(turn)[-1]
+        mask = self.env.aow_logic.get_all_actions(turn)[-1]
         state = self.env.aow_board.get_state(turn)
 
         action, prob, value = self.learner.take_action(state, mask)

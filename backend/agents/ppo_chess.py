@@ -21,7 +21,7 @@ class PPOChess(SingleAgentChess):
         self.black_learner.eval()
 
     def take_action(self, turn: int, episode: Episode):
-        mask = self.env.get_all_actions(turn)[-1]
+        mask = self.env.aow_logic.get_all_actions(turn)[-1]
         state = self.env.aow_board.get_state(turn)
 
         # Use the appropriate learner based on the current turn

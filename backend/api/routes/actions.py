@@ -3,12 +3,12 @@ import numpy as np
 from api.models.requests import ActionRequest
 from api.models.responses import ActionResponse
 from api.routes.base import BaseRoute
-from chess import Chess
+from chess.game.aow import ArtOfWar
 from utils import convert_cell_to_position
 
 
 class PlayableActions(BaseRoute):
-    def __init__(self, env: Chess, action_request: ActionRequest):
+    def __init__(self, env: ArtOfWar, action_request: ActionRequest):
         super().__init__(env)
         self.action_request = action_request
 

@@ -1,18 +1,17 @@
-from chess import Chess
-
-from .base import BaseAgent
 from buffer.episode import Episode
+from chess.game.aow import ArtOfWar
 from learnings.base import Learning
+from .base import BaseAgent
 
 
 class SingleAgentChess(BaseAgent):
     def __init__(
-        self,
-        env: Chess,
-        learner: Learning,
-        episodes: int,
-        train_on: int,
-        result_folder: str,
+            self,
+            env: ArtOfWar,
+            learner: Learning,
+            episodes: int,
+            train_on: int,
+            result_folder: str,
     ) -> None:
         super().__init__(env, learner, episodes, train_on, result_folder)
 

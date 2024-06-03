@@ -1,25 +1,25 @@
 from typing import Union, Optional, List
 
+import gym
 from gym.core import RenderFrame
 
 import chess.constants.rewards as Rewards
+from chess.game.aow_logic import AoWLogic
+from chess.models.board import AoWBoard
 from chess.models.cards import DutchWaterline
 from chess.models.pieces import King
 from chess.models.types import Cell
-from chess.models.board import AoWBoard
-from chess.game.aow_logic import AoWLogic
 from chess.utils.pygame import PyGameUtils
 
 
-class ArtOfWar:
-    def __init__(self, config: dict = None, window_size: int = 800, render_mode: str = 'human'):
-        self.config = config
+class ArtOfWar(gym.Env):
+    def __init__(self, max_steps: int = 128, window_size: int = 800, render_mode: str = 'human'):
         self.aow_board = AoWBoard()
         self.turn = 0  # 0 or 1, 0 means white, 1 means black
         self.steps = 0
         self.action_space_length = 0
         self.pygame_utils = PyGameUtils(window_size=window_size, render_mode=render_mode)
-        self.aow_logic = AoWLogic()
+        self.aow_logic = AoWLogic(max_steps=max_steps, board=self.aow_board)
 
     def step(self, action: int) -> tuple[list[int], bool, list[set]]:
         """
@@ -28,7 +28,7 @@ class ArtOfWar:
         :return: tuple[list[int], bool, list[set]]: The rewards, if the game is done, and the info
         """
         assert not self.aow_logic.is_game_done(), "the game is finished reset"
-        assert action < self.action_space_length, f"action number must be less than {self.action_space_length}."
+        assert action < self.aow_logic.action_space_length, f"action number must be less than {self.aow_logic.action_space_length}."
 
         source_pos, possibles, actions_mask = self.aow_logic.get_all_actions(self.turn)
         assert actions_mask[action], f"Cannot Take This Action = {action}, {source_pos[action]} -> {possibles[action]}"

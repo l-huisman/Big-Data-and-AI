@@ -1,17 +1,15 @@
+import sys
+from time import sleep
+
 import pygame
+
 from agents import PPOChess
 from buffer.episode import Episode
-from chess import Chess
-from time import sleep
-import numpy as np
-import random
-import sys
-
-from learnings.dqn import DQNLearner
+from chess.game.aow import ArtOfWar
 from learnings.ppo import PPO
 
 sys.setrecursionlimit(300)
-env = Chess(window_size=800, max_steps=256)
+env = ArtOfWar(window_size=800, max_steps=256)
 env.render()
 
 # Paths to your trained api

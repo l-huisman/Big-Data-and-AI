@@ -1,7 +1,6 @@
 import sys
 
 from agents import DoubleAgentsChess
-from chess import Chess
 from learnings.dqn import DQNLearner
 from learnings.ppo import PPO
 from learnings.a2c import A2C

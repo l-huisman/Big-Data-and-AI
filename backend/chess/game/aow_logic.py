@@ -1,8 +1,32 @@
-from chess.models.pieces import Piece
+import numpy as np
+from gym import spaces
+
+import chess.constants.info_keys as InfoKeys
+import chess.constants.rewards as Rewards
+import chess.models.pieces as pieces_module
+import chess.pieces as Pieces
+from chess.models.board import AoWBoard
+from chess.models.cards import DutchWaterline, WarElephantUpgradeCard, WingedKnightUpgradeCard, \
+    HopliteUpgradeCard
+from chess.models.pieces import *
+from chess.models.types import Cell
+from chess.utils.cell import CellUtils
 
 
 class AoWLogic:
-    def get_source_pos(self, name: str, turn: int):
+    def __init__(self, max_steps: int, board: AoWBoard):
+        self.action_space_length = 1200  # 3584
+        self.action_space = spaces.Discrete(self.action_space_length)  # standard chess board has 1000 possible moves.
+        self.observation_space = spaces.Box(0, 7, (128,), dtype=np.int32)
+
+        self.turn: int = Pieces.WHITE
+        self.done: bool = False
+        self.steps: int = 0
+        self.checked: list[bool] = [False, False]
+        self.max_steps: int = max_steps
+        self.aow_board = board
+
+    def get_source_pos(self, name: str, turn: int) -> np.ndarray:
         cat = name.split("_")[0]
         pos = self.aow_board.pieces[turn][name]
         if pos is None:
@@ -49,9 +73,13 @@ class AoWLogic:
             all_actions_mask.append(actions_mask)
             length += len(actions_mask)
 
-        possibles, source_pos, actions_mask = self.aow_board.get_card(turn, DutchWaterline()).get_actions(Cell(0, 0),
-                                                                                                          self.aow_board,
-                                                                                                          turn)
+        possibles, source_pos, actions_mask = (self.aow_board.get_card(
+            turn,
+            DutchWaterline()).get_actions(
+            Cell(0, 0), self.aow_board, turn
+            )
+        )
+
         all_possibles.append(possibles)
         all_actions_mask.append(actions_mask)
         all_source_pos.append(source_pos)
@@ -224,15 +252,15 @@ class AoWLogic:
     def move_piece(self, src: Cell, dst: Cell, turn: int):
         src = CellUtils.make_cell(src)
         dst = CellUtils.make_cell(dst)
-        piece = self.aow_board.get_piece(src, turn)
-        piece.set_has_moved()
+        selected_piece = self.aow_board.get_piece(src, turn)
+        selected_piece.set_has_moved()
 
         if self.aow_board.is_piece(1 - turn, Cell(7 - dst.row, dst.col), King()):
             return [0, 0], [set(), set()]
 
         # move piece
         self.aow_board.set_piece(turn, src, Empty())
-        self.aow_board.set_piece(turn, dst, piece)
+        self.aow_board.set_piece(turn, dst, selected_piece)
 
         # remove enemy piece in position
         self.aow_board.set_piece(1 - turn, Cell(7 - dst.row, dst.col), Empty())
@@ -255,11 +283,11 @@ class AoWLogic:
                 self.aow_board.pieces[1 - turn][key] = None
 
                 # add a reward for capturing a piece
-                piece = key.split("_")[0]
-                piece = piece.upper()
+                selected_piece = key.split("_")[0]
+                selected_piece = selected_piece.upper()
 
                 # get the reward from the rewards.py based on the name of the piece
-                reward = getattr(Rewards, piece)
+                reward = getattr(Rewards, selected_piece)
                 rewards = self.add_reward(rewards, reward, turn)
 
         return rewards, [set(), set()]
@@ -349,8 +377,8 @@ class AoWLogic:
         self.remove_resources(turn, new_piece)
         return rewards, [set(), set()]
 
-    def remove_resources(self, turn: int, piece: Piece):
-        match piece.get_piece_number():
+    def remove_resources(self, turn: int, selected_piece: Piece):
+        match selected_piece.get_piece_number():
             case Pieces.HOPLITE:
                 self.aow_board.remove_resources(turn, 2)
             case Pieces.WINGED_KNIGHT:

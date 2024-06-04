@@ -14,7 +14,7 @@ class AiGame(BaseRoute):
 
     def execute(self):
         try:
-            self.logger.info(f"Received aigame request: {self.ai_game_request}")
+            self.logger.info(f"Received ai game request: {self.ai_game_request}")
             self.reset_environment()
             agent = self.get_agent(black_model_name=self.ai_game_request.black_model,
                                    white_model_name=self.ai_game_request.white_model)
@@ -54,14 +54,14 @@ class AiGame(BaseRoute):
     def play_game(self, agent, episode) -> AIGameResponse:
         response = AIGameResponse(game=[], statistics=[])
 
-        response.game.append(agent.env.board.tolist())
+        response.game.append(agent.env.aow_board.get_numeric_board().tolist())
         response.statistics.append({"rewards": [0, 0], "infos": [[], []], "end": False})
 
         done = False
         while not done:
-            done, _ = agent.take_action(agent.env.turn, episode)
+            done, _ = agent.take_action(agent.env.aow_logic.turn, episode)
             response.statistics.append({"rewards": _[1], "infos": _[7], "end": done})
-            response.game.append(agent.env.board.tolist())
+            response.game.append(agent.env.aow_board.get_numeric_board().tolist())
 
         self.logger.info("AI game completed.")
         return response

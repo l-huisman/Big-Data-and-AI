@@ -180,10 +180,8 @@ class AoWLogic:
                 return True
             
             if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
-                print("is check pawn")
                 return True
             
-            print("is not check cross down right")
             break
             
 
@@ -207,7 +205,6 @@ class AoWLogic:
             if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
                 return True
             
-            print("is not check cross down left")
             break
 
         # CROSS UP
@@ -216,9 +213,6 @@ class AoWLogic:
             for c in [ck + d, ck - d]:
                 if not self.aow_board.is_in_range(Cell(r, c)):
                     continue
-
-                # if not self.aow_board.is_empty(Cell(r, c), turn):
-                #     break
                 
                 if self.aow_board.is_tile_empty_on_both_side(Cell(r, c), turn):
                     continue
@@ -232,7 +226,6 @@ class AoWLogic:
                    
                     return True
                 
-                print("is not check cross up")
                 break
 
         # KNIGHTS

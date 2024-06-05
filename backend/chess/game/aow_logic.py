@@ -173,7 +173,6 @@ class AoWLogic:
                 continue
 
             p = self.aow_board.get_piece(Cell(7 - r, ck + d))
-            print(f"r: {r}, c: {ck + d}, p: {p}")
 
             if isinstance(p, diagonal_pieces):
                 print("is check cross down right")
@@ -196,7 +195,6 @@ class AoWLogic:
                 continue
 
             p = self.aow_board.get_piece(Cell(7 - r, ck - d))
-            print(f"r: {r}, c: {ck - d}, p: {p}")
 
             if isinstance(p, diagonal_pieces):
                 print("is check cross down left")

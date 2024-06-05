@@ -121,6 +121,7 @@ class AoWLogic:
         for r in range(rk + 1, 8):
             if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck), turn):
                 continue
+            # print(self.aow_board.get_numeric_board())
             p = self.aow_board.get_piece(Cell(7 - r, ck))
             if isinstance(p, straight_pieces):
                 print("is check row up")
@@ -165,19 +166,11 @@ class AoWLogic:
         for r in range(rk + 1, 8):
             # RIGHT
             d = r - rk
-            if r == 1 and ck + d == 5:
-                print("-" * 20)
-                print(self.aow_board.get_piece(Cell(r, ck + d)))
-                
             if not self.aow_board.is_in_range(Cell(r, ck + d)):
                 break
 
             if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck + d), turn):
                 continue
-            
-            # if self.aow_board.is_piece(turn, Cell(rk, c), Pawn()):
-            #     print("is pawn right")
-            #     continue
 
             p = self.aow_board.get_piece(Cell(7 - r, ck + d))
             print(f"r: {r}, c: {ck + d}, p: {p}")
@@ -193,10 +186,9 @@ class AoWLogic:
             print("is not check cross down right")
             break
             
-            
 
         # CROSS DOWN left
-        for r in range(rk - 1, -1, -1):
+        for r in range(rk + 1, 8):
             # RIGHT
             d = r - rk
             if not self.aow_board.is_in_range(Cell(r, ck - d)):
@@ -204,10 +196,6 @@ class AoWLogic:
 
             if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck - d), turn):
                 continue
-            
-            # if self.aow_board.is_piece(turn, Cell(rk, c), Pawn()):
-            #     print("is pawn left")
-            #     continue
 
             p = self.aow_board.get_piece(Cell(7 - r, ck - d))
             print(f"r: {r}, c: {ck - d}, p: {p}")
@@ -217,7 +205,6 @@ class AoWLogic:
                 return True
 
             if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
-                # print("is check pawn")
                 return True
             
             print("is not check cross down left")

@@ -1,6 +1,5 @@
-import numpy as np
-
 import chess.pieces as Pieces
+import numpy as np
 from chess.models import Cell
 from chess.models.cards import DutchWaterline, WingedKnightUpgradeCard, HopliteUpgradeCard, WarElephantUpgradeCard
 from chess.models.cards.card import Card
@@ -292,6 +291,15 @@ class AoWBoard:
         pos = CellUtils.make_cell(pos)
         return not self.is_empty(Cell(7 - pos.row, pos.col), 1 - turn)
 
+    def get_enemy_piece(self, position: Cell, turn: int) -> Piece:
+        """
+        Get the enemy piece from the Art of War board
+        @param position: Cell: The position to get the enemy piece
+        @param turn: int: The player (Can be 0 or 1)
+        @return: Pieces: The enemy piece
+        """
+        return self.get_piece(Cell(7 - position.row, position.col), 1 - turn)
+
     def is_empty(self, pos: Cell, turn: int) -> bool:
         """
         Check if the cell is empty
@@ -357,7 +365,7 @@ class AoWBoard:
             return False
 
         if (self.is_enemy_king(next_pos, turn) or self.is_piece(pos=next_pos, turn=turn, piece=King())) and (
-        not deny_enemy_king):
+                not deny_enemy_king):
             return False
 
         if not self.is_path_empty_for_piece(current_pos, next_pos, turn):
@@ -398,7 +406,8 @@ class AoWBoard:
         temp = ArtOfWar(1, render_mode="rgb_array")
         temp.aow_board.board = self.copy_board()
         temp.aow_logic.move_piece(current_pos, next_pos, turn)
-        return temp.aow_logic.is_check(temp.aow_board.get_king_position(turn), turn)
+        # return temp.aow_logic.is_check(temp.aow_board.get_king_position(turn), turn)
+        return temp.aow_logic.test_is_check(temp.aow_board.get_king_position(turn))
 
     def is_path_empty_for_piece(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
         """

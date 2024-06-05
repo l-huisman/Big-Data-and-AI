@@ -1,16 +1,15 @@
-import numpy as np
-from gym import spaces
-
 import chess.constants.info_keys as InfoKeys
 import chess.constants.rewards as Rewards
 import chess.models.pieces as pieces_module
 import chess.pieces as Pieces
+import numpy as np
 from chess.models.board import AoWBoard
 from chess.models.cards import DutchWaterline, WarElephantUpgradeCard, WingedKnightUpgradeCard, \
     HopliteUpgradeCard
 from chess.models.pieces import *
 from chess.models.types import Cell
 from chess.utils.cell import CellUtils
+from gym import spaces
 
 
 class AoWLogic:
@@ -77,7 +76,7 @@ class AoWLogic:
             turn,
             DutchWaterline()).get_actions(
             Cell(0, 0), self.aow_board, turn
-            )
+        )
         )
 
         all_possibles.append(possibles)
@@ -110,6 +109,68 @@ class AoWLogic:
         diff_row = abs(row - row_enemy_king)
         diff_col = abs(col - col_enemy_king)
         return diff_row <= 1 and diff_col <= 1
+
+    def test_is_check(self, king_position: Cell) -> bool:
+        # Check if the king is in check for the horizontal and vertical directions
+        for direction in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            if self.test_is_check_horizontal(king_position, direction):
+                return True
+
+        # Check if the king is in check for the diagonal directions
+        for direction in [(1, 1), (-1, -1), (1, -1), (-1, 1)]:
+            if self.test_is_check_diagonal(king_position, direction):
+                return True
+
+        # The king is not in check
+        return False
+
+    def test_is_check_horizontal(self, king_position: Cell, direction: tuple[int, int]) -> bool:
+        # Start checking positions horizontally from the king position
+        row, column = king_position.row, king_position.col
+        for _ in range(1, 8):
+            # Get the next position to check
+            row += direction[0]
+            column += direction[1]
+
+            # Check if the position is on the board
+            if not self.aow_board.is_in_range(Cell(row, column)):
+                break
+
+            # Check if there is a piece in the position otherwise check the next position
+            if self.aow_board.is_empty(Cell(row, column), self.turn):
+                continue
+
+            # Get the piece in the position
+            piece = self.aow_board.get_enemy_piece(Cell(row, column), self.turn)
+
+            # Check if the piece is a rook or a queen
+            if isinstance(piece, Rook) or isinstance(piece, Queen):
+                return True
+        return False
+
+    def test_is_check_diagonal(self, king_position: Cell, direction: tuple[int, int]) -> bool:
+        # Start checking positions diagonally from the king position
+        row, column = king_position.row, king_position.col
+        for i in range(1, 8):
+            # Get the next position to check
+            row += direction[0]
+            column += direction[1]
+
+            # Check if the position is on the board
+            if not self.aow_board.is_in_range(Cell(row, column)):
+                break
+
+            # Check if there is a piece in the position otherwise check the next position
+            if self.aow_board.is_empty(Cell(row, column), self.turn):
+                continue
+
+            # Get the piece in the position
+            piece = self.aow_board.get_piece(Cell(row, column), self.turn)
+
+            # Check if the piece is a bishop or a queen
+            if isinstance(piece, Bishop) or isinstance(piece, Queen):
+                return True
+        return False
 
     def is_check(self, king_pos: Cell, turn: int) -> bool:
         rk, ck = king_pos

@@ -38,7 +38,6 @@ import Chessboard from '../components/Chessboard.vue';
 import * as echarts from 'echarts';
 import { baseUrl } from '../base-url.js';
 import { Title } from 'chart.js';
-import { color } from 'chart.js/helpers';
 
 export default {
   components: {
@@ -48,7 +47,7 @@ export default {
     return {
       rewardsList: [[0,0], [0,0], [0,0], [0,0], [0,0]],
       totalRewardsList: [[0,0], [0,0], [0,0], [0,0], [0,0]],
-      totalRewards: [0, 0],
+      totalRewards: 0,
       loading: false,
       fmodel: 'PPO',
       smodel: 'PPO',
@@ -111,7 +110,6 @@ export default {
       document.getElementById("start-button").removeAttribute('disabled');
     },
     makeMove(board) {
-      console.log(board);
       this.board = board;
       this.boardKey++;
     },
@@ -134,16 +132,14 @@ export default {
         },
         series: [
           {
-            name: 'Reward Black',
-            data: [0],
-            type: 'line',
-            color : 'black'
-          },
-          {
             name: 'Reward White',
             data: [0],
-            type: 'line',
-            color : 'white'
+            type: 'line'
+          },
+          {
+            name: 'Reward Black',
+            data: [0],
+            type: 'line'
           }
         ]
       };
@@ -167,16 +163,14 @@ export default {
         },
         series: [
           {
-            name: 'Reward Black',
-            data: [0],
-            type: 'line',
-            color : 'black'
-          },
-          {
             name: 'Reward White',
             data: [0],
-            type: 'line',
-            color : 'white'
+            type: 'line'
+          },
+          {
+            name: 'Reward Black',
+            data: [0],
+            type: 'line'
           }
         ]
       };
@@ -188,12 +182,12 @@ export default {
       this.rewardChart.setOption({
         series: [
           {
-            name: 'Reward Black',
+            name: 'Reward White',
             data: [rewardsList[0][0], rewardsList[1][0], rewardsList[2][0], rewardsList[3][0], rewardsList[4][0]],
             type: 'line'
           },
           {
-            name: 'Reward White',
+            name: 'Reward Black',
             data: [rewardsList[0][1], rewardsList[1][1], rewardsList[2][1], rewardsList[3][1], rewardsList[4][1]],
             type: 'line'
           }
@@ -205,12 +199,12 @@ export default {
       this.summaryRewardChart.setOption({
         series: [
           {
-            name: 'Reward Black',
+            name: 'Reward White',
             data: [totalRewards[0][0], totalRewards[1][0], totalRewards[2][0], totalRewards[3][0], totalRewards[4][0]],
             type: 'line'
           },
           {
-            name: 'Reward White',
+            name: 'Reward Black',
             data: [totalRewards[0][1], totalRewards[1][1], totalRewards[2][1], totalRewards[3][1], totalRewards[4][1]],
             type: 'line'
           }
@@ -225,10 +219,9 @@ export default {
       return this.rewardsList;
     },
     updateTotalRewards(stats) {
-      this.totalRewards[0] = stats["rewards"][0] + this.totalRewards[0];
-      this.totalRewards[1] = stats["rewards"][1] + this.totalRewards[1];
-      let reward = [this.totalRewards[0], this.totalRewards[1]];
-      this.totalRewardsList.push(reward);
+      // this.totalRewards += stats["rewards"][0] + stats["rewards"][1];
+      // this.totalRewardsList.push(this.totalRewards);
+      this.rewardsList.push(stats["rewards"]);
       if (this.totalRewardsList.length > 5) {
         this.totalRewardsList.shift();
       }

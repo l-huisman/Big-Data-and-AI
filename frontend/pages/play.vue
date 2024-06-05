@@ -85,7 +85,7 @@ export default {
                 turn: 1,
                 resources: [],
                 board: [[
-                [4, 3, 2, 6, 5, 2, 3, 4],
+                [4, 3, 0, 6, 5, 2, 3, 4],
                 [1, 1, 1, 1, 1, 1, 1, 1],
                 [0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0],
@@ -132,6 +132,16 @@ export default {
                     console.error('Error initializing game:', error);
                 });
         },
+        getPossibleActions(){
+            axios.get(`${baseUrl}/actions`)
+                .then(response => {
+                    console.log("test");
+
+                })
+                .catch(error => {
+                    console.error('Error getting possible moves:', error);
+                });
+        },
         getMove(){
             axios.get(`${baseUrl}/move`)
                 .then(response => {
@@ -170,7 +180,7 @@ export default {
         },
         handlePositionClicked(position) {
             if (!this.gameEnded) {
-                console.log("Position clicked:", position);
+                this.getPossibleActions();
 
             }
         },

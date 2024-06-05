@@ -126,7 +126,6 @@ class AoWLogic:
                 print("is check row up")
                 return True
             else:
-                print("is not check row up")
                 break
 
         # GO TO DOWN ROW
@@ -138,52 +137,91 @@ class AoWLogic:
                 print("is check row down")
                 return True
             else:
-                print("is not check row down")
                 break
 
         # GO TO RIGHT COL
         for c in range(ck + 1, 8):
             if self.aow_board.is_tile_empty_on_both_side(Cell(rk, c), turn):
                 continue
-            p = self.aow_board.get_piece(Cell(7 - rk, c), 1 - turn)
+            p = self.aow_board.get_piece(Cell(7 - rk, c))
             if isinstance(p, straight_pieces):
                 print("is check col right")
                 return True
             else:
-                print("is not check col right")
                 break
 
         # GOT TO LEFT COL
         for c in range(ck - 1, -1, -1):
             if self.aow_board.is_tile_empty_on_both_side(Cell(rk, c), turn):
                 continue
-            p = self.aow_board.get_piece(Cell(7 - rk, c), 1 - turn)
+            p = self.aow_board.get_piece(Cell(7 - rk, c))
             if isinstance(p, straight_pieces):
                 print("is check col left")
                 return True
             else:
-                print("is not check col left")
                 break
 
-        # CROSS DOWN
+        # CROSS DOWN right
         for r in range(rk + 1, 8):
             # RIGHT
             d = r - rk
-            for c in [ck + d, ck - d]:
-                if not self.aow_board.is_in_range(Cell(r, c)):
-                    continue
+            if r == 1 and ck + d == 5:
+                print("-" * 20)
+                print(self.aow_board.get_piece(Cell(r, ck + d)))
+                
+            if not self.aow_board.is_in_range(Cell(r, ck + d)):
+                break
 
-                if not self.aow_board.is_empty(Cell(r, c), turn):
-                    break
+            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck + d), turn):
+                continue
+            
+            # if self.aow_board.is_piece(turn, Cell(rk, c), Pawn()):
+            #     print("is pawn right")
+            #     continue
 
-                p = self.aow_board.get_piece(Cell(7 - r, c), 1 - turn)
+            p = self.aow_board.get_piece(Cell(7 - r, ck + d))
+            print(f"r: {r}, c: {ck + d}, p: {p}")
 
-                if isinstance(p, diagonal_pieces):
-                    return True
+            if isinstance(p, diagonal_pieces):
+                print("is check cross down right")
+                return True
+            
+            if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
+                print("is check pawn")
+                return True
+            
+            print("is not check cross down right")
+            break
+            
+            
 
-                if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
-                    print("is check cross down")
-                    return True
+        # CROSS DOWN left
+        for r in range(rk - 1, -1, -1):
+            # RIGHT
+            d = r - rk
+            if not self.aow_board.is_in_range(Cell(r, ck - d)):
+                break
+
+            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck - d), turn):
+                continue
+            
+            # if self.aow_board.is_piece(turn, Cell(rk, c), Pawn()):
+            #     print("is pawn left")
+            #     continue
+
+            p = self.aow_board.get_piece(Cell(7 - r, ck - d))
+            print(f"r: {r}, c: {ck - d}, p: {p}")
+
+            if isinstance(p, diagonal_pieces):
+                print("is check cross down left")
+                return True
+
+            if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
+                # print("is check pawn")
+                return True
+            
+            print("is not check cross down left")
+            break
 
         # CROSS UP
         for r in range(rk - 1, -1, -1):
@@ -192,16 +230,23 @@ class AoWLogic:
                 if not self.aow_board.is_in_range(Cell(r, c)):
                     continue
 
-                if not self.aow_board.is_empty(Cell(r, c), turn):
-                    break
+                # if not self.aow_board.is_empty(Cell(r, c), turn):
+                #     break
+                
+                if self.aow_board.is_tile_empty_on_both_side(Cell(r, c), turn):
+                    continue
 
-                p = self.aow_board.get_piece(Cell(7 - r, c), 1 - turn)
+                p = self.aow_board.get_piece(Cell(7 - r, c))
                 if p in diagonal_pieces:
+                    print("is check cross up")
                     return True
 
                 if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
-                    print("is check cross up")
+                   
                     return True
+                
+                print("is not check cross up")
+                break
 
         # KNIGHTS
         for r, c in Knight().get_moves():

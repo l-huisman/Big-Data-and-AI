@@ -14,7 +14,7 @@
           <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">&nbsp;</div>
 
           <!-- show the chessboard + pieces -->
-          <span @click="clickedPiece(RowIndex, colIndex)">
+          <span>
             <img v-if="square !== 0 && dict[RowIndex].hasOwnProperty('black')"
               :src="getPieceImagePath(square, 'black')">
             <img v-else-if="square !== 0 && dict[RowIndex].hasOwnProperty('white')"
@@ -82,16 +82,54 @@ export default {
     this.createDict();
   },
   methods: {
-    changeClickToMove(index) {
+    async changeClickToMove(index) {
+      if (this.isAIGame) {
+        return;
+      }
       const row = Math.floor(index / 8) + 1;
       const column = String.fromCharCode(97 + (index % 8));
       const position = column + row;
       this.position = this.position + position;
+      
+      console.log("position: ", position)
+      console.log("this.position: ", this.position);
+
+      let possibleMoves = await this.calculatePossibleMoves(this.position);
 
       if (this.position.length == 4) {
-        this.$emit('position-clicked', this.position);
-        this.position = '';
+        if (!possibleMoves.includes(this.position)) {
+          this.position = position;
+          this.colorSquares();
+        } else {
+          this.$emit('position-clicked', this.position);
+          this.position = '';
+        }
       }
+    },
+    async calculatePossibleMoves(move) {
+      let position = move.charAt(0) + move.charAt(1);
+      const response = await fetch(`${baseUrl}/actions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          board: [this.gameBoard],
+          turn: 1,
+          pieceLocation: position
+        })
+      });
+      const data = await response.json();
+      for (let move of data.possibleMoves) {
+        this.colorPossibleMoves(move);
+      }
+      if (this.position.length == 4) {
+        if (!data.possibleMoves.includes(position)) {
+          this.position = position;
+          this.colorSquares();
+        }
+      }
+      return data.possibleMoves;
     },
     createDict() {
       for (let i = 0; i < this.whitePieces.length; i++) {
@@ -127,39 +165,6 @@ export default {
       const specialNumbers = [0, 2, 4, 6, 9, 11, 13, 15, 16, 18, 20, 22, 25, 27, 29, 31, 32, 34, 36, 38, 41, 43, 45, 47, 48, 50, 52, 54, 57, 59, 61, 63];
       return specialNumbers.includes(num);
     },
-    async clickedPiece(rowIndex) {
-      if (this.isAIGame) {
-        return;
-      }
-
-      this.colorSquares();
-
-      const row = 8 - Math.floor(rowIndex / 8);
-      const column = String.fromCharCode(97 + (rowIndex % 8));
-      const position = column + row;
-
-      const response = await fetch(`${baseUrl}/actions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          board: [this.gameBoard],
-          turn: 1,
-          pieceLocation: position
-        })
-      });
-      const data = await response.json();
-      for (let move of data.possibleMoves) {
-        this.colorPossibleMoves(move);
-      }
-      if (this.position.length == 4) {
-        if (!data.possibleMoves.includes(position)) {
-          this.position = position;
-          this.colorSquares();
-        }
-      }
-    },
     colorPossibleMoves(move) {
       const column = move.charAt(2);
       const row = parseInt(move.charAt(3)) - 1;
@@ -168,12 +173,9 @@ export default {
     },
     colorSquares() {
       for (let i = 0; i < 64; i++) {
-        this.colorSquare(i);
+        document.getElementById(i).style.border = '#000 0px solid'
       }
     },
-    colorSquare(rowIndex) {
-      document.getElementById(rowIndex).style.border = '#000 0px solid';
-    }
   }
 };
 </script>

@@ -112,17 +112,6 @@ export default {
         async makeMove() {
             this.move_request.board[1].reverse();
 
-            // check for possible moves
-            let possibleMoves = await this.calculatePossibleMoves(this.move_request.move);
-            console.log(possibleMoves);
-            let transformedPos = this.move_request.move.charAt(0) + (9 - parseInt(this.move_request.move.charAt(1))).toString() + this.move_request.move.charAt(2) + (9 - parseInt(this.move_request.move.charAt(3))).toString();
-
-            if (!possibleMoves.includes(transformedPos)) {
-                console.log('Invalid move')
-                this.move_request.move = 'e2e4';
-                return;
-            }
-
             axios.post(`${baseUrl}/move`, this.move_request)
                 .then(response => {
                     this.errorMessage = '';
@@ -146,33 +135,6 @@ export default {
                     this.move_request.board[1].reverse();
                     this.move_request.move = '';
                 });
-        },
-        async calculatePossibleMoves(move) {
-            let position = move.charAt(0) + move.charAt(1);
-            position = position.charAt(0) + (9 - parseInt(position.charAt(1))).toString();
-            console.log(position);
-            const response = await fetch(`${baseUrl}/actions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    board: [this.gameBoard],
-                    turn: 1,
-                    pieceLocation: position
-                })
-            });
-            const data = await response.json();
-            console.log(data);
-            return data.possibleMoves;
-        },
-        handlePositionClicked(position) {
-            if (!this.gameEnded) {
-                if (position.length == 4) {
-                    this.move_request.move = position;
-                    this.makeMove();
-                }
-            }
         },
         calculatePiecePoints(piece) {
             switch (piece) {

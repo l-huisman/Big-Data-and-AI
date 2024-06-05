@@ -12,12 +12,9 @@
   "dependencies": {
     "axios": "^1.6.8",
     "browserify": "^17.0.0",
-    "chart": "^0.1.2",
-    "chart.js": "^4.4.2",
     "echarts": "^5.5.0",
     "nuxt": "^3.11.2",
     "vue": "^3.4.21",
-    "vue-chartjs": "^5.3.1",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {

@@ -1,19 +1,21 @@
 from copy import deepcopy
-from chess import Chess
-from .base import BaseAgent
+
+import torch
+from chess.game.aow import ArtOfWar
+
 from buffer.episode import Episode
 from learnings.base import Learning
-import torch
+from .base import BaseAgent
 
 
 class DoubleAgentsChess(BaseAgent):
     def __init__(
-        self,
-        env: Chess,
-        learner: Learning,
-        episodes: int,
-        train_on: int,
-        result_folder: str,
+            self,
+            env: ArtOfWar,
+            learner: Learning,
+            episodes: int,
+            train_on: int,
+            result_folder: str,
     ) -> None:
         super().__init__(env, learner, episodes, train_on, result_folder)
         self.white_agent = deepcopy(learner)
@@ -32,4 +34,3 @@ class DoubleAgentsChess(BaseAgent):
         self.black_agent.save(self.result_folder, "black")
         torch.save(self.white_agent.state_dict(), f"{self.result_folder}/white_dict.pt")
         torch.save(self.black_agent.state_dict(), f"{self.result_folder}/black_dict.pt")
-        

@@ -3,20 +3,23 @@ import numpy as np
 from api.models.requests import ActionRequest
 from api.models.responses import ActionResponse
 from api.routes.base import BaseRoute
-from chess import Chess
-from utils import convert_cell_to_position
+from chess.game.aow import ArtOfWar
+from utils import convert_cell_to_position, reverse_move
 
 
 class PlayableActions(BaseRoute):
-    def __init__(self, env: Chess, action_request: ActionRequest):
+    def __init__(self, env: ArtOfWar, action_request: ActionRequest):
         super().__init__(env)
         self.action_request = action_request
 
     def execute(self) -> ActionResponse:
         self.logger.info(f"Received action request: {self.action_request}")
 
+        if self.action_request.turn == 1:
+            self.action_request.pieceLocation = reverse_move(f"{self.action_request.pieceLocation}a1")[:2]
+
         try:
-            src, dst, mask = self.env.get_all_actions(self.action_request.turn)
+            src, dst, mask = self.env.aow_logic.get_all_actions(self.action_request.turn)
             from_pos = self.convert_cell_to_position()
 
             all_playable_actions_for_piece = self.get_all_playable_actions_for_piece(src, from_pos, mask)

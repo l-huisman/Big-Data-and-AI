@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from agents import PPOChess
@@ -9,7 +9,7 @@ from api.models.requests import MoveRequest, AIGameRequest, ActionRequest
 from api.models.responses import AIGameResponse, InitializeResponse, MoveResponse, ActionResponse
 from api.routes import Move, PlayableActions, Initialize, AiGame
 from buffer.episode import Episode
-from chess import Chess
+from chess.game.aow import ArtOfWar
 from learnings.ppo import PPO
 
 WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
@@ -39,7 +39,7 @@ app.add_middleware(
 )
 
 sys.setrecursionlimit(300)
-env = Chess(window_size=800, max_steps=256)
+env = ArtOfWar(window_size=800, max_steps=256)
 
 ppo = PPO(
     env,
@@ -56,7 +56,6 @@ try:
 except Exception as e:
     logger.error(e)
     raise Exception("Failed to initialize Chess agent. Try training (or retraining) the model.")
-
 
 
 @app.get(path="/initialize", response_model=InitializeResponse)

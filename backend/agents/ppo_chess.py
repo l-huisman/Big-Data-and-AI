@@ -1,7 +1,7 @@
 import torch
 from agents import SingleAgentChess
 from learnings.ppo import PPO
-from chess import info_keys as InfoKeys
+from chess.constants import info_keys as InfoKeys
 
 from buffer.episode import Episode
 
@@ -21,8 +21,8 @@ class PPOChess(SingleAgentChess):
         self.black_learner.eval()
 
     def take_action(self, turn: int, episode: Episode):
-        mask = self.env.get_all_actions(turn)[-1]
-        state = self.env.get_state(turn)
+        mask = self.env.aow_logic.get_all_actions(turn)[-1]
+        state = self.env.aow_board.get_state(turn)
 
         # Use the appropriate learner based on the current turn
         if turn == 0:

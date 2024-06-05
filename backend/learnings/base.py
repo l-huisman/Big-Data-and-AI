@@ -14,8 +14,8 @@ class Learning(nn.Module, ABC):
         learning_rate: float
     ) -> None:
         super().__init__()
-        self.state_dim = environment.observation_space.shape[0]
-        self.action_dim = environment.action_space.n
+        self.state_dim = environment.aow_logic.observation_space.shape[0]
+        self.action_dim = environment.aow_logic.action_space.n
 
         self.gamma = gamma
         self.epochs = epochs

@@ -24,7 +24,8 @@ class Pawn(Piece):
 
         # add 1 to front move
         if (board.is_valid_move(pos, Cell(pos[0] + 1, pos[1]), turn, deny_enemy_king) and
-                not board.is_piece(turn, Cell(pos[0] + 1, pos[1]))):
+                not board.is_piece(turn, Cell(pos[0] + 1, pos[1])) and
+                board.is_tile_empty_on_both_side(Cell(pos[0] + 1, pos[1]), turn)):
             next_pos = Cell(pos[0] + 1, pos[1])
             possibles[0] = next_pos
             actions_mask[0] = 1
@@ -44,7 +45,7 @@ class Pawn(Piece):
             actions_mask[2] = 1
 
         # add 2 to front move, when piece has not moved
-        if (not self.has_moved() and board.is_valid_move(pos, Cell(pos[0] + 2, pos[1]), turn, deny_enemy_king) and
+        if (pos[0] == 1 and board.is_valid_move(pos, Cell(pos[0] + 2, pos[1]), turn, deny_enemy_king) and
                 board.is_tile_empty_on_both_side(Cell(pos[0] + 1, pos[1]), turn) and
                 board.is_tile_empty_on_both_side(Cell(pos[0] + 2, pos[1]), turn)):
             next_pos = Cell(pos[0] + 2, pos[1])

@@ -212,26 +212,48 @@ class AoWLogic:
             
             break
 
-        # CROSS UP
+        # CROSS UP right
         for r in range(rk - 1, -1, -1):
+            # RIGHT
             d = r - rk
-            for c in [ck + d, ck - d]:
-                if not self.aow_board.is_in_range(Cell(r, c)):
-                    continue
-                
-                if self.aow_board.is_tile_empty_on_both_side(Cell(r, c), turn):
-                    continue
-
-                p = self.aow_board.get_piece(Cell(7 - r, c))
-                if p in diagonal_pieces:
-                    print("is check cross up")
-                    return True
-
-                if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
-                   
-                    return True
-                
+            if not self.aow_board.is_in_range(Cell(r, ck + d)):
                 break
+
+            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck + d), turn):
+                continue
+
+            p = self.aow_board.get_piece(Cell(7 - r, ck + d), 1 - turn)
+
+            if isinstance(p, diagonal_pieces):
+                print("is check cross down right")
+                return True
+            
+            if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
+                return True
+            
+            break
+
+
+            # CROSS UP left
+        for r in range(rk - 1, -1, -1):
+            # RIGHT
+            d = r - rk
+            if not self.aow_board.is_in_range(Cell(r, ck - d)):
+                break
+
+            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck - d), turn):
+                continue
+
+            p = self.aow_board.get_piece(Cell(7 - r, ck - d), 1 - turn)
+
+            if isinstance(p, diagonal_pieces):
+                print("is check cross down left")
+                return True
+
+            if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
+                return True
+            
+            break
 
         # KNIGHTS
         for r, c in Knight().get_moves():

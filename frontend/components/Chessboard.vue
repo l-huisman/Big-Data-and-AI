@@ -37,7 +37,6 @@
 <script>
 import axios from 'axios';
 import { baseUrl } from '../base-url.js';
-import { color } from 'chart.js/helpers';
 
 export default {
   props: {

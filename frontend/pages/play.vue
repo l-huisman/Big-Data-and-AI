@@ -136,6 +136,12 @@ export default {
                     this.move_request.move = '';
                 });
         },
+        handlePositionClicked(position) {
+            if (!this.gameEnded) {
+                this.move_request.move = position;
+                this.makeMove();
+            }
+        },
         calculatePiecePoints(piece) {
             switch (piece) {
                 case 0:

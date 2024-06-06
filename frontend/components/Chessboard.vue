@@ -51,6 +51,7 @@ export default {
       numbers: [1, 2, 3, 4, 5, 6, 7, 8],
       whitePieces: [],
       blackPieces: [],
+      possibleMoves: [],
       position: '',
       pieceImagesWhite: {
         1: '/_nuxt/assets/images/pieces/pawn white.png',
@@ -90,21 +91,30 @@ export default {
       const column = String.fromCharCode(97 + (index % 8));
       const position = column + row;
       this.position = this.position + position;
-      
+
       console.log("position: ", position)
-      console.log("this.position: ", this.position);
+      console.log("this.position: ", this.position.length);
 
-      let possibleMoves = await this.calculatePossibleMoves(this.position);
+      this.possibleMoves = await this.calculatePossibleMoves(this.position);
+      console.log("possibleMoves: ", this.possibleMoves)
 
-      if (this.position.length == 4) {
-        if (!possibleMoves.includes(this.position)) {
-          this.position = position;
-          this.colorSquares();
-        } else {
-          this.$emit('position-clicked', this.position);
-          this.position = '';
-        }
+      if (this.position.length === 2) {
+        console.log("kak")
+        return;
       }
+
+
+      if (!this.possibleMoves.includes(this.position)) {
+        console.log("not in: ", this.position)
+        this.position = position;
+        this.calculatePossibleMoves(position);
+        this.colorSquares();
+      } else {
+        console.log("in: ", this.position)
+        this.$emit('position-clicked', this.position);
+        this.position = '';
+      }
+
     },
     async calculatePossibleMoves(move) {
       let position = move.charAt(0) + move.charAt(1);
@@ -125,7 +135,6 @@ export default {
       }
       if (this.position.length == 4) {
         if (!data.possibleMoves.includes(position)) {
-          this.position = position;
           this.colorSquares();
         }
       }
@@ -168,7 +177,7 @@ export default {
     colorPossibleMoves(move) {
       const column = move.charAt(2);
       const row = parseInt(move.charAt(3)) - 1;
-      const index = (8 - row - 1) * 8 + (column.charCodeAt(0) - 97);
+      const index = row * 8 + (column.charCodeAt(0) - 97);
       document.getElementById(index).style.border = '#000 2px solid';
     },
     colorSquares() {

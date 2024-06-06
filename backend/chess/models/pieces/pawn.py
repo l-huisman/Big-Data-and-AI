@@ -1,14 +1,15 @@
 import chess.constants.moves as Moves
 
-from chess.models.pieces import Hoplite
 from chess.models.pieces.piece import Piece
+from chess.models.pieces.hoplite import Hoplite
+from chess.models.pieces.queen import Queen
 from chess.models.types import Cell
 
 
 class Pawn(Piece):
     def __init__(self, position: Cell | None = None):
         super().__init__(position=position, piece_number=1, possibles_length=7 * 4 * 2, upgradable=True,
-                         upgrade_options=[Hoplite()])
+                         upgrade_options=[Hoplite(), Queen()])
 
     def get_moves(self) -> tuple:
         return Moves.PAWN

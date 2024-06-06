@@ -124,7 +124,6 @@ class AoWLogic:
                 continue
             p = self.aow_board.get_piece(Cell(7 - r, ck), 1 - turn)
             if isinstance(p, straight_pieces):
-                print("is check row up")
                 return True
 
             if d == 1 and isinstance(p, Hoplite):
@@ -139,7 +138,6 @@ class AoWLogic:
                 continue
             p = self.aow_board.get_piece(Cell(7 - r, ck), 1 - turn)
             if isinstance(p, straight_pieces):
-                print("is check row down")
                 return True
 
             if d == 1 and isinstance(p, Hoplite):
@@ -153,7 +151,6 @@ class AoWLogic:
                 continue
             p = self.aow_board.get_piece(Cell(7 - rk, c), 1 - turn)
             if isinstance(p, straight_pieces):
-                print("is check col right")
                 return True
             
             break
@@ -164,7 +161,6 @@ class AoWLogic:
                 continue
             p = self.aow_board.get_piece(Cell(7 - rk, c), 1 - turn)
             if isinstance(p, straight_pieces):
-                print("is check col left")
                 return True
             
             break
@@ -182,7 +178,6 @@ class AoWLogic:
             p = self.aow_board.get_piece(Cell(7 - r, ck + d), 1 - turn)
 
             if isinstance(p, diagonal_pieces):
-                print("is check cross down right")
                 return True
             
             if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
@@ -204,7 +199,6 @@ class AoWLogic:
             p = self.aow_board.get_piece(Cell(7 - r, ck - d), 1 - turn)
 
             if isinstance(p, diagonal_pieces):
-                print("is check cross down left")
                 return True
 
             if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
@@ -225,7 +219,6 @@ class AoWLogic:
             p = self.aow_board.get_piece(Cell(7 - r, ck + d), 1 - turn)
 
             if isinstance(p, diagonal_pieces):
-                print("is check cross down right")
                 return True
             
             if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
@@ -247,7 +240,6 @@ class AoWLogic:
             p = self.aow_board.get_piece(Cell(7 - r, ck - d), 1 - turn)
 
             if isinstance(p, diagonal_pieces):
-                print("is check cross down left")
                 return True
 
             if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
@@ -261,7 +253,6 @@ class AoWLogic:
             if not self.aow_board.is_in_range(Cell(nr, nc)):
                 continue
             if self.aow_board.is_piece(1 - turn, Cell(7 - nr, nc), Knight()):
-                print("is check knight")
                 return True
 
         # WINGED KNIGHTS
@@ -270,7 +261,6 @@ class AoWLogic:
             if not self.aow_board.is_in_range(Cell(nr, nc)):
                 continue
             if self.aow_board.is_piece(1 - turn, Cell(7 - nr, nc), Wingedknight()):
-                print("is check winged knight")
                 return True
         return False
 

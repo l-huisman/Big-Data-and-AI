@@ -361,40 +361,20 @@ class AoWLogic:
         rewards[1 - turn] += -reward
         return rewards
 
-    def capture_pawn_by_warelephant(self, next_row: int, next_col: int, current_row: int, current_col: int, turn: int):
-        if self.aow_board.is_piece(turn, Cell(current_row, current_col), Warelephant()):
-            if current_row == next_row:
-                start_col = min(current_col, next_col) + 1
-                end_col = max(current_col, next_col)
-                for col in range(start_col, end_col):
-                    if self.aow_board.is_piece(pos=Cell(current_row, col), turn=turn,
-                                               piece=Pawn()) or self.aow_board.is_piece(pos=Cell(7 - current_row, col),
-                                                                                        turn=1 - turn, piece=Hoplite()):
-                        self.aow_board.set_piece(turn, Cell(current_row, col), Empty())
-                        self.aow_board.set_piece(1 - turn, Cell(7 - current_row, col), Empty())
-                        for key, value in self.aow_board.pieces[turn].items():
-                            if value == (current_row, col):
-                                self.aow_board.pieces[turn][key] = None
-                        for key, value in self.aow_board.pieces[1 - turn].items():
-                            if value == (7 - current_row, col):
-                                self.aow_board.pieces[1 - turn][key] = None
 
-            elif current_col == next_col:
-                start_row = min(current_row, next_row) + 1
-                end_row = max(current_row, next_row)
-                for row in range(start_row, end_row):
-                    if (self.aow_board.is_piece(pos=Cell(row, current_col), turn=turn, piece=Pawn()) or
-                            self.aow_board.is_piece(pos=Cell(row, current_col), turn=turn, piece=Hoplite()) or
-                            self.aow_board.is_piece(pos=Cell(7 - row, current_col), turn=1 - turn, piece=Pawn()) or
-                            self.aow_board.is_piece(pos=Cell(7 - row, current_col), turn=1 - turn, piece=Hoplite())):
-                        self.aow_board.set_piece(turn, Cell(row, current_col), Empty())
-                        self.aow_board.set_piece(1 - turn, Cell(7 - row, current_col), Empty())
-                    for key, value in self.aow_board.pieces[turn].items():
-                        if value == (row, current_col):
-                            self.aow_board.pieces[turn][key] = None
-                    for key, value in self.aow_board.pieces[1 - turn].items():
-                        if value == (7 - row, current_col): \
-                                self.aow_board.pieces[1 - turn][key] = None
+    def capture_pawn_by_warelephant(self, next_row: int, next_col: int, current_row: int, current_col: int, turn: int):
+        if self.aow_board.is_piece(turn, Cell(next_row, next_col), Warelephant()):
+            min_row, max_row = min(current_row, next_row), max(current_row, next_row)
+            min_col, max_col = min(current_col, next_col), max(current_col, next_col)
+
+            for r in range(min_row + 1, max_row):
+                if self.aow_board.is_piece(1 - turn, Cell(7 - r, current_col), Pawn()):
+                    self.aow_board.set_piece(1 - turn, Cell(7 - r, current_col), Empty())
+                    
+            for c in range(min_col + 1, max_col):
+                if self.aow_board.is_piece(1 - turn, Cell(7 - current_row, c), Pawn()):
+                    self.aow_board.set_piece(1 - turn, Cell(7 - current_row, c), Empty())
+
 
     def is_game_done(self):
         return self.done or (self.steps >= self.max_steps)

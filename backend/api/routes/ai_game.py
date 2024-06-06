@@ -33,9 +33,7 @@ class AiGame(BaseRoute):
             case "PPO":
                 white_model = self.WHITE_PPO_PATH
             case "DQN":
-                # white_model = self.WHITE_DQN_PATH
-                self.logger.info("DQN not implemented yet, using PPO instead.")
-                white_model = self.WHITE_PPO_PATH
+                white_model = self.WHITE_DQN_PATH
             case _:
                 white_model = self.WHITE_PPO_PATH
 
@@ -43,16 +41,14 @@ class AiGame(BaseRoute):
             case "PPO":
                 black_model = self.BLACK_PPO_PATH
             case "DQN":
-                # black_model = BLACK_DQN_PATH
-                self.logger.info("DQN not implemented yet, using PPO instead.")
-                black_model = self.BLACK_PPO_PATH
+                black_model = self.BLACK_DQN_PATH
             case _:
                 black_model = self.BLACK_PPO_PATH
 
         return PPOChess(self.env, self.get_ppo(), 1, 32, "", white_model, black_model)
 
     def play_game(self, agent, episode) -> AIGameResponse:
-        response = AIGameResponse(game=[], statistics=[])
+        response = AIGameResponse(game=[], statistics=[], possibles=[], source_pos=[], action_mask=[])
 
         response.game.append(agent.env.aow_board.get_numeric_board().tolist())
         response.statistics.append({"rewards": [0, 0], "infos": [[], []], "end": False})
@@ -62,6 +58,5 @@ class AiGame(BaseRoute):
             done, _ = agent.take_action(agent.env.aow_logic.turn, episode)
             response.statistics.append({"rewards": _[1], "infos": _[7], "end": done})
             response.game.append(agent.env.aow_board.get_numeric_board().tolist())
-
         self.logger.info("AI game completed.")
         return response

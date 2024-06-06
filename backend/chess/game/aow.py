@@ -64,8 +64,11 @@ class ArtOfWar(gym.Env):
         rewards, infos = self.aow_logic.update_draw(rewards, infos)
 
         if from_pos != next_pos or end_turn:
-            self.aow_board.add_resources(self.aow_logic.turn, 1)
-            self.aow_logic.turn = 1 - self.aow_logic.turn
+            if end_turn == False:
+                self.aow_logic.turn = self.aow_logic.turn
+            else:
+                self.aow_board.add_resources(self.aow_logic.turn, 1)
+                self.aow_logic.turn = 1 - self.aow_logic.turn
         self.aow_logic.steps += 1
         return rewards, self.aow_logic.is_game_done(), infos
 

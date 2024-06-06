@@ -308,8 +308,7 @@ class AoWBoard:
         @param turn: int: The player (Can be 0 or 1)
         @return: bool: If the cell is empty or a pawn
         """
-        return self.is_empty(pos, turn) or self.is_piece(turn, pos, Pieces.PAWN) or \
-            self.is_piece(turn, pos, Pieces.HOPLITE)
+        return self.is_empty(pos, turn) or self.is_piece(turn, pos, Pawn())
 
     def is_enemy_king(self, pos: Cell, turn: int) -> bool:
         """
@@ -319,7 +318,7 @@ class AoWBoard:
         @return: bool: If the piece is an enemy king
         """
         r, c = pos
-        return self.is_piece(1 - turn, Cell(7 - r, c), Pieces.KING)
+        return self.is_piece(1 - turn, Cell(7 - r, c), King())
 
     def is_tile_empty_on_both_side(self, pos: Cell, turn: int) -> bool:
         """
@@ -339,7 +338,7 @@ class AoWBoard:
         @return: bool: If the tile is empty or a pawn on both sides
         """
         r, c = pos
-        return self.is_empty_or_pawn(pos, turn) and self.is_empty_or_pawn(Cell(7 - r, c), 1 - turn)
+        return self.is_empty(pos, turn) and self.is_empty_or_pawn(Cell(7 - r, c), 1 - turn)
 
     def general_validation(self, current_pos: Cell, next_pos: Cell, turn: int, deny_enemy_king: bool) -> bool:
         """
@@ -437,12 +436,15 @@ class AoWBoard:
             if pos == current_pos:
                 continue
 
-            if not self.is_tile_empty_on_both_side(pos, turn):
-                if except_pawn and self.is_piece(turn, pos, Pawn()):
-                    except_pawn = False
-                    continue
-                return False
+            if except_pawn:
+                if not self.is_tile_empty_or_pawn_on_both_side(pos, turn):
+                    return False
+            else:
+                if not self.is_tile_empty_on_both_side(pos, turn):
+                    return False
+
         return True
+
 
     @staticmethod
     def get_path(current_pos: Cell, next_pos: Cell) -> list[Cell]:

@@ -12,5 +12,4 @@ class King(Piece):
 
     def get_actions(self, board: 'AoWBoard', pos: Cell | None, turn: int, deny_enemy_king: bool = False) -> tuple:
         var1, var2 = super().get_actions(board, pos, turn, deny_enemy_king=True)
-        # print(var1, var2)
         return var1, var2

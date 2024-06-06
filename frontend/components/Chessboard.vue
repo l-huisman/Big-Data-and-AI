@@ -92,25 +92,17 @@ export default {
       const position = column + row;
       this.position = this.position + position;
 
-      console.log("position: ", position)
-      console.log("this.position: ", this.position.length);
-
       this.possibleMoves = await this.calculatePossibleMoves(this.position);
-      console.log("possibleMoves: ", this.possibleMoves)
 
       if (this.position.length === 2) {
-        console.log("kak")
         return;
       }
 
-
       if (!this.possibleMoves.includes(this.position)) {
-        console.log("not in: ", this.position)
         this.position = position;
         this.calculatePossibleMoves(position);
         this.colorSquares();
       } else {
-        console.log("in: ", this.position)
         this.$emit('position-clicked', this.position);
         this.position = '';
       }

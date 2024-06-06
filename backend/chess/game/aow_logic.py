@@ -246,32 +246,54 @@ class AoWLogic:
         rewards[turn] = Rewards.UPGRADE_PIECE
         rewards[1 - turn] = 0
 
-        new_piece = None
+        new_piece = piece_to_upgrade.get_upgrade_options()[0]
 
         if upgrade_to is not None:
             for option in piece_to_upgrade.get_upgrade_options():
-                if isinstance(upgrade_to, option.__class__):
+                if option.get_name().lower() == upgrade_to.get_name().lower():
                     new_piece = option
+                    print(f"1{new_piece.get_name()}")
                     break
-        else:
-            new_piece = piece_to_upgrade.get_upgrade_options()[0]
 
+        print(f"1{new_piece.get_name()}")
         # get piece_name from position
         piece_name = None
         for key, value in self.aow_board.pieces[turn].items():
+            print(f" In loop:{new_piece.get_name()} pos: {pos.row, pos.col}")
+            print(key, value, pos.row, pos.col)
             if value == (pos.row, pos.col):
                 piece_name = key
+                print(f"Piece name: {piece_name}")
                 break
+
+        print(self.aow_board.pieces[turn].items())
+
+        print(f"2{new_piece.get_name()}")
+        # get piece at pos
+        print(self.aow_board.get_piece(pos, turn).get_name())
+
+        print(isinstance(new_piece, Empty) or piece_name is None)
+        print(isinstance(new_piece, Empty))
+        print(piece_name is None)
 
         # return rewards if the piece is empty (This happens because of Dutch waterline,
         # which can be activated on an empty space)
         if isinstance(new_piece, Empty) or piece_name is None:
             return [0, 0], [set(), set()]
 
+        print(f"3{new_piece.get_name()}")
+
         split_piece_name = piece_name.split("_")
+
+        print(f"4{new_piece.get_name()}")
 
         if len(split_piece_name) < 2:
             return [0, 0], [set(), set()]
+
+        print(f"5{new_piece.get_name()}")
+
+        new_piece_name = f"{new_piece.get_name().lower()}_{split_piece_name[1]}"
+        print(f"Upgrading {piece_name} to {new_piece_name}")
 
         # update the piece
         self.aow_board.pieces[turn][f"{new_piece.get_name().lower()}_{piece_name.split('_')[1]}"] = \

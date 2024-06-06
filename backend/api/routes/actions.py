@@ -24,6 +24,8 @@ class PlayableActions(BaseRoute):
 
             all_playable_actions_for_piece = self.get_all_playable_actions_for_piece(src, from_pos, mask)
             formatted_playable_moves = self.format_playable_moves(all_playable_actions_for_piece, src, dst)
+            if self.action_request.turn == 1:
+                formatted_playable_moves = self.reverse_formatted_moves(formatted_playable_moves)
 
             return ActionResponse(possibleMoves=formatted_playable_moves)
         except Exception as e:
@@ -54,3 +56,10 @@ class PlayableActions(BaseRoute):
             string_from = chr(from_loc[1] + ord('a')) + str(from_loc[0] + 1)
             playable_moves.append(f"{string_from}{string_to}")
         return playable_moves
+    
+    @staticmethod
+    def reverse_formatted_moves(playable_moves):
+        reversed_moves = []
+        for move in playable_moves:
+            reversed_moves.append(reverse_move(move))
+        return reversed_moves

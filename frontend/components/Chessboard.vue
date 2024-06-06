@@ -2,13 +2,13 @@
   <div class="grid grid-cols-8 ml-30">
     <template v-for="(row, RowIndex) in this.dict" :key="'row-' + RowIndex">
       <template v-for="(square, colIndex) in row" :key="'square-' + colIndex">
-        <div @click="changeClickToMove(RowIndex)"
-          :class="{ 'hover:bg-[#b0a468] bg-[#D0C27A]': GetSquareColors(RowIndex), 'hover:bg-[#8a6b2d] bg-[#AA8439]': !GetSquareColors(RowIndex) }"
+        <div :id="RowIndex" @click="changeClickToMove(RowIndex)"
+          :class="{ 'hover:bg-[#b0a468] bg-[#D0C27A]': getSquareColors(RowIndex), 'hover:bg-[#8a6b2d] bg-[#AA8439]': !getSquareColors(RowIndex) }"
           class="w-[60px] h-[60px] pt-[10px] pb-[10px] flex justify-center items-center">
 
           <!-- show the numbers on the left side of the chessboard -->
           <div v-if="RowIndex % 8 == 0" class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]" :class="{
-            'text-[#D0C27A]': !GetSquareColors(RowIndex), 'text-[#AA8439]': GetSquareColors(RowIndex)
+            'text-[#D0C27A]': !getSquareColors(RowIndex), 'text-[#AA8439]': getSquareColors(RowIndex)
           }">{{ (RowIndex /
             8) + 1 }}</div>
           <div v-else class="text-sm mb-auto mr-auto pl-[4px] mt-[-8px]">&nbsp;</div>
@@ -23,8 +23,8 @@
 
           <!-- show the letters on the bottom of the chessboard -->
           <div v-if="RowIndex >= 56" class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]" :class="{
-            'text-[#D0C27A]': !GetSquareColors(RowIndex),
-            'text-[#AA8439]': GetSquareColors(RowIndex)
+            'text-[#D0C27A]': !getSquareColors(RowIndex),
+            'text-[#AA8439]': getSquareColors(RowIndex)
           }">{{ String.fromCharCode(RowIndex + 9).toLowerCase() }}</div>
           <div v-else class="text-sm mt-auto ml-auto pr-[4px] mb-[-9px]">&nbsp;</div>
         </div>
@@ -36,9 +36,12 @@
 
 <script>
 import axios from 'axios';
+import { baseUrl } from '../base-url.js';
+
 export default {
   props: {
-    board: Array
+    board: Array,
+    isAIGame: Boolean
   },
   data() {
     return {
@@ -47,6 +50,7 @@ export default {
       numbers: [1, 2, 3, 4, 5, 6, 7, 8],
       whitePieces: [],
       blackPieces: [],
+      possibleMoves: [],
       position: '',
       pieceImagesWhite: {
         1: '/_nuxt/assets/images/pieces/pawn white.png',
@@ -75,21 +79,59 @@ export default {
   mounted() {
     this.blackPieces = this.gameBoard[0];
     this.whitePieces = this.gameBoard[1].reverse();
-    this.CreateDict();
+    this.createDict();
   },
   methods: {
-    changeClickToMove(index) {
+    async changeClickToMove(index) {
+      if (this.isAIGame) {
+        return;
+      }
       const row = Math.floor(index / 8) + 1;
       const column = String.fromCharCode(97 + (index % 8));
       const position = column + row;
       this.position = this.position + position;
 
-      if (this.position.length == 4) {
+      this.possibleMoves = await this.calculatePossibleMoves(this.position);
+
+      if (this.position.length === 2) {
+        return;
+      }
+
+      if (!this.possibleMoves.includes(this.position)) {
+        this.position = position;
+        this.calculatePossibleMoves(position);
+        this.colorSquares();
+      } else {
         this.$emit('position-clicked', this.position);
         this.position = '';
       }
+
     },
-    CreateDict() {
+    async calculatePossibleMoves(move) {
+      let position = move.charAt(0) + move.charAt(1);
+      const response = await fetch(`${baseUrl}/actions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          board: [this.gameBoard],
+          turn: 1,
+          pieceLocation: position
+        })
+      });
+      const data = await response.json();
+      for (let move of data.possibleMoves) {
+        this.colorPossibleMoves(move);
+      }
+      if (this.position.length == 4) {
+        if (!data.possibleMoves.includes(position)) {
+          this.colorSquares();
+        }
+      }
+      return data.possibleMoves;
+    },
+    createDict() {
       for (let i = 0; i < this.whitePieces.length; i++) {
         for (let j = 0; j < this.whitePieces[i].length; j++) {
           if (this.whitePieces[i][j] != 0) {
@@ -119,10 +161,21 @@ export default {
         return this.pieceImagesBlack[pieceNumber];
       }
     },
-    GetSquareColors(num) {
+    getSquareColors(num) {
       const specialNumbers = [0, 2, 4, 6, 9, 11, 13, 15, 16, 18, 20, 22, 25, 27, 29, 31, 32, 34, 36, 38, 41, 43, 45, 47, 48, 50, 52, 54, 57, 59, 61, 63];
       return specialNumbers.includes(num);
-    }
+    },
+    colorPossibleMoves(move) {
+      const column = move.charAt(2);
+      const row = parseInt(move.charAt(3)) - 1;
+      const index = row * 8 + (column.charCodeAt(0) - 97);
+      document.getElementById(index).style.border = '#000 2px solid';
+    },
+    colorSquares() {
+      for (let i = 0; i < 64; i++) {
+        document.getElementById(i).style.border = '#000 0px solid'
+      }
+    },
   }
 };
 </script>

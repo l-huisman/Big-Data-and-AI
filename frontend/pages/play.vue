@@ -1,7 +1,8 @@
 <template>
     <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
-            <Chessboard :board="this.move_request.board" :key="boardKey" @position-clicked="handlePositionClicked" />
+            <Chessboard :board="this.move_request.board" :key="boardKey" @position-clicked="handlePositionClicked"
+                :isAIGame="false" ref="aowboard" />
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">
@@ -16,7 +17,9 @@
             <div>
                 <div v-for="(row, index) in imageRows" :key="index" class="flex flex-row justify-end">
                     <div v-for="(image, imageIndex) in row" :key="imageIndex" class="ml-[10px] ">
-                        <img :src="getImageUrl(image)" alt="not working" class="h-[165px] mb-[10px] card" :class="{ 'selected': selectedImageIndex === index + (imageIndex * 3) }" id="card" @click="handleImageClick(index + (imageIndex * 3))"/>
+                        <img :src="getImageUrl(image)" alt="not working" class="h-[165px] mb-[10px] card"
+                            :class="{ 'selected': selectedImageIndex === index + (imageIndex * 3) }" id="card"
+                            @click="handleImageClick(index + (imageIndex * 3))" />
                     </div>
                 </div>
             </div>
@@ -106,7 +109,7 @@ export default {
                     console.error('Error initializing game:', error);
                 });
         },
-        makeMove() {
+        async makeMove() {
             this.move_request.board[1].reverse();
 
             axios.post(`${baseUrl}/move`, this.move_request)
@@ -127,8 +130,10 @@ export default {
                 })
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);
+                    console.log(this.move_request.move)
                     this.errorMessage = error.response.data.detail;
                     this.move_request.board[1].reverse();
+                    this.move_request.move = '';
                 });
         },
         handlePositionClicked(position) {
@@ -196,5 +201,4 @@ body {
     border-style: solid;
     height: 163px
 }
-
 </style>

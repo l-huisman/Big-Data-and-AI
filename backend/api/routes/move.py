@@ -48,7 +48,7 @@ class Move(BaseRoute):
                 resources=self.env.aow_board.resources, has_game_ended=done
             )
 
-        if self.env.aow_logic.turn != self.move_request.turn:
+        while self.env.aow_logic.turn != self.move_request.turn:
             self.process_ai_move(turn=self.env.aow_logic.turn, episode=self.episode)
 
         self.logger.info("Move processed successfully.")

@@ -1,14 +1,15 @@
-import pygame
-from chess import Chess
-from time import sleep
-import numpy as np
 import random
 import sys
+from time import sleep
+
+import numpy as np
+import pygame
+
+from chess.game.aow import ArtOfWar
 
 sys.setrecursionlimit(100)
-env = Chess(window_size=800)
+env = ArtOfWar(window_size=800, max_steps=128)
 env.render()
-
 
 running = True
 while running:
@@ -21,7 +22,7 @@ while running:
         #     else:
     turn = env.turn
     print("White" if turn else "Black")
-    src, dst, mask = env.get_all_actions(turn)
+    src, dst, mask = env.aow_logic.get_all_actions(turn)
     action = random.sample(list(np.where(mask == 1)[0]), 1)[0]
     print(f"Action = {action}", src[action], dst[action])
     rewards, done, infos = env.step(action)
@@ -33,6 +34,5 @@ while running:
     if done:
         env.reset()
         print("RESET")
-
 
 env.close()

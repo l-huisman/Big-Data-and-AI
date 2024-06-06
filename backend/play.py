@@ -1,17 +1,15 @@
+import sys
+from chess.game.aow import ArtOfWar
+
+import numpy as np
 import pygame
 
 from agents import PPOChess
 from buffer.episode import Episode
-from chess import Chess
-from time import sleep
-import numpy as np
-import random
-import sys
-
 from learnings.ppo import PPO
 
 sys.setrecursionlimit(300)
-env = Chess(window_size=800, max_steps=256)
+env = ArtOfWar(window_size=800, max_steps=256)
 
 # Paths to your trained api
 white_ppo_path = 'results/DoubleAgentsPPO/white_dict.pt'
@@ -52,7 +50,6 @@ while running:
 
         if action_str == 'q':
             break
-
 
         # Convert human-readable action to chess move object
         try:

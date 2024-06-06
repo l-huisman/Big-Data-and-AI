@@ -1,17 +1,15 @@
+import sys
+from time import sleep
+
 import pygame
+
 from agents import PPOChess
 from buffer.episode import Episode
-from chess import Chess
-from time import sleep
-import numpy as np
-import random
-import sys
-
-from learnings.dqn import DQNLearner
+from chess.game.aow import ArtOfWar
 from learnings.ppo import PPO
 
 sys.setrecursionlimit(300)
-env = Chess(window_size=800, max_steps=256)
+env = ArtOfWar(window_size=800, max_steps=256)
 env.render()
 
 # Paths to your trained api
@@ -52,13 +50,13 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    done, _ = chess_game.take_action(chess_game.env.turn, episode)
+    done, _ = chess_game.take_action(chess_game.env.aow_logic.turn, episode)
     # print("turn: ", chess_game.env.turn)
     env.render()
     sleep(.1)  # Pause for a short time to make the game viewable
     counter += 1
     if done:
         print("Game Over")
-        print("Winner: White" if chess_game.env.turn else "Winner: Black")
+        print("Winner: White" if chess_game.env.aow_logic.turn else "Winner: Black")
         print("Game Length: ", counter)
         break

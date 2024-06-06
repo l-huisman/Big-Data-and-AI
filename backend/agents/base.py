@@ -1,25 +1,25 @@
-from abc import ABC, abstractmethod
 import os
-import numpy as np
-import chess.pieces as Pieces
-import chess.info_keys as InfoKeys
+from abc import ABC, abstractmethod
+from chess.game.aow import ArtOfWar
 
+import numpy as np
+from tqdm import tqdm
+
+import chess.constants.info_keys as InfoKeys
+import chess.pieces as Pieces
 from buffer.episode import Episode
 from learnings.base import Learning
-from tqdm import tqdm
-from chess import Chess
-import torch as T
 from utils import save_to_video
 
 
 class BaseAgent(ABC):
     def __init__(
-        self,
-        env: Chess,
-        learner: Learning,
-        episodes: int,
-        train_on: int,
-        result_folder: str,
+            self,
+            env: ArtOfWar,
+            learner: Learning,
+            episodes: int,
+            train_on: int,
+            result_folder: str,
     ) -> None:
         super().__init__()
         self.env = env
@@ -51,8 +51,8 @@ class BaseAgent(ABC):
                 self.checks_lose[turn, self.current_ep] += 1
 
     def take_action(self, turn: int, episode: Episode):
-        mask = self.env.get_all_actions(turn)[-1]
-        state = self.env.get_state(turn)
+        mask = self.env.aow_logic.get_all_actions(turn)[-1]
+        state = self.env.aow_board.get_state(turn)
 
         action, prob, value = self.learner.take_action(state, mask)
         rewards, done, infos = self.env.step(action)
@@ -74,8 +74,8 @@ class BaseAgent(ABC):
         renders = []
 
         def render_fn():
-            if self.env.render_mode != "human":
-                renders.append(self.env.render())
+            if self.env.pygame_utils.render_mode != "human":
+                renders.append(self.env.pygame_utils.render(self.env.aow_board.get_numeric_board()))
 
         self.env.reset()
         episode_white = Episode()
@@ -85,7 +85,7 @@ class BaseAgent(ABC):
         render_fn()
 
         while True:
-            if self.env.turn == 1:
+            if self.env.aow_logic.turn == 1:
                 done, white_data = self.take_action(Pieces.WHITE, episode_white)
                 self.update_enemy(black_data, episode_black, white_data[1][Pieces.BLACK])
                 render_fn()
@@ -102,7 +102,7 @@ class BaseAgent(ABC):
         self.rewards[Pieces.BLACK, self.current_ep] = episode_black.total_reward()
         self.rewards[Pieces.WHITE, self.current_ep] = episode_white.total_reward()
 
-        if (render or self.env.done) and self.env.render_mode != "human":
+        if (render or self.env.aow_logic.done) and self.env.pygame_utils.render_mode != "human":
             path = os.path.join(self.result_folder, "renders", f"episode_{self.current_ep}.mp4")
             save_to_video(path, np.array(renders))
 

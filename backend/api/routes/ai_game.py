@@ -14,7 +14,7 @@ class AiGame(BaseRoute):
 
     def execute(self):
         try:
-            self.logger.info(f"Received aigame request: {self.ai_game_request}")
+            self.logger.info(f"Received ai game request: {self.ai_game_request}")
             self.reset_environment()
             agent = self.get_agent(black_model_name=self.ai_game_request.black_model,
                                    white_model_name=self.ai_game_request.white_model)
@@ -50,22 +50,13 @@ class AiGame(BaseRoute):
     def play_game(self, agent, episode) -> AIGameResponse:
         response = AIGameResponse(game=[], statistics=[], possibles=[], source_pos=[], action_mask=[])
 
-        response.game.append(agent.env.board.tolist())
+        response.game.append(agent.env.aow_board.get_numeric_board().tolist())
         response.statistics.append({"rewards": [0, 0], "infos": [[], []], "end": False})
 
         done = False
         while not done:
-            
-            #extra info not working yet to check for game state stuck
-            
-            done, _ = agent.take_action(agent.env.turn, episode)
-            #state 0, rewards 1, action 2, goal 3, prob 4, value 5, mask 6, infos 7
-            value = agent.env.get_all_actions(agent.env.turn)
-            # response.source_pos.append(value[0].tolist())
-            # response.possibles.append(value[1].tolist())
-            # response.action_mask.append(value[2].tolist())
-            response.statistics.append({"rewards": _[1], "action": _[2], "infos": _[7], "end": done})
-            response.game.append(agent.env.board.tolist())
-
+            done, _ = agent.take_action(agent.env.aow_logic.turn, episode)
+            response.statistics.append({"rewards": _[1], "infos": _[7], "end": done})
+            response.game.append(agent.env.aow_board.get_numeric_board().tolist())
         self.logger.info("AI game completed.")
         return response

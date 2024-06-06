@@ -49,8 +49,8 @@ class BaseRoute:
         try:
             self.env.reset()
         except Exception as e:
-            logger.error(f"An error occurred while resetting the game. {e}")
-            raise raise_http_exception(500, detail="An error occurred while resetting the game.")
+            self.logger.error(f"An error occurred while resetting the game. {e}")
+            raise self.raise_http_exception(500, detail="An error occurred while resetting the game.")
 
     def get_ppo(self):
         return PPO(

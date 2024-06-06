@@ -1,25 +1,25 @@
 import sys
 
 from agents import DoubleAgentsChess
-from chess import Chess
+from chess.game.aow import ArtOfWar
 from learnings.dqn import DQNLearner
 from learnings.ppo import PPO
 from learnings.a2c import A2C
 
 args = dict({
-    "episodes": 100,
+    "episodes": 10,
     "render_each": 20,
     "save_on_learn": True,
     "chess": dict({
         "window_size": 512,
-        "max_steps": 128,
+        "max_steps": 256,
         "render_mode": "rgb_array",
     }),
     "ppo": dict({
         "hidden_layers": (2048,) * 4,
         "epochs": 100,
         "buffer_size": 32,
-        "batch_size": 128,
+        "batch_size": 256,
         "result_folder": "results/DoubleAgentsPPO",
     }),
     "a2c": dict({
@@ -46,7 +46,7 @@ args = dict({
 })
 
 if __name__ == "__main__":
-    chess = Chess(
+    chess = ArtOfWar(
         window_size=args["chess"]["window_size"],
         max_steps=args["chess"]["max_steps"],
         render_mode=args["chess"]["render_mode"]

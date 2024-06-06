@@ -9,14 +9,14 @@ KING = 6
 # new pieces
 WINGED_KNIGHT = 7
 HOPLITE = 8
-WARELEFANT = 9
+WARELEPHANT = 9
 
 BLACK = 0
 WHITE = 1
 
 ASCIIS = (
-    ("♙", "♗", "♘", "♖", "♕", "♔", "☺", "♨", "♩"),
-    ("♟︎", "♝", "♞", "♜", "♛", "♚", "☻", "♆", "♫"),
+    ("♙", "♗", "♘", "♖", "♕", "♔", "☺", "♆", "♩"),
+    ("♟", "♝", "♞", "♜", "♛", "♚", "☻", "♨", "♫"),
 )
 
 
@@ -35,7 +35,7 @@ def get_piece_name(piece: int) -> str:
         KING: "king",
         WINGED_KNIGHT: "wingedknight",
         HOPLITE: "hoplite",
-        WARELEFANT: "warelefant",
+        WARELEPHANT: "warelefant",
     }[piece]
 
 
@@ -45,10 +45,10 @@ def get_upgraded_variant(piece: int) -> int:
         PAWN: HOPLITE,
         BISHOP: BISHOP,
         KNIGHT: WINGED_KNIGHT,
-        ROOK: WARELEFANT,
+        ROOK: WARELEPHANT,
         QUEEN: QUEEN,
         KING: KING,
         WINGED_KNIGHT: WINGED_KNIGHT,
         HOPLITE: HOPLITE,
-        WARELEFANT: WARELEFANT,
+        WARELEPHANT: WARELEPHANT,
     }[piece]

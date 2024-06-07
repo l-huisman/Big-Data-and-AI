@@ -152,9 +152,10 @@ class AoWLogic:
 
         return rewards, infos
 
-    def move_piece(self, src: Cell, dst: Cell, turn: int):
+    def move_piece(self, src: Cell, dst: Cell, turn: int, temp: bool = True) -> tuple[list[int], list[set]]:
         src = CellUtils.make_cell(src)
         dst = CellUtils.make_cell(dst)
+
         selected_piece = self.aow_board.get_piece(src, turn)
         selected_piece.set_has_moved()
 
@@ -173,7 +174,6 @@ class AoWLogic:
         rewards[1 - turn] *= 0
 
         self.capture_pawn_by_warelephant(dst.row, dst.col, src.row, src.col, turn)
-        self.promote_pawn_or_hoplite(dst, turn)
         # self.castle(src, dst, turn)
 
         for (key, value) in self.aow_board.pieces[turn].items():
@@ -193,6 +193,9 @@ class AoWLogic:
                 # get the reward from the rewards.py based on the name of the piece
                 reward = getattr(Rewards, selected_piece)
                 rewards = self.add_reward(rewards, reward, turn)
+
+        if not temp:  # This mitigates the issue, but the issue is still there.
+            self.promote_pawn_or_hoplite(dst, turn)
 
         return rewards, [set(), set()]
 
@@ -227,15 +230,18 @@ class AoWLogic:
         :param pos: Position of the piece
         :param turn: Turn of the player
         """
+
         if pos.row != 7:
             return
 
         # Check if the piece is a pawn and if it has reached the last row and upgrade it to a queen
         if self.aow_board.is_piece(turn, pos, Pawn()):
+            print("Trying to upgrade pawn to queen")
             self.upgrade_piece(pos, turn, self.aow_board.get_piece(pos, turn), Queen())
 
         # Check if the piece is a hoplite and if it has reached the last row and upgrade it to a queen
         if self.aow_board.is_piece(turn, pos, Hoplite()):
+            print("Trying to upgrade hoplite to queen")
             self.upgrade_piece(pos, turn, self.aow_board.get_piece(pos, turn), Queen())
 
     def upgrade_piece(self, pos: Cell, turn: int, piece_to_upgrade: Piece, upgrade_to: Piece = None):
@@ -258,6 +264,7 @@ class AoWLogic:
         print(f"1{new_piece.get_name()}")
         # get piece_name from position
         piece_name = None
+        print(self.aow_board.pieces[turn].items())
         for key, value in self.aow_board.pieces[turn].items():
             print(f" In loop:{new_piece.get_name()} pos: {pos.row, pos.col}")
             print(key, value, pos.row, pos.col)
@@ -265,6 +272,8 @@ class AoWLogic:
                 piece_name = key
                 print(f"Piece name: {piece_name}")
                 break
+
+        assert piece_name is not None, f"Piece name is None for {pos.row, pos.col} print board: \n{self.aow_board.get_numeric_board()}, the pieces: \n{self.aow_board.pieces[turn].items()}, \n{self.aow_board.pieces[1 - turn].items()}"
 
         print(self.aow_board.pieces[turn].items())
 

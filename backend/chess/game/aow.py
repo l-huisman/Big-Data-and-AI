@@ -55,7 +55,7 @@ class ArtOfWar(gym.Env):
             end_turn = False
         else:
             rewards, infos = self.aow_logic.move_piece(
-                from_pos, next_pos, self.aow_logic.turn
+                from_pos, next_pos, self.aow_logic.turn, temp=False
             )
             end_turn = True
 

@@ -1,6 +1,7 @@
 import numpy as np
 
 import chess.pieces as Pieces
+from chess.game.check import Check
 from chess.models import Cell
 from chess.models.cards import DutchWaterline, WingedKnightUpgradeCard, HopliteUpgradeCard, WarElephantUpgradeCard
 from chess.models.cards.card import Card
@@ -397,7 +398,7 @@ class AoWBoard:
         temp = ArtOfWar(1, render_mode="rgb_array")
         temp.aow_board.board = self.copy_board()
         temp.aow_logic.move_piece(current_pos, next_pos, turn)
-        return temp.aow_logic.is_check(temp.aow_board.get_king_position(turn), turn)
+        return Check(temp.aow_board).is_check(temp.aow_board.get_king_position(turn), turn)
 
     def is_path_empty_for_piece(self, current_pos: Cell, next_pos: Cell, turn: int) -> bool:
         """

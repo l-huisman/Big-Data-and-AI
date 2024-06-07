@@ -1,4 +1,5 @@
 from chess.models.pieces.piece import Piece
+from chess.models.pieces.queen import Queen
 from chess.models.types import Cell
 import chess.constants.moves as Moves
 

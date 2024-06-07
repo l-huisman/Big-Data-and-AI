@@ -28,6 +28,7 @@ class AoWBoard:
         self.board = self.init_board()
         self.pieces = self.init_pieces()
         self.resources = self.init_resources()
+        self.cards = self.init_cards()
 
     def is_in_range(self, pos: Cell) -> bool:
         """

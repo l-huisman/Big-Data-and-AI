@@ -5,13 +5,13 @@ import chess.constants.info_keys as InfoKeys
 import chess.constants.rewards as Rewards
 import chess.models.pieces as pieces_module
 import chess.pieces as Pieces
+from chess.game.check import Check
 from chess.models.board import AoWBoard
 from chess.models.cards import DutchWaterline, WarElephantUpgradeCard, WingedKnightUpgradeCard, \
     HopliteUpgradeCard
 from chess.models.pieces import *
 from chess.models.types import Cell
 from chess.utils.cell import CellUtils
-from chess.game.check import Check
 
 
 class AoWLogic:
@@ -174,6 +174,7 @@ class AoWLogic:
         rewards[1 - turn] *= 0
 
         self.capture_pawn_by_warelephant(dst.row, dst.col, src.row, src.col, turn)
+
         # self.castle(src, dst, turn)
 
         for (key, value) in self.aow_board.pieces[turn].items():
@@ -194,7 +195,7 @@ class AoWLogic:
                 reward = getattr(Rewards, selected_piece)
                 rewards = self.add_reward(rewards, reward, turn)
 
-        if not temp:  # This mitigates the issue, but the issue is still there.
+        if not temp:
             self.promote_pawn_or_hoplite(dst, turn)
 
         return rewards, [set(), set()]
@@ -205,7 +206,6 @@ class AoWLogic:
         rewards[turn] += reward
         rewards[1 - turn] += -reward
         return rewards
-
 
     def capture_pawn_by_warelephant(self, next_row: int, next_col: int, current_row: int, current_col: int, turn: int):
         if self.aow_board.is_piece(turn, Cell(next_row, next_col), Warelephant()):
@@ -219,7 +219,6 @@ class AoWLogic:
             for c in range(min_col + 1, max_col):
                 if self.aow_board.is_piece(1 - turn, Cell(7 - current_row, c), Pawn()):
                     self.aow_board.set_piece(1 - turn, Cell(7 - current_row, c), Empty())
-
 
     def is_game_done(self):
         return self.done or (self.steps >= self.max_steps)
@@ -236,12 +235,10 @@ class AoWLogic:
 
         # Check if the piece is a pawn and if it has reached the last row and upgrade it to a queen
         if self.aow_board.is_piece(turn, pos, Pawn()):
-            print("Trying to upgrade pawn to queen")
             self.upgrade_piece(pos, turn, self.aow_board.get_piece(pos, turn), Queen())
 
         # Check if the piece is a hoplite and if it has reached the last row and upgrade it to a queen
         if self.aow_board.is_piece(turn, pos, Hoplite()):
-            print("Trying to upgrade hoplite to queen")
             self.upgrade_piece(pos, turn, self.aow_board.get_piece(pos, turn), Queen())
 
     def upgrade_piece(self, pos: Cell, turn: int, piece_to_upgrade: Piece, upgrade_to: Piece = None):
@@ -258,51 +255,26 @@ class AoWLogic:
             for option in piece_to_upgrade.get_upgrade_options():
                 if option.get_name().lower() == upgrade_to.get_name().lower():
                     new_piece = option
-                    print(f"1{new_piece.get_name()}")
                     break
 
-        print(f"1{new_piece.get_name()}")
         # get piece_name from position
         piece_name = None
-        print(self.aow_board.pieces[turn].items())
         for key, value in self.aow_board.pieces[turn].items():
-            print(f" In loop:{new_piece.get_name()} pos: {pos.row, pos.col}")
-            print(key, value, pos.row, pos.col)
             if value == (pos.row, pos.col):
                 piece_name = key
-                print(f"Piece name: {piece_name}")
                 break
-
-        assert piece_name is not None, f"Piece name is None for {pos.row, pos.col} print board: \n{self.aow_board.get_numeric_board()}, the pieces: \n{self.aow_board.pieces[turn].items()}, \n{self.aow_board.pieces[1 - turn].items()}"
-
-        print(self.aow_board.pieces[turn].items())
-
-        print(f"2{new_piece.get_name()}")
-        # get piece at pos
-        print(self.aow_board.get_piece(pos, turn).get_name())
-
-        print(isinstance(new_piece, Empty) or piece_name is None)
-        print(isinstance(new_piece, Empty))
-        print(piece_name is None)
 
         # return rewards if the piece is empty (This happens because of Dutch waterline,
         # which can be activated on an empty space)
         if isinstance(new_piece, Empty) or piece_name is None:
             return [0, 0], [set(), set()]
 
-        print(f"3{new_piece.get_name()}")
-
         split_piece_name = piece_name.split("_")
-
-        print(f"4{new_piece.get_name()}")
 
         if len(split_piece_name) < 2:
             return [0, 0], [set(), set()]
 
-        print(f"5{new_piece.get_name()}")
-
         new_piece_name = f"{new_piece.get_name().lower()}_{split_piece_name[1]}"
-        print(f"Upgrading {piece_name} to {new_piece_name}")
 
         # update the piece
         self.aow_board.pieces[turn][f"{new_piece.get_name().lower()}_{piece_name.split('_')[1]}"] = \

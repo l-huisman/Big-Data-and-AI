@@ -89,7 +89,6 @@ class Move(BaseRoute):
             src, dst, _ = self.env.aow_logic.get_all_actions(self.env.aow_logic.turn)
             action = np.nonzero((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
             if len(action) == 0:
-                print(f"Invalid move: {action_str}")
                 self.raise_http_exception(400, "Invalid move.")
             _, done, _ = self.env.step(int(action[0]))
 

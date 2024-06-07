@@ -11,6 +11,7 @@ from chess.models.cards import DutchWaterline, WarElephantUpgradeCard, WingedKni
 from chess.models.pieces import *
 from chess.models.types import Cell
 from chess.utils.cell import CellUtils
+from chess.game.check import Check
 
 
 class AoWLogic:
@@ -77,7 +78,7 @@ class AoWLogic:
             turn,
             DutchWaterline()).get_actions(
             Cell(0, 0), self.aow_board, turn
-            )
+        )
         )
 
         all_possibles.append(possibles)
@@ -103,174 +104,14 @@ class AoWLogic:
             case _:
                 assert False, f"Invalid card id {card_id}"
 
-    def is_neighbor_enemy_king(self, pos: Cell, turn: int) -> bool:
-        row, col = pos
-        row_enemy_king, col_enemy_king = self.aow_board.get_king_position(1 - turn)
-        row_enemy_king = 7 - row_enemy_king
-        diff_row = abs(row - row_enemy_king)
-        diff_col = abs(col - col_enemy_king)
-        return diff_row <= 1 and diff_col <= 1
-
-    def is_check(self, king_pos: Cell, turn: int) -> bool:
-        rk, ck = king_pos
-
-        diagonal_pieces = (Bishop, Queen)
-        straight_pieces = (Rook, Queen, Warelephant)
-
-        # GO TO UP ROW
-        for r in range(rk + 1, 8):
-            d = r - rk
-            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck), turn):
-                continue
-            p = self.aow_board.get_piece(Cell(7 - r, ck), 1 - turn)
-            if isinstance(p, straight_pieces):
-                return True
-
-            if d == 1 and isinstance(p, Hoplite):
-                return True
-            
-            break
-
-        # GO TO DOWN ROW
-        for r in range(rk - 1, -1, -1):
-            d = r - rk
-            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck), turn):
-                continue
-            p = self.aow_board.get_piece(Cell(7 - r, ck), 1 - turn)
-            if isinstance(p, straight_pieces):
-                return True
-
-            if d == 1 and isinstance(p, Hoplite):
-                return True
-            
-            break
-
-        # GO TO RIGHT COL
-        for c in range(ck + 1, 8):
-            if self.aow_board.is_tile_empty_on_both_side(Cell(rk, c), turn):
-                continue
-            p = self.aow_board.get_piece(Cell(7 - rk, c), 1 - turn)
-            if isinstance(p, straight_pieces):
-                return True
-            
-            break
-
-        # GOT TO LEFT COL
-        for c in range(ck - 1, -1, -1):
-            if self.aow_board.is_tile_empty_on_both_side(Cell(rk, c), turn):
-                continue
-            p = self.aow_board.get_piece(Cell(7 - rk, c), 1 - turn)
-            if isinstance(p, straight_pieces):
-                return True
-            
-            break
-
-        # CROSS DOWN right
-        for r in range(rk + 1, 8):
-            # RIGHT
-            d = r - rk
-            if not self.aow_board.is_in_range(Cell(r, ck + d)):
-                break
-
-            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck + d), turn):
-                continue
-
-            p = self.aow_board.get_piece(Cell(7 - r, ck + d), 1 - turn)
-
-            if isinstance(p, diagonal_pieces):
-                return True
-            
-            if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
-                return True
-            
-            break
-            
-
-        # CROSS DOWN left
-        for r in range(rk + 1, 8):
-            # RIGHT
-            d = r - rk
-            if not self.aow_board.is_in_range(Cell(r, ck - d)):
-                break
-
-            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck - d), turn):
-                continue
-
-            p = self.aow_board.get_piece(Cell(7 - r, ck - d), 1 - turn)
-
-            if isinstance(p, diagonal_pieces):
-                return True
-
-            if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
-                return True
-            
-            break
-
-        # CROSS UP right
-        for r in range(rk - 1, -1, -1):
-            # RIGHT
-            d = r - rk
-            if not self.aow_board.is_in_range(Cell(r, ck + d)):
-                break
-
-            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck + d), turn):
-                continue
-
-            p = self.aow_board.get_piece(Cell(7 - r, ck + d), 1 - turn)
-
-            if isinstance(p, diagonal_pieces):
-                return True
-            
-            if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
-                return True
-            
-            break
-
-
-            # CROSS UP left
-        for r in range(rk - 1, -1, -1):
-            # RIGHT
-            d = r - rk
-            if not self.aow_board.is_in_range(Cell(r, ck - d)):
-                break
-
-            if self.aow_board.is_tile_empty_on_both_side(Cell(r, ck - d), turn):
-                continue
-
-            p = self.aow_board.get_piece(Cell(7 - r, ck - d), 1 - turn)
-
-            if isinstance(p, diagonal_pieces):
-                return True
-
-            if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
-                return True
-            
-            break
-
-        # KNIGHTS
-        for r, c in Knight().get_moves():
-            nr, nc = rk + r, ck + c
-            if not self.aow_board.is_in_range(Cell(nr, nc)):
-                continue
-            if self.aow_board.is_piece(1 - turn, Cell(7 - nr, nc), Knight()):
-                return True
-
-        # WINGED KNIGHTS
-        for r, c in Wingedknight().get_moves():
-            nr, nc = rk + r, ck + c
-            if not self.aow_board.is_in_range(Cell(nr, nc)):
-                continue
-            if self.aow_board.is_piece(1 - turn, Cell(7 - nr, nc), Wingedknight()):
-                return True
-        return False
-
     def update_checks(self, rewards: list[int] = None, infos: list[set] = None):
+        check = Check(self.aow_board)
         rewards = [0, 0] if rewards is None else rewards
         infos = [set(), set()] if infos is None else infos
 
         for turn in range(2):
             king_pos = self.aow_board.get_king_position(turn)
-            is_check = self.is_check(king_pos, turn)
+            is_check = check.is_check(king_pos, turn)
             self.checked[turn] = is_check
             if is_check:
                 rewards[turn] += Rewards.CHECK_LOSE
@@ -333,6 +174,7 @@ class AoWLogic:
 
         self.capture_pawn_by_warelephant(dst.row, dst.col, src.row, src.col, turn)
         self.promote_pawn_or_hoplite(dst, turn)
+        self.castle(src, dst, turn)
 
         for (key, value) in self.aow_board.pieces[turn].items():
             if value == tuple(src):
@@ -447,3 +289,17 @@ class AoWLogic:
                 self.aow_board.remove_resources(turn, 3)
             case Pieces.WARELEPHANT:
                 self.aow_board.remove_resources(turn, 5)
+
+    def castle(self, current_pos: Cell, next_pos: Cell, turn: int):
+        current_pos = CellUtils.make_cell(current_pos)
+        next_pos = CellUtils.make_cell(next_pos)
+
+        if self.aow_board.is_piece(turn, next_pos, King()):
+            if current_pos.col - next_pos.col == 2:
+                self.aow_board.set_piece(turn, Cell(current_pos.row, 3),
+                                         self.aow_board.get_piece(Cell(current_pos.row, 0), turn))
+                self.aow_board.set_piece(turn, Cell(current_pos.row, 0), Empty())
+            elif current_pos.col - next_pos.col == -2:
+                self.aow_board.set_piece(turn, Cell(current_pos.row, 5),
+                                         self.aow_board.get_piece(Cell(current_pos.row, 7), turn))
+                self.aow_board.set_piece(turn, Cell(current_pos.row, 7), Empty())

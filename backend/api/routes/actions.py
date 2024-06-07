@@ -30,6 +30,7 @@ class PlayableActions(BaseRoute):
             return ActionResponse(possibleMoves=formatted_playable_moves)
         except Exception as e:
             self.logger.error(f"An error occurred while getting the possible moves. {e}")
+            raise e
             self.raise_http_exception(500, detail="An error occurred while getting the possible moves.")
         finally:
             self.logger.info("Action request completed.")

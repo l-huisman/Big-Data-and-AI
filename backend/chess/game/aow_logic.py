@@ -260,11 +260,8 @@ class AoWLogic:
         # get piece_name from position
         piece_name = None
         for key, value in self.aow_board.pieces[turn].items():
-            print(f" In loop:{new_piece.get_name()} pos: {pos.row, pos.col}")
-            print(key, value, pos.row, pos.col)
             if value == (pos.row, pos.col):
                 piece_name = key
-                print(f"Piece name: {piece_name}")
                 break
 
         # return rewards if the piece is empty (This happens because of Dutch waterline,
@@ -272,11 +269,7 @@ class AoWLogic:
         if isinstance(new_piece, Empty) or piece_name is None:
             return [0, 0], [set(), set()]
 
-        print(f"3{new_piece.get_name()}")
-
         split_piece_name = piece_name.split("_")
-
-        print(f"4{new_piece.get_name()}")
 
         if len(split_piece_name) < 2:
             return [0, 0], [set(), set()]

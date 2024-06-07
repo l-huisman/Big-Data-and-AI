@@ -72,3 +72,4 @@ class King(Piece):
         diff_row = abs(row - row_enemy_king)
         diff_col = abs(col - col_enemy_king)
         return diff_row <= 1 and diff_col <= 1
+

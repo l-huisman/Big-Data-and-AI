@@ -174,7 +174,7 @@ class AoWLogic:
 
         self.capture_pawn_by_warelephant(dst.row, dst.col, src.row, src.col, turn)
         self.promote_pawn_or_hoplite(dst, turn)
-        self.castle(src, dst, turn)
+        # self.castle(src, dst, turn)
 
         for (key, value) in self.aow_board.pieces[turn].items():
             if value == tuple(src):

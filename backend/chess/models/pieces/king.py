@@ -29,6 +29,10 @@ class King(Piece):
             can_castle_right = self.can_castle(turn, pos, Cell(pos.row, pos.col + 3), board)
             can_castle_left = self.can_castle(turn, pos, Cell(pos.row, pos.col - 4), board)
 
+            # temp since it removes king?
+            if i == 8 or i == 9:
+                continue
+
             if i == 8 and not can_castle_right:
                 continue
 

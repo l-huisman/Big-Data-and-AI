@@ -44,27 +44,22 @@ class King(Piece):
         rook_pos = CellUtils.make_cell(rook_pos)
 
         if not board.is_in_range(king_pos) or not board.is_in_range(rook_pos):
-            print("Out of range")
             return False
 
         if not board.is_piece(turn, rook_pos, Rook()) or not board.is_piece(turn, Cell(0, 4), King()):
-            print("Not a rook")
             return False
 
         if Check(board).is_check(king_pos, turn):
             return False
 
         if self.has_moved() or (king_pos.row != 0 and king_pos.col != 4):
-            print("King has moved")
             return False
 
         if not board.is_path_empty(king_pos, rook_pos, turn):
-            print("Path is not empty")
             return False
 
         # check if rook has moved
         if not board.get_piece(rook_pos, turn).has_moved():
-            print("Rook has moved")
             return False
 
         return True

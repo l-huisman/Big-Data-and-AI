@@ -91,43 +91,6 @@ class Check:
             break
         return False
 
-    # def is_check_vertical(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
-    #     if self.is_check_up(king_pos, pieces_to_check, turn):
-    #         return True
-    #
-    #     if self.is_check_down(king_pos, pieces_to_check, turn):
-    #         return True
-    #
-    #     return False
-    #
-    # def is_check_up(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
-    #     for r in range(king_pos.row + 1, 8):
-    #         d = r - king_pos.row
-    #         if self.aow_board.is_tile_empty_on_both_side(Cell(r, king_pos.col), turn):
-    #             continue
-    #         p = self.aow_board.get_piece(Cell(7 - r, king_pos.col), 1 - turn)
-    #         if isinstance(p, pieces_to_check):
-    #             return True
-    #
-    #         if d == 1 and isinstance(p, Hoplite):
-    #             return True
-    #         break
-    #     return False
-    #
-    # def is_check_down(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
-    #     for r in range(king_pos.row - 1, -1, -1):
-    #         d = r - king_pos.row
-    #         if self.aow_board.is_tile_empty_on_both_side(Cell(r, king_pos.col), turn):
-    #             continue
-    #         p = self.aow_board.get_piece(Cell(7 - r, king_pos.col), 1 - turn)
-    #         if isinstance(p, pieces_to_check):
-    #             return True
-    #
-    #         if d == 1 and isinstance(p, Hoplite):
-    #             return True
-    #         break
-    #     return False
-
     def is_check_diagonal(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
         if self.is_check_diagonal_up(king_pos, pieces_to_check, turn):
             return True

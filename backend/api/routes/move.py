@@ -115,6 +115,16 @@ class Move(BaseRoute):
         valid_src = src[valid_indices]
         valid_dst = dst[valid_indices]
 
+        print("Possible actions: 2")
+
+        # print all valid actions
+        for i in valid_indices:
+            to_loc = dst[i]
+            from_loc = src[i]
+            string_to = chr(to_loc[1] + ord('a')) + str(to_loc[0] + 1)
+            string_from = chr(from_loc[1] + ord('a')) + str(from_loc[0] + 1)
+            print(f"{src[i]} -> {dst[i]} or {string_from} -> {string_to}")
+
         return valid_src, valid_dst, valid_indices
 
     def validate_resources(self, resources):

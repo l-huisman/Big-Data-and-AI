@@ -15,6 +15,12 @@ class PlayableActions(BaseRoute):
     def execute(self) -> ActionResponse:
         self.logger.info(f"Received action request: {self.action_request}")
 
+        board = self.convert_board(self.action_request.board)
+        self.validate_board_size(board)
+
+        self.env.aow_board.set_board(board)
+        self.env.aow_logic.turn = self.action_request.turn
+
         if self.action_request.turn == 1:
             self.action_request.pieceLocation = reverse_move(f"{self.action_request.pieceLocation}a1")[:2]
 
@@ -63,3 +69,13 @@ class PlayableActions(BaseRoute):
         for move in playable_moves:
             reversed_moves.append(reverse_move(move))
         return reversed_moves
+
+    def convert_board(self, board) -> np.ndarray:
+        try:
+            board = np.array(board)
+            if not board.any():
+                self.raise_http_exception(400, "Please provide a board.")
+        except Exception as e:
+            self.logger.warning(f"An error occurred while processing the board. {e}")
+            self.raise_http_exception(400, "Invalid board.")
+        return board

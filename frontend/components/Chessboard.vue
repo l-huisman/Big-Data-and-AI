@@ -109,21 +109,27 @@ export default {
     },
     async calculatePossibleMoves(move) {
       let position = move.charAt(0) + move.charAt(1);
+      this.gameBoard[1].reverse();
       const response = await fetch(`${baseUrl}/actions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          board: [this.gameBoard],
+          board: this.gameBoard,
           turn: 1,
           pieceLocation: position
         })
+      }).catch(error => {
+        console.error('Error:', error);
       });
+      this.gameBoard[1].reverse();
       const data = await response.json();
+
       for (let move of data.possibleMoves) {
         this.colorPossibleMoves(move);
       }
+
       if (this.position.length == 4) {
         if (!data.possibleMoves.includes(position)) {
           this.colorSquares();

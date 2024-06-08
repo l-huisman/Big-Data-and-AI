@@ -44,7 +44,7 @@ while running:
         if event.type == pygame.KEYDOWN and event.key != pygame.K_ESCAPE:
             running = False
             break
-    turn = env.turn
+    turn = env.aow_logic.turn
     if turn == 0:
         action_str = input("Choose action (e.g., 'e2e4'): ")
 
@@ -60,7 +60,7 @@ while running:
             t2 = ord(action_str[2]) - ord('a')
             to_pos = np.array([t1, t2])
 
-            src, dst, mask = env.get_all_actions(turn)
+            src, dst, mask = env.aow_logic.get_all_actions(turn)
             action = np.where((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
 
             # getting all valid actions for the piece

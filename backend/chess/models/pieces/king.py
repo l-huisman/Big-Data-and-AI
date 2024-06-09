@@ -59,7 +59,8 @@ class King(Piece):
             return False
 
         # Why does this not work for one side???????????????
-        # if not board.get_piece(rook_pos, turn).has_moved():
+        # FIXME: When having this code in the loop, the frontend wont be able to castle to the right side. Because it says no matter what that the Rook on the right side has moved. I don't understand why
+        # if board.get_piece(rook_pos, turn).has_moved():
         #     print(f"Rook at {rook_pos} has moved")
         #     return False
 

@@ -20,7 +20,7 @@ class King(Piece):
         for i, (r, c) in enumerate(Moves.KING):
             next_pos = Cell(pos.row + r, pos.col + c)
 
-            if not board.is_valid_move(Cell(pos.row, pos.col), next_pos, turn, False):
+            if not board.is_valid_move(Cell(pos.row, pos.col), next_pos, turn, False) and i != 8 and i != 9:
                 continue
 
             if self.is_neighbor_enemy_king(next_pos, turn, board):
@@ -28,10 +28,6 @@ class King(Piece):
 
             can_castle_right = self.can_castle(turn, pos, Cell(pos.row, pos.col + 3), board)
             can_castle_left = self.can_castle(turn, pos, Cell(pos.row, pos.col - 4), board)
-
-            # temp since it removes king?
-            if i == 8 or i == 9:
-                continue
 
             if i == 8 and not can_castle_right:
                 continue
@@ -62,9 +58,11 @@ class King(Piece):
         if not board.is_path_empty(king_pos, rook_pos, turn):
             return False
 
-        # check if rook has moved
-        if not board.get_piece(rook_pos, turn).has_moved():
-            return False
+        # Why does this not work for one side???????????????
+        # FIXME: When having this code in the loop, the frontend wont be able to castle to the right side. Because it says no matter what that the Rook on the right side has moved. I don't understand why
+        # if board.get_piece(rook_pos, turn).has_moved():
+        #     print(f"Rook at {rook_pos} has moved")
+        #     return False
 
         return True
 
@@ -76,4 +74,3 @@ class King(Piece):
         diff_row = abs(row - row_enemy_king)
         diff_col = abs(col - col_enemy_king)
         return diff_row <= 1 and diff_col <= 1
-

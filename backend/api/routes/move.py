@@ -48,7 +48,7 @@ class Move(BaseRoute):
                 resources=self.env.aow_board.resources, has_game_ended=done
             )
 
-        while self.env.aow_logic.turn != self.move_request.turn:
+        while self.env.aow_logic.turn != self.move_request.turn and not self.env.aow_logic.done:
             self.process_ai_move(turn=self.env.aow_logic.turn, episode=self.episode)
 
         self.logger.info("Move processed successfully.")
@@ -86,11 +86,13 @@ class Move(BaseRoute):
                 action_str = reverse_move(action_str)
 
             from_pos, to_pos = convert_move_to_positions(action_str)
-            src, dst, _ = self.env.aow_logic.get_all_actions(self.env.aow_logic.turn)
-            action = np.nonzero((src == from_pos).all(axis=1) & (dst == to_pos).all(axis=1))[0]
+            src, dst, mask = self.env.aow_logic.get_all_actions(self.env.aow_logic.turn)
+            valid_src, valid_dst, valid_indices = self.get_valid_actions(src, dst, mask)
+            index = np.nonzero((valid_src == from_pos).all(axis=1) & (valid_dst == to_pos).all(axis=1))[0]
+            action = valid_indices[index] if len(index) > 0 else []
             if len(action) == 0:
                 self.raise_http_exception(400, "Invalid move.")
-            _, done, _ = self.env.step(int(action[0]))
+            _, done, _ = self.env.step(int(action))
 
             player_move_board = self.env.aow_board.get_numeric_board().tolist()
             return player_move_board, done
@@ -99,6 +101,21 @@ class Move(BaseRoute):
         except Exception as e:
             self.logger.error("Something went wrong while processing the move. " + str(e))
             self.raise_http_exception(400, "Invalid move")
+
+    @staticmethod
+    def get_valid_actions(src, dst, mask):
+        src = np.array(src)
+        dst = np.array(dst)
+        mask = np.array(mask)
+
+        if len(src) != len(dst):
+            raise ValueError("All input arrays must have the same length")
+
+        valid_indices = np.nonzero(mask == 1)[0]
+        valid_src = src[valid_indices]
+        valid_dst = dst[valid_indices]
+
+        return valid_src, valid_dst, valid_indices
 
     def validate_resources(self, resources):
         if len(resources) != 2:

@@ -28,6 +28,7 @@ class AoWBoard:
         self.board = self.init_board()
         self.pieces = self.init_pieces()
         self.resources = self.init_resources()
+        self.cards = self.init_cards()
 
     def is_in_range(self, pos: Cell) -> bool:
         """
@@ -431,6 +432,8 @@ class AoWBoard:
         @param except_pawn: bool: If the path should ignore pawns
         @return: bool: If the path between the two positions is empty
         """
+        current_pos = CellUtils.make_cell(current_pos)
+        next_pos = CellUtils.make_cell(next_pos)
         path = self.get_path(current_pos, next_pos)
 
         for pos in path:

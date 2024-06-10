@@ -174,9 +174,8 @@ class AoWLogic:
         rewards[1 - turn] *= 0
 
         self.capture_pawn_by_warelephant(dst.row, dst.col, src.row, src.col, turn)
-
-        # self.castle(src, dst, turn)
-
+        self.castle(src, dst, turn)
+        
         for (key, value) in self.aow_board.pieces[turn].items():
             if value == tuple(src):
                 # # Update the location of the piece in the pieces array
@@ -297,7 +296,7 @@ class AoWLogic:
         current_pos = CellUtils.make_cell(current_pos)
         next_pos = CellUtils.make_cell(next_pos)
 
-        if self.aow_board.is_piece(turn, next_pos, King()):
+        if self.aow_board.is_piece(turn, next_pos, King()) and (next_pos.col == 2 or next_pos.col == 6):
             if current_pos.col - next_pos.col == 2:
                 self.aow_board.set_piece(turn, Cell(current_pos.row, 3),
                                          self.aow_board.get_piece(Cell(current_pos.row, 0), turn))

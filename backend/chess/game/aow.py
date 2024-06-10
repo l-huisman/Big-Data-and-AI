@@ -13,10 +13,12 @@ from chess.utils.pygame import PyGameUtils
 
 
 class ArtOfWar(gym.Env):
-    def __init__(self, max_steps: int = 128, window_size: int = 800, render_mode: str = 'human'):
+    def __init__(self, max_steps: int = 128, window_size: int = 800, render_mode: str = 'human',
+                 console_render: bool = False):
         self.aow_board = AoWBoard()
         self.pygame_utils = PyGameUtils(window_size=window_size, render_mode=render_mode)
         self.aow_logic = AoWLogic(max_steps=max_steps, board=self.aow_board)
+        self.console_render = console_render
 
     def step(self, action: int) -> tuple[list[int], bool, list[set]]:
         """
@@ -32,6 +34,10 @@ class ArtOfWar(gym.Env):
 
         from_pos = Cell(int(source_pos[action][0]), int(source_pos[action][1]))
         next_pos = Cell(int(possibles[action][0]), int(possibles[action][1]))
+
+        if self.console_render is True:
+            print(self.aow_board.get_numeric_board())
+            print(f"Action = {action}, {from_pos} -> {next_pos}")
 
         if (self.aow_board.is_piece(self.aow_logic.turn, next_pos, King()) or
                 self.aow_board.is_piece(1 - self.aow_logic.turn, Cell(7 - next_pos.row, next_pos.col), King())):

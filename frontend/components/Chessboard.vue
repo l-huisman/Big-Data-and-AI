@@ -47,7 +47,6 @@ export default {
     return {
       gameBoard: this.board,
       dict: [],
-      numbers: [1, 2, 3, 4, 5, 6, 7, 8],
       whitePieces: [],
       blackPieces: [],
       possibleMoves: [],
@@ -125,7 +124,7 @@ export default {
       });
       this.gameBoard[1].reverse();
       const data = await response.json();
-
+      console.log(data.possibleMoves)
       for (let move of data.possibleMoves) {
         this.colorPossibleMoves(move);
       }

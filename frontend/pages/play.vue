@@ -125,6 +125,7 @@ export default {
                     this.move_request.resources = response.data.resources;
                     this.move_request.board = response.data.playerMoveBoard;
                     this.boardKey++;
+                    this.selectedImageIndex = null;
 
                     setTimeout(() => {
                         this.move_request.board = response.data.combinedMoveBoard;
@@ -139,9 +140,11 @@ export default {
                     this.errorMessage = error.response.data.detail;
                     this.move_request.board[1].reverse();
                     this.move_request.move = '';
+                    this.selectedImageIndex = null;
                 });
         },
         handlePositionClicked(position) {
+            console.log('position clicked:', position)
             if (!this.gameEnded) {
                 this.move_request.move = position;
                 this.makeMove();
@@ -185,6 +188,18 @@ export default {
                 this.selectedImageIndex = null;
             } else {
                 this.selectedImageIndex = index;
+            }
+            console.log(this.selectedImageIndex);
+            console.log(this.move_request.resources[1]);
+
+            // Color the squares with index 16, 24, 32, 40
+            const indexes = [16, 24, 32, 40];
+            for (let i = 0; i < indexes.length; i++) {
+                if (this.selectedImageIndex === 4 && this.move_request.resources[1] >= 4) {
+                    document.getElementById(indexes[i]).style.border = '#000 2px solid';
+                } else {
+                    document.getElementById(indexes[i]).style.border = '#000 0px solid';
+                }
             }
         },
         goBack() {

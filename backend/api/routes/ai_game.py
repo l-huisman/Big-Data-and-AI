@@ -34,6 +34,8 @@ class AiGame(BaseRoute):
                 white_model = self.WHITE_PPO_PATH
             case "DQN":
                 white_model = self.WHITE_DQN_PATH
+            case "A2C":
+                white_model = self.WHITE_A2C_PATH
             case _:
                 white_model = self.WHITE_PPO_PATH
 
@@ -42,6 +44,8 @@ class AiGame(BaseRoute):
                 black_model = self.BLACK_PPO_PATH
             case "DQN":
                 black_model = self.BLACK_DQN_PATH
+            case "A2C":
+                black_model = self.BLACK_A2C_PATH
             case _:
                 black_model = self.BLACK_PPO_PATH
 

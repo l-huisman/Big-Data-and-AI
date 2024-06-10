@@ -19,6 +19,8 @@ class BaseRoute:
     BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
     WHITE_DQN_PATH = 'results/DoubleAgentsDQN/white_dict.pt'
     BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
+    WHITE_A2C_PATH = 'results/DoubleAgentsA2C/white_dict.pt'
+    BLACK_A2C_PATH = 'results/DoubleAgentsA2C/black_dict.pt'
 
     def execute(self):
         raise NotImplementedError()

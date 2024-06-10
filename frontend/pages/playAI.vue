@@ -9,16 +9,18 @@
     </div>
     <div class="ml-[50px] flex flex-col w-[45%]">
       <div class="flex flex-row bg-[#5a9679] rounded-[5px] border-[7px] border-[#5a9679] mb-2">
-        <select v-model="fmodel" class="bg-[#5a9679]" name="firstmodel" id="firstmodel">
+        <select v-if="!gameIsActive" v-model="fmodel" class="bg-[#5a9679]" name="firstmodel" id="firstmodel">
           <option value="PPO">PPO</option>
           <option value="DQN">DQN</option>
+          <option value="A2C">A2C</option>
         </select>
-        <select v-model="smodel" class="bg-[#5a9679]" name="secondmodel" id="secondmodel">
+        <select v-if="!gameIsActive" v-model="smodel" class="bg-[#5a9679]" name="secondmodel" id="secondmodel">
           <option value="PPO">PPO</option>
           <option value="DQN">DQN</option>
+          <option value="A2C">A2C</option>
         </select>
-        <Button id="start-button" type="button"  @click="fetchGameAIvsAI(fmodel, smodel), setupCharts()" 
-          class="w-full rounded-full bg-[#3B6651] p-2"><span v-if="loading"> <i class="fa fa-spinner fa-spin"></i> Loading</span><span v-else> Start AI
+        <Button id="start-button" type="button" @click="fetchGameAIvsAI(fmodel, smodel), setupCharts()" 
+          class="w-full rounded-full bg-[#3B6651] p-2"><span v-if="loading"> <i class="fa fa-spinner fa-spin"></i> Loading</span><span v-else-if="this.gameIsActive">{{ this.fmodel }} is playing against {{ this.smodel }}</span><span v-else> Start AI
           game</span></Button>
       </div>
       <div class="flex flex-row bg-[#afe0c8] rounded-[20px] border-[10px] border-[#5a9679]">
@@ -48,6 +50,7 @@ export default {
       totalRewardsList: [[0,0], [0,0], [0,0], [0,0], [0,0]],
       totalRewards: [0, 0],
       loading: false,
+      gameIsActive: false,
       fmodel: 'PPO',
       smodel: 'PPO',
       rewardChart: null,
@@ -82,6 +85,7 @@ export default {
   },
   methods: {
     async fetchGameAIvsAI(white_model, black_model) {
+      this.gameIsActive = true; 
       this.loading = true;
       document.getElementById("start-button").disabled = "true"; 
       const response = await fetch(`${baseUrl}/aigame`, {
@@ -107,6 +111,7 @@ export default {
       }
       console.log("Game finished");
       document.getElementById("start-button").removeAttribute('disabled');
+      
     },
     makeMove(board) {
       console.log(board);

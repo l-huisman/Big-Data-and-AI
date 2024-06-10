@@ -1,4 +1,7 @@
 <template>
+    <div>
+        <button class="w-[100px] text-white rounded-full bg-[#5a9679] p-2 m-4" @click="goBack()"><-</button>
+    </div>
     <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
             <Chessboard :board="this.move_request.board" :key="boardKey" @position-clicked="handlePositionClicked"
@@ -184,6 +187,9 @@ export default {
                 this.selectedImageIndex = index;
             }
         },
+        goBack() {
+            this.$router.push('/');
+        }
     }
 };
 

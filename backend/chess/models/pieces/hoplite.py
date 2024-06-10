@@ -1,11 +1,13 @@
+import chess.constants.moves as Moves
 from chess.models.pieces.piece import Piece
 from chess.models.pieces.queen import Queen
 from chess.models.types import Cell
-import chess.constants.moves as Moves
+
 
 class Hoplite(Piece):
     def __init__(self, position: Cell | None = None):
-        super().__init__(position=position, piece_number=8, possibles_length=7*4*2)
+        super().__init__(position=position, piece_number=8, possibles_length=7 * 4 * 2, upgradable=True,
+                         upgrade_options=[Queen()])
 
     def get_moves(self) -> tuple:
         return Moves.HOPLITE
@@ -40,7 +42,7 @@ class Hoplite(Piece):
             actions_mask[2] = 1
 
         # add 2 to front move, when piece has not moved
-        if (pos[0] == 1  and board.is_valid_move(pos, Cell(pos[0] + 2, pos[1]), turn, deny_enemy_king) and
+        if (not self.has_moved() and board.is_valid_move(pos, Cell(pos[0] + 2, pos[1]), turn, deny_enemy_king) and
                 board.is_tile_empty_on_both_side(Cell(pos[0] + 1, pos[1]), turn) and
                 board.is_tile_empty_on_both_side(Cell(pos[0] + 2, pos[1]), turn)):
             next_pos = Cell(pos[0] + 2, pos[1])

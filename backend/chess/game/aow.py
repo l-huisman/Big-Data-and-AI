@@ -60,9 +60,7 @@ class ArtOfWar(gym.Env):
             infos = [set(), set()]
             end_turn = False
         else:
-            rewards, infos = self.aow_logic.move_piece(
-                from_pos, next_pos, self.aow_logic.turn
-            )
+            rewards, infos = self.aow_logic.move_piece(from_pos, next_pos, self.aow_logic.turn, temp=False)
             end_turn = True
 
         rewards, infos = self.aow_logic.update_checks(rewards, infos)

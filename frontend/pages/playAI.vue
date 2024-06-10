@@ -113,7 +113,7 @@ export default {
     },
     async runAIvsAI(game, stats) {
       for (let i = 1; i < game.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         this.makeMove(game[i]);
         this.updateCharts(stats[i]);
       }

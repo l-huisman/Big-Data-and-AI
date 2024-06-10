@@ -8,7 +8,7 @@ from chess.utils.cell import CellUtils
 
 class DutchWaterline(ActionCard):
     def __init__(self):
-        super().__init__(1)
+        super().__init__(4)
 
     def get_actions(self, pos: Cell, board: 'AoWBoard', turn: int) -> tuple:
         possibles = np.zeros((4, 2), dtype=np.int32)

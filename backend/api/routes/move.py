@@ -21,7 +21,7 @@ class Move(BaseRoute):
 
     def execute(self) -> MoveResponse:
         self.logger.info(f"Received move request: {self.move_request}")
-        self.reset_environment()
+        # self.reset_environment()
 
         if self.agent is None:
             self.logger.error("No game has been initialized yet.")

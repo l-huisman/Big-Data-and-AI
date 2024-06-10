@@ -33,8 +33,7 @@
       </div>
       <div>
         <div v-if="!gameIsActive" class="ml-4 mt-4 text-2xl">
-          <div v-if="winner == 'Draw'">Game ended in a draw!</div>
-          <div v-else>{{ this.winner }} won the game!</div>
+          <div> {{this.winner}}</div>
         </div>
       </div>
     </div>
@@ -106,14 +105,20 @@ export default {
         })
       });
       const data = await response.json();
-      this.winner = data.winner;
-      console.log(data);
+      
+      if(data.winner == 'Draw'){
+        this.winner = 'The game ended in a draw!';
+      }
+      else {
+        this.winner = data.winner + ' has won the game!';
+      }
+      
       this.runAIvsAI(data.game, data.statistics);
       this.loading = false;
     },
     async runAIvsAI(game, stats) {
       for (let i = 1; i < game.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 0));
         this.makeMove(game[i]);
         this.updateCharts(stats[i]);
       }

@@ -53,7 +53,6 @@ class AoWLogic:
         all_actions_mask = []
         length = 0
         for name in self.aow_board.pieces[turn].keys():
-            # DENY ENEMY KING == FOR CHECKMATE VALIDATION ONLY SO ....
             if name == "king_1" and deny_enemy_king:
                 continue
 

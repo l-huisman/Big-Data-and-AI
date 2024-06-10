@@ -5,6 +5,7 @@ from api.models.requests import AIGameRequest
 from api.models.responses import AIGameResponse
 from api.routes.base import BaseRoute
 from buffer.episode import Episode
+from chess.constants.info_keys import CHECK_MATE_WIN, CHECK_MATE_LOSE, DRAW
 
 
 class AiGame(BaseRoute):
@@ -52,15 +53,25 @@ class AiGame(BaseRoute):
         return PPOChess(self.env, self.get_ppo(), 1, 32, "", white_model, black_model)
 
     def play_game(self, agent, episode) -> AIGameResponse:
-        response = AIGameResponse(game=[], statistics=[], possibles=[], source_pos=[], action_mask=[])
+        response = AIGameResponse(game=[], statistics=[], possibles=[], source_pos=[], action_mask=[], winner="")
 
         response.game.append(agent.env.aow_board.get_numeric_board().tolist())
         response.statistics.append({"rewards": [0, 0], "infos": [[], []], "end": False})
 
         done = False
+        info = None
         while not done:
-            done, _ = agent.take_action(agent.env.aow_logic.turn, episode)
-            response.statistics.append({"rewards": _[1], "infos": _[7], "end": done})
+            done, info = agent.take_action(agent.env.aow_logic.turn, episode)
+            response.statistics.append({"rewards": info[1], "infos": info[7], "end": done})
             response.game.append(agent.env.aow_board.get_numeric_board().tolist())
+
+        if CHECK_MATE_WIN in info[7][0]:
+            response.winner = "White"
+        elif CHECK_MATE_WIN in info[7][1]:
+            response.winner = "Black"
+        elif CHECK_MATE_WIN not in info[7][0] and CHECK_MATE_WIN not in info[7][1]:
+            response.winner = "Draw"
+
+        print(response.winner)
         self.logger.info("AI game completed.")
         return response

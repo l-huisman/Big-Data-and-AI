@@ -31,6 +31,12 @@
           <div id="summary-reward-chart" style="width: 100%; height: 300px; padding-top: 20px;"></div>
         </div>
       </div>
+      <div>
+        <div v-if="!gameIsActive" class="ml-4 mt-4 text-2xl">
+          <div v-if="winner == 'Draw'">Game ended in a draw!</div>
+          <div v-else>{{ this.winner }} won the game!</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -51,6 +57,7 @@ export default {
       totalRewards: [0, 0],
       loading: false,
       gameIsActive: false,
+      winner: "",
       fmodel: 'PPO',
       smodel: 'PPO',
       rewardChart: null,
@@ -58,7 +65,7 @@ export default {
       rewards: [],
       boardKey: 0,
       board: [[
-        [4, 3, 2, 6, 5, 2, 3, 4],
+        [4, 3, 2, 5, 6, 2, 3, 4],
         [1, 1, 1, 1, 1, 1, 1, 1],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -68,7 +75,7 @@ export default {
         [0, 0, 0, 0, 0, 0, 0, 0]
       ],
       [
-        [4, 3, 2, 6, 5, 2, 3, 4],
+        [4, 3, 2, 5, 6, 2, 3, 4],
         [1, 1, 1, 1, 1, 1, 1, 1],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -99,22 +106,22 @@ export default {
         })
       });
       const data = await response.json();
+      this.winner = data.winner;
       console.log(data);
       this.runAIvsAI(data.game, data.statistics);
       this.loading = false;
     },
     async runAIvsAI(game, stats) {
       for (let i = 1; i < game.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 0));
         this.makeMove(game[i]);
         this.updateCharts(stats[i]);
       }
-      console.log("Game finished");
+      this.gameIsActive = false;
       document.getElementById("start-button").removeAttribute('disabled');
       
     },
     makeMove(board) {
-      console.log(board);
       this.board = board;
       this.boardKey++;
     },

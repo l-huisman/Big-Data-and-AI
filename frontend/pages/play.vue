@@ -6,7 +6,7 @@
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">
-                <div>Turn 1</div>
+                <div>Turn {{ this.turn }}</div>
                 <div v-if="pointsBoard1 >= pointsBoard2"> + {{ Math.abs(pointsBoard1 - pointsBoard2) }}</div>
                 <div v-else> - {{ Math.abs(pointsBoard1 - pointsBoard2) }}</div>
             </div>
@@ -57,6 +57,7 @@ export default {
             selectedImageIndex: null,
             boardKey: 0,
             gameEnded: false,
+            turn: 1,
             move_request: {
                 move: '',
                 turn: 1,
@@ -124,6 +125,7 @@ export default {
 
                     setTimeout(() => {
                         this.move_request.board = response.data.combinedMoveBoard;
+                        this.turn++;
                         this.boardKey++;
                     }, 1000);
 

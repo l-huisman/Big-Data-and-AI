@@ -8,7 +8,6 @@ class AIGameResponse(BaseModel):
     possibles: list
     action_mask: list
     winner: str
-    
 
 
 class MoveResponse(BaseModel):
@@ -17,9 +16,12 @@ class MoveResponse(BaseModel):
     cards: list
     resources: list
     has_game_ended: bool
+    infos: list
+
 
 class ActionResponse(BaseModel):
     possibleMoves: list
+
 
 class InitializeResponse(BaseModel):
     board: list

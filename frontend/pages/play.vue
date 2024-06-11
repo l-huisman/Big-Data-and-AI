@@ -152,7 +152,6 @@ export default {
                 });
         },
         checkWinner(info) {
-            print(info)
             console.log(info[0][0]);
             console.log(info[1][1]);
             if (info[0][0] == 'check_mate_win') {

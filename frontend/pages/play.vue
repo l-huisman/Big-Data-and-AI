@@ -196,7 +196,7 @@ export default {
             for (let i = 0; i < indexes.length; i++) {
                 if (this.selectedImageIndex === 1 && this.move_request.resources[1] >= 4 && !this.waterlineCardUsed) {
                     document.getElementById(indexes[i]).style.border = '#000 2px solid';
-                } else {
+                } else if (this.selectedImageIndex === 1) {
                     document.getElementById(indexes[i]).style.border = '#000 0px solid';
                     this.selectedImageIndex = null;
                 }

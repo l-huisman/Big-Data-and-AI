@@ -9,16 +9,18 @@
     </div>
     <div class="ml-[50px] flex flex-col w-[45%]">
       <div class="flex flex-row bg-[#5a9679] rounded-[5px] border-[7px] border-[#5a9679] mb-2">
-        <select v-model="fmodel" class="bg-[#5a9679]" name="firstmodel" id="firstmodel">
+        <select v-if="!gameIsActive" v-model="fmodel" class="bg-[#5a9679]" name="firstmodel" id="firstmodel">
           <option value="PPO">PPO</option>
           <option value="DQN">DQN</option>
+          <option value="A2C">A2C</option>
         </select>
-        <select v-model="smodel" class="bg-[#5a9679]" name="secondmodel" id="secondmodel">
+        <select v-if="!gameIsActive" v-model="smodel" class="bg-[#5a9679]" name="secondmodel" id="secondmodel">
           <option value="PPO">PPO</option>
           <option value="DQN">DQN</option>
+          <option value="A2C">A2C</option>
         </select>
-        <Button id="start-button" type="button"  @click="fetchGameAIvsAI(fmodel, smodel), setupCharts()" 
-          class="w-full rounded-full bg-[#3B6651] p-2"><span v-if="loading"> <i class="fa fa-spinner fa-spin"></i> Loading</span><span v-else> Start AI
+        <Button id="start-button" type="button" @click="fetchGameAIvsAI(fmodel, smodel), setupCharts()" 
+          class="w-full rounded-full bg-[#3B6651] p-2"><span v-if="loading"> <i class="fa fa-spinner fa-spin"></i> Loading</span><span v-else-if="this.gameIsActive">{{ this.fmodel }} is playing against {{ this.smodel }}</span><span v-else> Start AI
           game</span></Button>
       </div>
       <div class="flex flex-row bg-[#afe0c8] rounded-[20px] border-[10px] border-[#5a9679]">
@@ -27,6 +29,11 @@
         </div>
         <div class="w-1/2">
           <div id="summary-reward-chart" style="width: 100%; height: 300px; padding-top: 20px;"></div>
+        </div>
+      </div>
+      <div>
+        <div v-if="!gameIsActive" class="ml-4 mt-4 text-2xl">
+          <div> {{this.winner}}</div>
         </div>
       </div>
     </div>
@@ -48,6 +55,8 @@ export default {
       totalRewardsList: [[0,0], [0,0], [0,0], [0,0], [0,0]],
       totalRewards: [0, 0],
       loading: false,
+      gameIsActive: false,
+      winner: "",
       fmodel: 'PPO',
       smodel: 'PPO',
       rewardChart: null,
@@ -55,7 +64,7 @@ export default {
       rewards: [],
       boardKey: 0,
       board: [[
-        [4, 3, 2, 6, 5, 2, 3, 4],
+        [4, 3, 2, 5, 6, 2, 3, 4],
         [1, 1, 1, 1, 1, 1, 1, 1],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -65,7 +74,7 @@ export default {
         [0, 0, 0, 0, 0, 0, 0, 0]
       ],
       [
-        [4, 3, 2, 6, 5, 2, 3, 4],
+        [4, 3, 2, 5, 6, 2, 3, 4],
         [1, 1, 1, 1, 1, 1, 1, 1],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -82,6 +91,7 @@ export default {
   },
   methods: {
     async fetchGameAIvsAI(white_model, black_model) {
+      this.gameIsActive = true; 
       this.loading = true;
       document.getElementById("start-button").disabled = "true"; 
       const response = await fetch(`${baseUrl}/aigame`, {
@@ -95,9 +105,18 @@ export default {
         })
       });
       const data = await response.json();
-      console.log(data);
+      
+      this.checkWinner(data);
       this.runAIvsAI(data.game, data.statistics);
       this.loading = false;
+    },
+    checkWinner(data) {
+      if(data.winner == 'Draw'){
+        this.winner = 'The game ended in a draw!';
+      }
+      else {
+        this.winner = data.winner + ' has won the game!';
+      }
     },
     async runAIvsAI(game, stats) {
       for (let i = 1; i < game.length; i++) {
@@ -105,11 +124,11 @@ export default {
         this.makeMove(game[i]);
         this.updateCharts(stats[i]);
       }
-      console.log("Game finished");
+      this.gameIsActive = false;
       document.getElementById("start-button").removeAttribute('disabled');
+      
     },
     makeMove(board) {
-      console.log(board);
       this.board = board;
       this.boardKey++;
     },

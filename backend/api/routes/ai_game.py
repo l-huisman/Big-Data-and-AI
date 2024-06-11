@@ -5,6 +5,7 @@ from api.models.requests import AIGameRequest
 from api.models.responses import AIGameResponse
 from api.routes.base import BaseRoute
 from buffer.episode import Episode
+from chess.constants.info_keys import CHECK_MATE_WIN, CHECK_MATE_LOSE, DRAW
 
 
 class AiGame(BaseRoute):
@@ -34,6 +35,8 @@ class AiGame(BaseRoute):
                 white_model = self.WHITE_PPO_PATH
             case "DQN":
                 white_model = self.WHITE_DQN_PATH
+            case "A2C":
+                white_model = self.WHITE_A2C_PATH
             case _:
                 white_model = self.WHITE_PPO_PATH
 
@@ -42,21 +45,35 @@ class AiGame(BaseRoute):
                 black_model = self.BLACK_PPO_PATH
             case "DQN":
                 black_model = self.BLACK_DQN_PATH
+            case "A2C":
+                black_model = self.BLACK_A2C_PATH
             case _:
                 black_model = self.BLACK_PPO_PATH
 
         return PPOChess(self.env, self.get_ppo(), 1, 32, "", white_model, black_model)
 
     def play_game(self, agent, episode) -> AIGameResponse:
-        response = AIGameResponse(game=[], statistics=[], possibles=[], source_pos=[], action_mask=[])
+        response = AIGameResponse(game=[], statistics=[], possibles=[], source_pos=[], action_mask=[], winner="")
 
         response.game.append(agent.env.aow_board.get_numeric_board().tolist())
         response.statistics.append({"rewards": [0, 0], "infos": [[], []], "end": False})
 
         done = False
+        info = None
         while not done:
-            done, _ = agent.take_action(agent.env.aow_logic.turn, episode)
-            response.statistics.append({"rewards": _[1], "infos": _[7], "end": done})
+            done, info = agent.take_action(agent.env.aow_logic.turn, episode)
+            response.statistics.append({"rewards": info[1], "infos": info[7], "end": done})
             response.game.append(agent.env.aow_board.get_numeric_board().tolist())
+
+        response = self.check_winner(info[7], response)
         self.logger.info("AI game completed.")
+        return response
+    
+    def check_winner(self, info, response):
+        if CHECK_MATE_WIN in info[0]:
+            response.winner = "White"
+        elif CHECK_MATE_WIN in info[1]:
+            response.winner = "Black"
+        elif CHECK_MATE_WIN not in info[0] and CHECK_MATE_WIN not in info[1]:
+            response.winner = "Draw"
         return response

@@ -4,7 +4,7 @@
     </div>
     <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
-            <Chessboard :board="this.move_request.board" :key="boardKey" @position-clicked="handlePositionClicked"
+            <Chessboard :board="this.move_request.board" :cards="this.selectedImageIndex" :key="boardKey" @position-clicked="handlePositionClicked"
                 :isAIGame="false" ref="aowboard" />
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
@@ -54,8 +54,8 @@ export default {
         return {
             errorMessage: '',
             imageRows: [
-                ['hoplite', 'hoplite', 'hoplite'],
-                ['winged knight', 'dutch waterline', 'war elefant']
+                ['hoplite', 'winged knight'],
+                ['dutch waterline', 'war elefant']
             ],
             selectedImageIndex: null,
             boardKey: 0,
@@ -104,7 +104,6 @@ export default {
             this.gameEnded = false;
             axios.get(`${baseUrl}/initialize`)
                 .then(response => {
-                    console.log(response.data);
                     this.move_request.board = response.data.board;
                     this.move_request.resources = response.data.resources;
                     this.boardKey++;
@@ -135,7 +134,6 @@ export default {
                 })
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);
-                    console.log(this.move_request.move)
                     this.errorMessage = error.response.data.detail;
                     this.move_request.board[1].reverse();
                     this.move_request.move = '';

@@ -7,6 +7,7 @@ class AIGameResponse(BaseModel):
     source_pos: list
     possibles: list
     action_mask: list
+    winner: str
     
 
 

@@ -35,17 +35,18 @@
 
 
 <script>
-import axios from 'axios';
 import { baseUrl } from '../base-url.js';
 
 export default {
   props: {
     board: Array,
-    isAIGame: Boolean
+    isAIGame: Boolean,
+    cards: Int8Array,
   },
   data() {
     return {
       gameBoard: this.board,
+      cards: this.cards,
       dict: [],
       numbers: [1, 2, 3, 4, 5, 6, 7, 8],
       whitePieces: [],
@@ -90,10 +91,11 @@ export default {
       const column = String.fromCharCode(97 + (index % 8));
       const position = column + row;
       this.position = this.position + position;
-
       this.possibleMoves = await this.calculatePossibleMoves(this.position);
-
-      if (this.position.length === 2) {
+      if(this.cards == 0 || this.cards == 3 || this.cards == 4){
+        this.position = this.position + this.position;
+      }
+      else if (this.position.length === 2) {
         return;
       }
 

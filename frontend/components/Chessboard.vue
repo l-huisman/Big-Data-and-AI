@@ -43,6 +43,7 @@ export default {
     isAIGame: Boolean,
     cardId: Number,
     cards: Int8Array,
+    cardId: Number
   },
   data() {
     return {

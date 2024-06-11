@@ -92,7 +92,6 @@ export default {
       const position = column + row;
       this.position = this.position + position;
       this.possibleMoves = await this.calculatePossibleMoves(this.position);
-      console.log(this.position);
       if(this.cards == 0 || this.cards == 3 || this.cards == 4){
         this.position = this.position + this.position;
       }

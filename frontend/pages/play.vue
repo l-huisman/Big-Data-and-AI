@@ -134,7 +134,6 @@ export default {
                 })
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);
-                    console.log(this.move_request.move)
                     this.errorMessage = error.response.data.detail;
                     this.move_request.board[1].reverse();
                     this.move_request.move = '';

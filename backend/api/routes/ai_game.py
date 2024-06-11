@@ -65,13 +65,15 @@ class AiGame(BaseRoute):
             response.statistics.append({"rewards": info[1], "infos": info[7], "end": done})
             response.game.append(agent.env.aow_board.get_numeric_board().tolist())
 
+        response = self.check_winner(info, response)
+        self.logger.info("AI game completed.")
+        return response
+    
+    def check_winner(self, info, response):
         if CHECK_MATE_WIN in info[7][0]:
             response.winner = "White"
         elif CHECK_MATE_WIN in info[7][1]:
             response.winner = "Black"
         elif CHECK_MATE_WIN not in info[7][0] and CHECK_MATE_WIN not in info[7][1]:
             response.winner = "Draw"
-
-        print(response.winner)
-        self.logger.info("AI game completed.")
         return response

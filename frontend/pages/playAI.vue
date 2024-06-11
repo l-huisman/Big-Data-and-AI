@@ -106,19 +106,21 @@ export default {
       });
       const data = await response.json();
       
+      this.checkWinner(data);
+      this.runAIvsAI(data.game, data.statistics);
+      this.loading = false;
+    },
+    checkWinner(data) {
       if(data.winner == 'Draw'){
         this.winner = 'The game ended in a draw!';
       }
       else {
         this.winner = data.winner + ' has won the game!';
       }
-      
-      this.runAIvsAI(data.game, data.statistics);
-      this.loading = false;
     },
     async runAIvsAI(game, stats) {
       for (let i = 1; i < game.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         this.makeMove(game[i]);
         this.updateCharts(stats[i]);
       }

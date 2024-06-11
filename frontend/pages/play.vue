@@ -4,8 +4,8 @@
     </div>
     <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
-            <Chessboard :board="this.move_request.board" :cards="this.selectedImageIndex" :key="boardKey" @position-clicked="handlePositionClicked"
-                :isAIGame="false" ref="aowboard" />
+            <Chessboard :board="this.move_request.board" :key="boardKey" @position-clicked="handlePositionClicked"
+                :isAIGame="false" :cardId="this.selectedImageIndex" ref="aowboard" />
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">
@@ -60,6 +60,7 @@ export default {
             selectedImageIndex: null,
             boardKey: 0,
             gameEnded: false,
+            waterlineCardUsed: false,
             turn: 1,
             move_request: {
                 move: '',
@@ -102,6 +103,7 @@ export default {
     methods: {
         initialize() {
             this.gameEnded = false;
+            this.waterlineCardUsed = false;
             axios.get(`${baseUrl}/initialize`)
                 .then(response => {
                     this.move_request.board = response.data.board;
@@ -124,6 +126,7 @@ export default {
                     this.move_request.resources = response.data.resources;
                     this.move_request.board = response.data.playerMoveBoard;
                     this.boardKey++;
+                    this.selectedImageIndex = null;
 
                     setTimeout(() => {
                         this.move_request.board = response.data.combinedMoveBoard;
@@ -137,10 +140,12 @@ export default {
                     this.errorMessage = error.response.data.detail;
                     this.move_request.board[1].reverse();
                     this.move_request.move = '';
+                    this.selectedImageIndex = null;
                 });
         },
         handlePositionClicked(position) {
             if (!this.gameEnded) {
+                this.checkForWaterlineMove(position);
                 this.move_request.move = position;
                 this.makeMove();
             }
@@ -179,15 +184,37 @@ export default {
             return `/_nuxt/assets/images/cards/${imageName}.png`;
         },
         handleImageClick(index) {
+            this.colorSquares();
             if (this.selectedImageIndex === index) {
                 this.selectedImageIndex = null;
             } else {
                 this.selectedImageIndex = index;
             }
+
+            // Color the squares with index 16, 24, 32, 40
+            const indexes = [16, 24, 32, 40];
+            for (let i = 0; i < indexes.length; i++) {
+                if (this.selectedImageIndex === 1 && this.move_request.resources[1] >= 4 && !this.waterlineCardUsed) {
+                    document.getElementById(indexes[i]).style.border = '#000 2px solid';
+                } else if (this.selectedImageIndex === 1) {
+                    document.getElementById(indexes[i]).style.border = '#000 0px solid';
+                    this.selectedImageIndex = null;
+                }
+            }
+        },
+        checkForWaterlineMove(position) {
+            if (position == 'a3h8' || position == 'a6h8' || position == 'a4h8' || position == 'a5h8') {
+                this.waterlineCardUsed = true;
+            }
         },
         goBack() {
             this.$router.push('/');
-        }
+        },
+        colorSquares() {
+            for (let i = 0; i < 64; i++) {
+                document.getElementById(i).style.border = '#000 0px solid'
+            }
+        },
     }
 };
 

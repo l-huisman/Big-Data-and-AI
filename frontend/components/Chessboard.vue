@@ -41,6 +41,7 @@ export default {
   props: {
     board: Array,
     isAIGame: Boolean,
+    cardId: Number,
     cards: Int8Array,
   },
   data() {
@@ -89,6 +90,14 @@ export default {
       const row = Math.floor(index / 8) + 1;
       const column = String.fromCharCode(97 + (index % 8));
       const position = column + row;
+
+      if (this.cardId == 4) {
+        this.checkForWaterlineMove(position);
+        this.$emit('position-clicked', this.position);
+        this.position = '';
+        return;
+      }
+
       this.position = this.position + position;
       this.possibleMoves = await this.calculatePossibleMoves(this.position);
       if(this.cards == 0 || this.cards == 3 || this.cards == 4){
@@ -158,6 +167,20 @@ export default {
           }
 
         }
+      }
+    },
+    checkForWaterlineMove(position) {
+      if (position == 'a3') {
+        this.position = 'a6h8';
+      }
+      else if (position == 'a4') {
+        this.position = 'a5h8';
+      }
+      else if (position == 'a5') {
+        this.position = 'a4h8';
+      }
+      else if (position == 'a6') {
+        this.position = 'a3h8';
       }
     },
     getPieceImagePath(pieceNumber, color) {

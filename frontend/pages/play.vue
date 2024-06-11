@@ -4,8 +4,8 @@
     </div>
     <div class="flex w-screen mt-[155px] text-white">
         <div class="ml-[10%] text-2xl">
-            <Chessboard :board="this.move_request.board" :cards="this.selectedImageIndex" :key="boardKey" @position-clicked="handlePositionClicked"
-                :isAIGame="false" ref="aowboard" />
+            <Chessboard :board="this.move_request.board" :key="boardKey" @position-clicked="handlePositionClicked"
+                :isAIGame="false" :cardId="this.selectedImageIndex" ref="aowboard" />
         </div>
         <div class="ml-[50px] flex flex-col w-[40%]">
             <div class="flex flex-row justify-between h-[100px] text-2xl">

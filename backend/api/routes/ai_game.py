@@ -71,9 +71,9 @@ class AiGame(BaseRoute):
     
     def check_winner(self, info, response):
         if CHECK_MATE_WIN in info[0]:
-            response.winner = "White"
-        elif CHECK_MATE_WIN in info[1]:
             response.winner = "Black"
+        elif CHECK_MATE_WIN in info[1]:
+            response.winner = "White"
         elif CHECK_MATE_WIN not in info[0] and CHECK_MATE_WIN not in info[1]:
             response.winner = "Draw"
         return response

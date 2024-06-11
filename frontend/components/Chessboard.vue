@@ -91,10 +91,11 @@ export default {
       const position = column + row;
 
       if (this.cardId == 4) {
-        this.checkForWaterlineMove(position);
-        this.$emit('position-clicked', this.position);
-        this.position = '';
-        return;
+        if (this.checkForWaterlineMove(position)){
+          this.$emit('position-clicked', this.position);
+          this.position = '';
+          return;
+        }
       }
 
       this.position = this.position + position;
@@ -133,7 +134,6 @@ export default {
       });
       this.gameBoard[1].reverse();
       const data = await response.json();
-      console.log(data.possibleMoves)
       for (let move of data.possibleMoves) {
         this.colorPossibleMoves(move);
       }
@@ -179,7 +179,10 @@ export default {
       }
       else if (position == 'a6') {
         this.position = 'a3h8';
+      } else {
+        return false;
       }
+      return true;
     },
     getPieceImagePath(pieceNumber, color) {
       if (color == 'white') {

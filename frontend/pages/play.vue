@@ -60,6 +60,7 @@ export default {
             selectedImageIndex: null,
             boardKey: 0,
             gameEnded: false,
+            waterlineCardUsed: false,
             turn: 1,
             move_request: {
                 move: '',
@@ -102,9 +103,9 @@ export default {
     methods: {
         initialize() {
             this.gameEnded = false;
+            this.waterlineCardUsed = false;
             axios.get(`${baseUrl}/initialize`)
                 .then(response => {
-                    console.log(response.data);
                     this.move_request.board = response.data.board;
                     this.move_request.resources = response.data.resources;
                     this.boardKey++;
@@ -144,8 +145,8 @@ export default {
                 });
         },
         handlePositionClicked(position) {
-            console.log('position clicked:', position)
             if (!this.gameEnded) {
+                this.checkForWaterlineMove(position);
                 this.move_request.move = position;
                 this.makeMove();
             }
@@ -184,27 +185,37 @@ export default {
             return `/_nuxt/assets/images/cards/${imageName}.png`;
         },
         handleImageClick(index) {
+            this.colorSquares();
             if (this.selectedImageIndex === index) {
                 this.selectedImageIndex = null;
             } else {
                 this.selectedImageIndex = index;
             }
-            console.log(this.selectedImageIndex);
-            console.log(this.move_request.resources[1]);
 
             // Color the squares with index 16, 24, 32, 40
             const indexes = [16, 24, 32, 40];
             for (let i = 0; i < indexes.length; i++) {
-                if (this.selectedImageIndex === 4 && this.move_request.resources[1] >= 4) {
+                if (this.selectedImageIndex === 4 && this.move_request.resources[1] >= 4 && !this.waterlineCardUsed) {
                     document.getElementById(indexes[i]).style.border = '#000 2px solid';
                 } else {
                     document.getElementById(indexes[i]).style.border = '#000 0px solid';
+                    this.selectedImageIndex = null;
                 }
+            }
+        },
+        checkForWaterlineMove(position) {
+            if (position == 'a3h8' || position == 'a6h8' || position == 'a4h8' || position == 'a5h8') {
+                this.waterlineCardUsed = true;
             }
         },
         goBack() {
             this.$router.push('/');
-        }
+        },
+        colorSquares() {
+            for (let i = 0; i < 64; i++) {
+                document.getElementById(i).style.border = '#000 0px solid'
+            }
+        },
     }
 };
 

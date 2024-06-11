@@ -38,6 +38,7 @@
     </div>
     <div v-else class="ml-[10%] text-white">
         <button class="bg-[#123456] pl-[15px] pr-[15px] pb-[3px] pt-[3px]" @click="initialize()">Play again</button>
+        <div>{{ this.winner }}</div>
     </div>
 </template>
 
@@ -60,9 +61,11 @@ export default {
             selectedImageIndex: null,
             boardKey: 0,
             gameEnded: false,
+            winner: '',
             waterlineCardUsed: false,
             turn: 1,
             move_request: {
+                infos: [],
                 move: '',
                 turn: 1,
                 resources: [],
@@ -122,11 +125,16 @@ export default {
                     this.errorMessage = '';
                     this.move_request.move = '';
 
+                    this.infos = response.data.infos;
                     this.gameEnded = response.data.has_game_ended;
                     this.move_request.resources = response.data.resources;
                     this.move_request.board = response.data.playerMoveBoard;
                     this.boardKey++;
                     this.selectedImageIndex = null;
+
+                    if(this.gameEnded) {
+                        this.checkWinner(this.infos);
+                    }
 
                     setTimeout(() => {
                         this.move_request.board = response.data.combinedMoveBoard;
@@ -142,6 +150,18 @@ export default {
                     this.move_request.move = '';
                     this.selectedImageIndex = null;
                 });
+        },
+        checkWinner(info) {
+            print(info)
+            console.log(info[0][0]);
+            console.log(info[1][1]);
+            if (info[0][0] == 'check_mate_win') {
+                this.winner = 'Black won the game!';
+            } else if (info[1][1] == 'check_mate_win') {
+                this.winner = 'White won the game!';
+            } else {
+                this.winner ='The game ended in a draw!';
+            }
         },
         handlePositionClicked(position) {
             if (!this.gameEnded) {

@@ -5,7 +5,7 @@ from api.models.requests import AIGameRequest
 from api.models.responses import AIGameResponse
 from api.routes.base import BaseRoute
 from buffer.episode import Episode
-from chess.constants.info_keys import CHECK_MATE_WIN, CHECK_MATE_LOSE, DRAW
+from chess.constants.info_keys import CHECK_MATE_WIN
 
 
 class AiGame(BaseRoute):

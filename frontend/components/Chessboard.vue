@@ -42,13 +42,10 @@ export default {
     board: Array,
     isAIGame: Boolean,
     cardId: Number,
-    cards: Int8Array,
-    cardId: Number
   },
   data() {
     return {
       gameBoard: this.board,
-      cards: this.cards,
       dict: [],
       whitePieces: [],
       blackPieces: [],
@@ -92,7 +89,7 @@ export default {
       const column = String.fromCharCode(97 + (index % 8));
       const position = column + row;
 
-      if (this.cardId == 4) {
+      if (this.cardId == 1) {
         if (this.checkForWaterlineMove(position)){
           this.$emit('position-clicked', this.position);
           this.position = '';
@@ -102,7 +99,7 @@ export default {
 
       this.position = this.position + position;
       this.possibleMoves = await this.calculatePossibleMoves(this.position);
-      if(this.cards == 0 || this.cards == 3 || this.cards == 4){
+      if(this.cardId == 0 || this.cardId == 3 || this.cardId == 4){
         this.position = this.position + this.position;
       }
       else if (this.position.length === 2) {

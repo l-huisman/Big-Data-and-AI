@@ -194,7 +194,7 @@ export default {
             // Color the squares with index 16, 24, 32, 40
             const indexes = [16, 24, 32, 40];
             for (let i = 0; i < indexes.length; i++) {
-                if (this.selectedImageIndex === 4 && this.move_request.resources[1] >= 4 && !this.waterlineCardUsed) {
+                if (this.selectedImageIndex === 1 && this.move_request.resources[1] >= 4 && !this.waterlineCardUsed) {
                     document.getElementById(indexes[i]).style.border = '#000 2px solid';
                 } else {
                     document.getElementById(indexes[i]).style.border = '#000 0px solid';

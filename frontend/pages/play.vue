@@ -152,8 +152,6 @@ export default {
                 });
         },
         checkWinner(info) {
-            console.log(info[0][0]);
-            console.log(info[1][1]);
             if (info[0][0] == 'check_mate_win') {
                 this.winner = 'Black won the game!';
             } else if (info[1][1] == 'check_mate_win') {

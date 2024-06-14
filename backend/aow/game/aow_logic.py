@@ -149,14 +149,13 @@ class AoWLogic:
         return rewards, infos
 
     def move_piece(self, src: Cell, dst: Cell, turn: int, temp: bool = True) -> tuple[list[int], list[set]]:
-        src = CellUtils.make_cell(src)
-        dst = CellUtils.make_cell(dst)
+        src, dst = CellUtils.make_cell(src), CellUtils.make_cell(dst)
 
         selected_piece = self.aow_board.get_piece(src, turn)
         selected_piece.set_has_moved()
 
         if self.aow_board.is_piece(1 - turn, Cell(7 - dst.row, dst.col), King()):
-            return [-100, -100], [set(), set()]
+            return [0, 0], [set(), set()]
 
         # move piece
         self.aow_board.set_piece(turn, src, Empty())
@@ -169,6 +168,7 @@ class AoWLogic:
         rewards = [Rewards.MOVE, Rewards.MOVE]
         rewards[1 - turn] *= 0
 
+        # Check some special moves like castling and pawn capture by war elephant
         self.capture_pawn_by_warelephant(dst.row, dst.col, src.row, src.col, turn)
         self.castle(src, dst, turn)
 

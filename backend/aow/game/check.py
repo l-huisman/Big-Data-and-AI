@@ -1,13 +1,12 @@
 from aow.models import Cell
-from aow.models.pieces.pawn import Pawn
-from aow.models.pieces.knight import Knight
-from aow.models.pieces.winged_knight import Wingedknight
-from aow.models.pieces.hoplite import Hoplite
 from aow.models.pieces.bishop import Bishop
+from aow.models.pieces.hoplite import Hoplite
+from aow.models.pieces.knight import Knight
+from aow.models.pieces.pawn import Pawn
 from aow.models.pieces.queen import Queen
 from aow.models.pieces.rook import Rook
 from aow.models.pieces.war_elephant import Warelephant
-
+from aow.models.pieces.winged_knight import Wingedknight
 from aow.utils.cell import CellUtils
 
 
@@ -21,7 +20,7 @@ class Check:
         diagonal_pieces = (Bishop, Queen)
         straight_pieces = (Rook, Queen, Warelephant)
 
-        if self.is_check_diagonal(king_pos, diagonal_pieces, turn):
+        if self.is_check_diagonals(king_pos, diagonal_pieces, turn):
             return True
 
         if self.is_check_horizontal(king_pos, straight_pieces, turn):
@@ -91,23 +90,17 @@ class Check:
             break
         return False
 
-    def is_check_diagonal(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
-        if self.is_check_diagonal_up(king_pos, pieces_to_check, turn):
-            return True
-
-        if self.is_check_diagonal_down(king_pos, pieces_to_check, turn):
-            return True
-
-        return False
+    def is_check_diagonals(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
+        return (self.is_check_diagonal_down(king_pos, pieces_to_check, turn) or
+                self.is_check_diagonal_up(king_pos, pieces_to_check, turn))
 
     def is_check_diagonal_up(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
-        if self.is_check_diagonal_up_right(king_pos, pieces_to_check, turn):
-            return True
+        return (self.is_check_diagonal_up_right(king_pos, pieces_to_check, turn) or
+                self.is_check_diagonal_up_left(king_pos, pieces_to_check, turn))
 
-        if self.is_check_diagonal_up_left(king_pos, pieces_to_check, turn):
-            return True
-
-        return False
+    def is_check_diagonal_down(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
+        return (self.is_check_diagonal_down_right(king_pos, pieces_to_check, turn) or
+                self.is_check_diagonal_down_left(king_pos, pieces_to_check, turn))
 
     def is_check_diagonal_up_right(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
         for r in range(king_pos.row - 1, -1, -1):
@@ -131,7 +124,6 @@ class Check:
 
     def is_check_diagonal_up_left(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
         for r in range(king_pos.row - 1, -1, -1):
-            # RIGHT
             d = r - king_pos.row
             if not self.aow_board.is_in_range(Cell(r, king_pos.col - d)):
                 break
@@ -150,18 +142,8 @@ class Check:
             break
         return False
 
-    def is_check_diagonal_down(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
-        if self.is_check_diagonal_down_right(king_pos, pieces_to_check, turn):
-            return True
-
-        if self.is_check_diagonal_down_left(king_pos, pieces_to_check, turn):
-            return True
-
-        return False
-
     def is_check_diagonal_down_right(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
         for r in range(king_pos.row + 1, 8):
-            # RIGHT
             d = r - king_pos.row
             if not self.aow_board.is_in_range(Cell(r, king_pos.col + d)):
                 break
@@ -176,13 +158,11 @@ class Check:
 
             if d == 1 and (isinstance(p, Pawn) or isinstance(p, Hoplite)):
                 return True
-
             break
         return False
 
     def is_check_diagonal_down_left(self, king_pos: Cell, pieces_to_check: tuple, turn: int) -> bool:
         for r in range(king_pos.row + 1, 8):
-            # RIGHT
             d = r - king_pos.row
             if not self.aow_board.is_in_range(Cell(r, king_pos.col - d)):
                 break

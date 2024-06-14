@@ -1,4 +1,6 @@
 import logging
+import os
+from dotenv import load_dotenv
 
 from fastapi import HTTPException
 
@@ -9,18 +11,19 @@ BOARD_LENGTH = 8
 BOARD_WIDTH = 8
 BOARD_SIDES = 2
 
+load_dotenv()
 
 class BaseRoute:
     def __init__(self, env):
         self.logger = logging.getLogger(__name__)
         self.env = env
 
-    WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
-    BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
-    WHITE_DQN_PATH = 'results/DoubleAgentsDQN/white_dict.pt'
-    BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
-    WHITE_A2C_PATH = 'results/DoubleAgentsA2C/white_dict.pt'
-    BLACK_A2C_PATH = 'results/DoubleAgentsA2C/black_dict.pt'
+    WHITE_PPO_PATH = os.getenv("PPO_RESULT_FOLDER") + '/white_dict.pt'
+    BLACK_PPO_PATH = os.getenv("PPO_RESULT_FOLDER") + '/black_dict.pt'
+    WHITE_DQN_PATH = os.getenv("DQN_RESULT_FOLDER") + '/white_dict.pt'
+    BLACK_DQN_PATH = os.getenv("DQN_RESULT_FOLDER") + '/black_dict.pt'
+    WHITE_A2C_PATH = os.getenv("A2C_RESULT_FOLDER") + '/white_dict.pt'
+    BLACK_A2C_PATH = os.getenv("A2C_RESULT_FOLDER") + '/black_dict.pt'
 
     def execute(self):
         raise NotImplementedError()
@@ -57,8 +60,12 @@ class BaseRoute:
     def get_ppo(self):
         return PPO(
             self.env,
-            hidden_layers=(2048,) * 4,
-            epochs=100,
-            buffer_size=32 * 2,
-            batch_size=128,
+            hidden_layers=(int(os.getenv("PPO_HIDDEN_LAYERS_SIZE")),) * int(os.getenv("PPO_HIDDEN_LAYERS_COUNT")),
+            epochs=int(os.getenv("PPO_EPOCHS")),
+            buffer_size=int(os.getenv("BUFFER_SIZE")) * 2,
+            batch_size=int(os.getenv("BATCH_SIZE")),
+            gamma=float(os.getenv("PPO_GAMMA")),
+            gae_lambda=float(os.getenv("PPO_GAE_LAMBDA")),
+            policy_clip=float(os.getenv("PPO_POLICY_CLIP")),
+            learning_rate=float(os.getenv("PPO_LEARNING_RATE")),
         )

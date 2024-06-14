@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+
 from fastapi import HTTPException
 
 from agents import PlayAgent
@@ -7,6 +10,7 @@ from api.routes.base import BaseRoute
 from buffer.episode import Episode
 from aow.constants.info_keys import CHECK_MATE_WIN
 
+load_dotenv()
 
 class AiGame(BaseRoute):
     def __init__(self, env, ai_game_request: AIGameRequest):
@@ -50,7 +54,8 @@ class AiGame(BaseRoute):
             case _:
                 black_model = self.BLACK_PPO_PATH
 
-        return PlayAgent(self.env, self.get_ppo(), 1, 32, "", white_model, black_model)
+        return PlayAgent(self.env, self.get_ppo(), episodes=int(os.getenv("EPISODES")), train_on=int(os.getenv("BUFFER_SIZE")),
+                        result_folder="", white_ppo_path=white_model, black_ppo_path=black_model)
 
     def play_game(self, agent, episode) -> AIGameResponse:
         response = AIGameResponse(game=[], statistics=[], possibles=[], source_pos=[], action_mask=[], winner="")

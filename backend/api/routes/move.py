@@ -26,6 +26,26 @@ class Move(BaseRoute):
             self.logger.error("No game has been initialized yet.")
             self.raise_http_exception(404, "No game has been initialized yet.")
 
+        action_str = self.validate()
+
+        player_move_board, done, infos = self.process_player_move(action_str)
+        cards = self.env.aow_board.get_cards(self.move_request.turn)
+        card_names = []
+        for card in cards:
+            card_names.append(card.__str__())
+
+        while self.env.aow_logic.turn != self.move_request.turn and not self.env.aow_logic.done and not done:
+            infos = self.process_ai_move(turn=self.env.aow_logic.turn, episode=self.episode)
+
+        self.logger.info("Move processed successfully.")
+        return MoveResponse(playerMoveBoard=player_move_board,
+                            combinedMoveBoard=self.env.aow_board.get_numeric_board().tolist(),
+                            cards=card_names,
+                            resources=self.env.aow_board.resources,
+                            has_game_ended=self.env.aow_logic.done,
+                            infos=infos)
+        
+    def validate(self):
         board = self.convert_board(self.move_request.board)
         self.validate_board_size(board)
         self.validate_resources(self.move_request.resources)
@@ -36,31 +56,8 @@ class Move(BaseRoute):
         action_str = self.move_request.move
 
         self.validate_move_format(action_str)
-
-        player_move_board, done, infos = self.process_player_move(action_str)
-        cards = self.env.aow_board.get_cards(self.move_request.turn)
-        card_names = []
-        for card in cards:
-            card_names.append(card.__str__())
-
-        if done:
-            return MoveResponse(
-                playerMoveBoard=player_move_board,
-                combinedMoveBoard=player_move_board,
-                cards=card_names,
-                resources=self.env.aow_board.resources, has_game_ended=done, infos=infos
-            )
-
-        while self.env.aow_logic.turn != self.move_request.turn and not self.env.aow_logic.done:
-            infos = self.process_ai_move(turn=self.env.aow_logic.turn, episode=self.episode)
-
-        self.logger.info("Move processed successfully.")
-        return MoveResponse(playerMoveBoard=player_move_board,
-                            combinedMoveBoard=self.env.aow_board.get_numeric_board().tolist(),
-                            cards=card_names,
-                            resources=self.env.aow_board.resources,
-                            has_game_ended=self.env.aow_logic.done,
-                            infos=infos)
+        
+        return action_str
 
     def process_ai_move(self, turn, episode):
         try:

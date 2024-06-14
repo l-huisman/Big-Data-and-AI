@@ -122,26 +122,7 @@ export default {
 
             axios.post(`${baseUrl}/move`, this.move_request)
                 .then(response => {
-                    this.errorMessage = '';
-                    this.move_request.move = '';
-
-                    this.infos = response.data.infos;
-                    this.gameEnded = response.data.has_game_ended;
-                    this.move_request.resources = response.data.resources;
-                    this.move_request.board = response.data.playerMoveBoard;
-                    this.boardKey++;
-                    this.selectedImageIndex = null;
-
-                    if(this.gameEnded) {
-                        this.checkWinner(this.infos);
-                    }
-
-                    setTimeout(() => {
-                        this.move_request.board = response.data.combinedMoveBoard;
-                        this.turn++;
-                        this.boardKey++;
-                    }, 1000);
-
+                    this.updateValues(response);
                 })
                 .catch(error => {
                     console.error('Error making move:', error.response.data.detail);
@@ -150,6 +131,27 @@ export default {
                     this.move_request.move = '';
                     this.selectedImageIndex = null;
                 });
+        },
+        updateValues(response) {
+            this.errorMessage = '';
+            this.move_request.move = '';
+
+            this.infos = response.data.infos;
+            this.gameEnded = response.data.has_game_ended;
+            this.move_request.resources = response.data.resources;
+            this.move_request.board = response.data.playerMoveBoard;
+            this.boardKey++;
+            this.selectedImageIndex = null;
+
+            if(this.gameEnded) {
+                this.checkWinner(this.infos);
+            }
+
+            setTimeout(() => {
+                this.move_request.board = response.data.combinedMoveBoard;
+                this.turn++;
+                this.boardKey++;
+            }, 1000);
         },
         checkWinner(info) {
             if (info[0][0] == 'check_mate_win') {
@@ -207,7 +209,9 @@ export default {
             } else {
                 this.selectedImageIndex = index;
             }
-
+            this.colorWaterlineSquares();
+        },
+        colorWaterlineSquares() {
             // Color the squares with index 16, 24, 32, 40
             const indexes = [16, 24, 32, 40];
             for (let i = 0; i < indexes.length; i++) {

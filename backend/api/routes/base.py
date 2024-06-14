@@ -1,4 +1,6 @@
 import logging
+import os
+from dotenv import load_dotenv
 
 from fastapi import HTTPException
 
@@ -9,6 +11,7 @@ BOARD_LENGTH = 8
 BOARD_WIDTH = 8
 BOARD_SIDES = 2
 
+load_dotenv()
 
 class BaseRoute:
     def __init__(self, env):

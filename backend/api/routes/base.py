@@ -18,12 +18,12 @@ class BaseRoute:
         self.logger = logging.getLogger(__name__)
         self.env = env
 
-    WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
-    BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
-    WHITE_DQN_PATH = 'results/DoubleAgentsDQN/white_dict.pt'
-    BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
-    WHITE_A2C_PATH = 'results/DoubleAgentsA2C/white_dict.pt'
-    BLACK_A2C_PATH = 'results/DoubleAgentsA2C/black_dict.pt'
+    WHITE_PPO_PATH = os.getenv("PPO_RESULT_FOLDER") + '/white_dict.pt'
+    BLACK_PPO_PATH = os.getenv("PPO_RESULT_FOLDER") + '/black_dict.pt'
+    WHITE_DQN_PATH = os.getenv("DQN_RESULT_FOLDER") + '/white_dict.pt'
+    BLACK_DQN_PATH = os.getenv("DQN_RESULT_FOLDER") + '/black_dict.pt'
+    WHITE_A2C_PATH = os.getenv("A2C_RESULT_FOLDER") + '/white_dict.pt'
+    BLACK_A2C_PATH = os.getenv("A2C_RESULT_FOLDER") + '/black_dict.pt'
 
     def execute(self):
         raise NotImplementedError()

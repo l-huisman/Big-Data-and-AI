@@ -1,5 +1,9 @@
-from buffer.episode import Episode
+import os
+
+import torch
+
 from aow.game.aow import ArtOfWar
+from buffer.episode import Episode
 from learnings.base import Learning
 from .base import BaseAgent
 
@@ -23,4 +27,8 @@ class SingleAgent(BaseAgent):
         self.learner.learn()
 
     def save_learners(self):
-        self.learner.save(self.result_folder, "single_agent_ppo.pt")
+        if not os.path.exists(self.result_folder):
+            os.makedirs(self.result_folder)
+
+        self.learner.save(self.result_folder, "single_agent.pt")
+        torch.save(self.learner.state_dict(), f"{self.result_folder}/single_agent_dict.pt")

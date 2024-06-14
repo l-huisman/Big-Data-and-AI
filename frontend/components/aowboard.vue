@@ -134,6 +134,9 @@ export default {
       });
       this.gameBoard[1].reverse();
       const data = await response.json();
+      return this.color(data, position);
+    },
+    color(data, position) {
       for (let move of data.possibleMoves) {
         this.colorPossibleMoves(move);
       }

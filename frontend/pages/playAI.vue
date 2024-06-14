@@ -93,7 +93,8 @@ export default {
     async fetchGameAIvsAI(white_model, black_model) {
       this.gameIsActive = true; 
       this.loading = true;
-      document.getElementById("start-button").disabled = "true"; 
+      document.getElementById("start-button").disabled = "true";
+
       const response = await fetch(`${baseUrl}/aigame`, {
         method: 'POST',
         headers: {
@@ -132,14 +133,10 @@ export default {
       this.board = board;
       this.boardKey++;
     },
-    setupCharts() {
-      var chartDom = document.getElementById('reward-chart');
-      this.rewardChart = echarts.init(chartDom);
-      var optionR;
-
-      optionR = {
+    getOptions(title){
+      return {
         title: {
-          text: 'Rewards per move',
+          text: title,
           left: 'center'
         },
         xAxis: {
@@ -164,71 +161,36 @@ export default {
           }
         ]
       };
+    },
+    setupCharts() {
+      let chartDom = document.getElementById('reward-chart');
+      this.rewardChart = echarts.init(chartDom);
+      let optionR = this.getOptions("Rewards per move");
       optionR && this.rewardChart.setOption(optionR);
 
-      var chartDomSummary = document.getElementById('summary-reward-chart');
+      let chartDomSummary = document.getElementById('summary-reward-chart');
       this.summaryRewardChart = echarts.init(chartDomSummary);
-      var optionSR;
-
-      optionSR = {
-        title: {
-          text: 'Total rewards',
-          left: 'center'
-        },
-        xAxis: {
-          type: 'category',
-          data: ['5', '4', '3', '2', '1']
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
-            name: 'Reward Black',
-            data: [0],
-            type: 'line',
-            color : 'black'
-          },
-          {
-            name: 'Reward White',
-            data: [0],
-            type: 'line',
-            color : 'white'
-          }
-        ]
-      };
-
+      let optionSR = this.getOptions("Total rewards");
       optionSR && this.summaryRewardChart.setOption(optionSR);
     },
     updateCharts(stats) {
-      var rewardsList = this.updateRewardsList(stats);
-      this.rewardChart.setOption({
-        series: [
-          {
-            name: 'Reward Black',
-            data: [rewardsList[0][0], rewardsList[1][0], rewardsList[2][0], rewardsList[3][0], rewardsList[4][0]],
-            type: 'line'
-          },
-          {
-            name: 'Reward White',
-            data: [rewardsList[0][1], rewardsList[1][1], rewardsList[2][1], rewardsList[3][1], rewardsList[4][1]],
-            type: 'line'
-          }
-        ]
-      });
+      let rewardsList = this.updateRewardsList(stats);
+      this.updateChart(rewardsList, this.rewardChart);
 
       let totalRewards = this.updateTotalRewards(stats);
-
-      this.summaryRewardChart.setOption({
+      this.updateChart(totalRewards, this.summaryRewardChart);
+    },
+    updateChart(list, chart){
+      chart.setOption({
         series: [
           {
             name: 'Reward Black',
-            data: [totalRewards[0][0], totalRewards[1][0], totalRewards[2][0], totalRewards[3][0], totalRewards[4][0]],
+            data: [list[0][0], list[1][0], list[2][0], list[3][0], list[4][0]],
             type: 'line'
           },
           {
             name: 'Reward White',
-            data: [totalRewards[0][1], totalRewards[1][1], totalRewards[2][1], totalRewards[3][1], totalRewards[4][1]],
+            data: [list[0][1], list[1][1], list[2][1], list[3][1], list[4][1]],
             type: 'line'
           }
         ]

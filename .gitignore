@@ -238,6 +238,9 @@ fabric.properties
 *.pth.tar
 *.pth.tar.examples
 
+# Results
+results/
+
 # Node.js
 node_modules/
 

@@ -42,6 +42,7 @@ for name in ["Double AgentsPPO", "Double AgentsDQN", "Single Agent", "Double Age
 
 ppochecks = np.load("results/DoubleAgentsPPO/checks_win.npy")
 a2cchecks = np.load("results/DoubleAgentsA2C/checks_win.npy")
+dqnchecks = np.load("results/DoubleAgentsDQN/checks_win.npy")
 moves = np.load("results/DoubleAgentsPPO/moves.npy")
 
 def density(arr, count, episode):
@@ -68,8 +69,9 @@ def plot_check_mates(
     density_ax.grid()
     
 plt.figure(figsize=(10, 6), dpi=200)
-fig, axs = plt.subplots(1, 2, figsize=(20, 12), dpi=200)
+fig, axs = plt.subplots(1, 3, figsize=(20, 12), dpi=200)
 
 plot_check_mates(axs[0], ppochecks, episodes, COUNT)
 plot_check_mates(axs[1], a2cchecks, episodes, COUNT)
+plot_check_mates(axs[2], dqnchecks, episodes, COUNT)
 plt.savefig("results/check_mates.jpeg")

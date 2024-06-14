@@ -1,10 +1,10 @@
 from buffer.episode import Episode
-from chess.game.aow import ArtOfWar
+from aow.game.aow import ArtOfWar
 from learnings.base import Learning
 from .base import BaseAgent
 
 
-class SingleAgentChess(BaseAgent):
+class SingleAgent(BaseAgent):
     def __init__(
             self,
             env: ArtOfWar,

@@ -1,14 +1,14 @@
 from copy import deepcopy
 
 import torch
-from chess.game.aow import ArtOfWar
+from aow.game.aow import ArtOfWar
 
 from buffer.episode import Episode
 from learnings.base import Learning
 from .base import BaseAgent
 
 
-class DoubleAgentsChess(BaseAgent):
+class DoubleAgents(BaseAgent):
     def __init__(
             self,
             env: ArtOfWar,

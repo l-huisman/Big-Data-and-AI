@@ -4,8 +4,8 @@
   </div>
   <div class="flex h-full w-full mt-[155px] text-white">
     <div class="ml-[10%] text-2xl">
-      <Chessboard :board="board" :key="boardKey" :isAIGame="true" />
-      <!-- <Chessboard :board="board" @update:board="newState" /> -->
+      <aowboard :board="board" :key="boardKey" :isAIGame="true" />
+      <!-- <aowboard :board="board" @update:board="newState" /> -->
     </div>
     <div class="ml-[50px] flex flex-col w-[45%]">
       <div class="flex flex-row bg-[#5a9679] rounded-[5px] border-[7px] border-[#5a9679] mb-2">
@@ -41,13 +41,13 @@
 </template>
 
 <script>
-import Chessboard from '../components/Chessboard.vue';
+import aowboard from '../components/aowboard.vue';
 import * as echarts from 'echarts';
 import { baseUrl } from '../base-url.js';
 
 export default {
   components: {
-    Chessboard,
+    aowboard,
   },
   data() {
     return {

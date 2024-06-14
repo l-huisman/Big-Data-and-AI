@@ -1,6 +1,6 @@
 from api.models.responses import InitializeResponse
 from api.routes.base import BaseRoute
-from chess.game.aow import ArtOfWar
+from aow.game.aow import ArtOfWar
 
 
 class Initialize(BaseRoute):

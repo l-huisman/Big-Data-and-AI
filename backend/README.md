@@ -9,7 +9,7 @@ The project was created for the Big Data & AI school project at InHolland, Minot
 
 This version of Art of War includes:
 
-* Standard chess mechanics
+* Standard aow mechanics
 * Special moves activated by cards:
     * Hoplites
     * War Elephant

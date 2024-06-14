@@ -3,7 +3,7 @@ import numpy as np
 from api.models.requests import ActionRequest
 from api.models.responses import ActionResponse
 from api.routes.base import BaseRoute
-from chess.game.aow import ArtOfWar
+from aow.game.aow import ArtOfWar
 from utils import convert_cell_to_position, reverse_move
 
 

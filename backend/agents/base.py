@@ -1,12 +1,12 @@
 import os
 from abc import ABC, abstractmethod
-from chess.game.aow import ArtOfWar
+from aow.game.aow import ArtOfWar
 
 import numpy as np
 from tqdm import tqdm
 
-import chess.constants.info_keys as InfoKeys
-import chess.pieces as Pieces
+import aow.constants.info_keys as InfoKeys
+import aow.pieces as Pieces
 from buffer.episode import Episode
 from learnings.base import Learning
 from utils import save_to_video

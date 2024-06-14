@@ -4,12 +4,12 @@ import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from agents import PPOChess
+from agents import PlayAgent
 from api.models.requests import MoveRequest, AIGameRequest, ActionRequest
 from api.models.responses import AIGameResponse, InitializeResponse, MoveResponse, ActionResponse
 from api.routes import Move, PlayableActions, Initialize, AiGame
 from buffer.episode import Episode
-from chess.game.aow import ArtOfWar
+from aow.game.aow import ArtOfWar
 from learnings.ppo import PPO
 
 WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
@@ -50,12 +50,12 @@ ppo = PPO(
 )
 
 episode = Episode()
-ppo_chess = None
+ppo_aow = None
 try:
-    ppo_chess = PPOChess(env, ppo, 1, 32, "", WHITE_PPO_PATH, BLACK_PPO_PATH)
+    ppo_aow = PlayAgent(env, ppo, 1, 32, "", WHITE_PPO_PATH, BLACK_PPO_PATH)
 except Exception as e:
     logger.error(e)
-    raise Exception("Failed to initialize Chess agent. Try training (or retraining) the model.")
+    raise Exception("Failed to initialize aow agent. Try training (or retraining) the model.")
 
 
 @app.get(path="/initialize", response_model=InitializeResponse)
@@ -66,7 +66,7 @@ def initialize():
 
 @app.post(path="/move", response_model=MoveResponse)
 def move(move_request: MoveRequest):
-    route = Move.Move(env=env, agent=ppo_chess, episode=episode, move_request=move_request)
+    route = Move.Move(env=env, agent=ppo_aow, episode=episode, move_request=move_request)
     return route.execute()
 
 

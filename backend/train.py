@@ -1,7 +1,7 @@
 import sys
 
-from agents import DoubleAgentsChess
-from chess.game.aow import ArtOfWar
+from agents import DoubleAgents
+from aow.game.aow import ArtOfWar
 from learnings.dqn import DQNLearner
 from learnings.ppo import PPO
 from learnings.a2c import A2C
@@ -10,7 +10,7 @@ args = dict({
     "episodes": 10,
     "render_each": 20,
     "save_on_learn": True,
-    "chess": dict({
+    "aow": dict({
         "window_size": 512,
         "max_steps": 256,
         "render_mode": "rgb_array",
@@ -46,12 +46,12 @@ args = dict({
 })
 
 if __name__ == "__main__":
-    chess = ArtOfWar(
-        window_size=args["chess"]["window_size"],
-        max_steps=args["chess"]["max_steps"],
-        render_mode=args["chess"]["render_mode"]
+    aow = ArtOfWar(
+        window_size=args["aow"]["window_size"],
+        max_steps=args["aow"]["max_steps"],
+        render_mode=args["aow"]["render_mode"]
     )
-    chess.reset()
+    aow.reset()
 
     possible_models = ["dqn", "ppo", "a2c"]
     sys_args = sys.argv
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     agent = None
     if sys_args[1] == "ppo":
         ppo = PPO(
-            chess,
+            aow,
             hidden_layers=args["ppo"]["hidden_layers"],
             epochs=args["ppo"]["epochs"],
             buffer_size=args["ppo"]["buffer_size"] * 2,
@@ -72,8 +72,8 @@ if __name__ == "__main__":
         print(ppo.device)
         print(ppo)
 
-        agent = DoubleAgentsChess(
-            env=chess,
+        agent = DoubleAgents(
+            env=aow,
             learner=ppo,
             episodes=args["episodes"],
             train_on=args["ppo"]["buffer_size"],
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     elif sys_args[1] == "dqn":
         dqn = DQNLearner(
-            environment=chess,
+            environment=aow,
             epochs=args["dqn"]["epochs"],
             gamma=args["dqn"]["gamma"],
             learning_rate=args["dqn"]["learning_rate"],
@@ -98,8 +98,8 @@ if __name__ == "__main__":
         print(dqn.device)
         print(dqn)
 
-        agent = DoubleAgentsChess(
-            env=chess,
+        agent = DoubleAgents(
+            env=aow,
             learner=dqn,
             episodes=args["episodes"],
             train_on=args["dqn"]["buffer_size"],
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     elif sys_args[1] == "a2c":
         a2c = A2C(
-            environment=chess,
+            environment=aow,
             epochs=args["a2c"]["epochs"],
             hidden_layers=args["a2c"]["hidden_layers"],
             buffer_size=args["a2c"]["buffer_size"],
@@ -117,8 +117,8 @@ if __name__ == "__main__":
         print(a2c.device)
         print(a2c)
 
-        agent = DoubleAgentsChess(
-            env=chess,
+        agent = DoubleAgents(
+            env=aow,
             learner=a2c,
             episodes=args["episodes"],
             train_on=args["a2c"]["buffer_size"],
@@ -127,4 +127,4 @@ if __name__ == "__main__":
 
     agent.train(render_each=args["render_each"], save_on_learn=args["save_on_learn"])
     agent.save()
-    chess.close()
+    aow.close()

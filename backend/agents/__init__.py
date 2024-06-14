@@ -1,3 +1,3 @@
-from .single_agent import SingleAgentChess
-from .double_agents import DoubleAgentsChess
-from .ppo_chess import PPOChess
+from .single_agent import SingleAgent
+from .double_agents import DoubleAgents
+from .play_agent import PlayAgent

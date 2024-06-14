@@ -1,10 +1,10 @@
 import sys
-from chess.game.aow import ArtOfWar
+from aow.game.aow import ArtOfWar
 
 import numpy as np
 import pygame
 
-from agents import PPOChess
+from agents import PlayAgent
 from buffer.episode import Episode
 from learnings.ppo import PPO
 
@@ -23,9 +23,9 @@ ppo = PPO(
     batch_size=256,
 )
 
-# Create an instance of PPOChess
+# Create an instance of PlayAgent
 try:
-    ppo_chess = PPOChess(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
+    ppo_aow = PlayAgent(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
 except FileNotFoundError:
     print("Could not find model on specified location, make sure the location is correct."
           " If you have not trained a model yet, train one first.")
@@ -51,7 +51,7 @@ while running:
         if action_str == 'q':
             break
 
-        # Convert human-readable action to chess move object
+        # Convert human-readable action to aow move object
         try:
             f1 = int(action_str[1]) - 1
             f2 = ord(action_str[0]) - ord('a')
@@ -105,7 +105,7 @@ while running:
         action_str = ''
     else:
         print("White" if turn else "Black")
-        done, _ = ppo_chess.take_action(turn, ep)
+        done, _ = ppo_aow.take_action(turn, ep)
 
         rewards = ep.rewards
         print("turn: ", counter)

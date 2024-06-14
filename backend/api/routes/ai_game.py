@@ -1,11 +1,11 @@
 from fastapi import HTTPException
 
-from agents import PPOChess
+from agents import PlayAgent
 from api.models.requests import AIGameRequest
 from api.models.responses import AIGameResponse
 from api.routes.base import BaseRoute
 from buffer.episode import Episode
-from chess.constants.info_keys import CHECK_MATE_WIN
+from aow.constants.info_keys import CHECK_MATE_WIN
 
 
 class AiGame(BaseRoute):
@@ -50,7 +50,7 @@ class AiGame(BaseRoute):
             case _:
                 black_model = self.BLACK_PPO_PATH
 
-        return PPOChess(self.env, self.get_ppo(), 1, 32, "", white_model, black_model)
+        return PlayAgent(self.env, self.get_ppo(), 1, 32, "", white_model, black_model)
 
     def play_game(self, agent, episode) -> AIGameResponse:
         response = AIGameResponse(game=[], statistics=[], possibles=[], source_pos=[], action_mask=[], winner="")

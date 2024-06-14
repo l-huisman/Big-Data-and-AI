@@ -47,43 +47,40 @@ class AoWLogic:
 
         return src_poses, *piece_class().get_actions(self.aow_board, piece_pos, turn, deny_enemy_king)
 
+    @staticmethod
+    def append_actions(all_source_pos, all_possibles, all_actions_mask, source_pos, possibles, actions_mask) -> int:
+        all_source_pos.append(source_pos)
+        all_possibles.append(possibles)
+        all_actions_mask.append(actions_mask)
+        return len(actions_mask)
+
     def get_all_actions(self, turn: int, deny_enemy_king: bool = False):
-        all_possibles = []
-        all_source_pos = []
-        all_actions_mask = []
+        all_possibles, all_source_pos, all_actions_mask = [], [], []
+
         length = 0
         for name in self.aow_board.pieces[turn].keys():
             if name == "king_1" and deny_enemy_king:
                 continue
 
-            source_pos, possibles, actions_mask = self.get_actions_for(
-                name, turn, deny_enemy_king
-            )
+            source_pos, possibles, actions_mask = self.get_actions_for(name, turn, deny_enemy_king)
 
-            all_source_pos.append(source_pos)
-            all_possibles.append(possibles)
-            all_actions_mask.append(actions_mask)
-            length += len(actions_mask)
+            length += self.append_actions(all_source_pos, all_possibles, all_actions_mask, source_pos, possibles,
+                                          actions_mask)
 
         for i in range(3):
             source_pos, possibles, actions_mask = self.get_card_upgrade_actions(turn, i)
 
-            all_source_pos.append(source_pos)
-            all_possibles.append(possibles)
-            all_actions_mask.append(actions_mask)
-            length += len(actions_mask)
+            length += self.append_actions(all_source_pos, all_possibles, all_actions_mask, source_pos, possibles,
+                                          actions_mask)
 
         possibles, source_pos, actions_mask = (self.aow_board.get_card(
             turn,
             DutchWaterline()).get_actions(
             Cell(0, 0), self.aow_board, turn
-        )
-        )
+        ))
 
-        all_possibles.append(possibles)
-        all_actions_mask.append(actions_mask)
-        all_source_pos.append(source_pos)
-        length += len(actions_mask)
+        length += self.append_actions(all_source_pos, all_possibles, all_actions_mask, source_pos, possibles,
+                                      actions_mask)
 
         all_actions_mask.append(np.zeros(self.action_space_length - length, dtype=bool))
         return (
@@ -174,7 +171,7 @@ class AoWLogic:
 
         self.capture_pawn_by_warelephant(dst.row, dst.col, src.row, src.col, turn)
         self.castle(src, dst, turn)
-        
+
         for (key, value) in self.aow_board.pieces[turn].items():
             if value == tuple(src):
                 # # Update the location of the piece in the pieces array
@@ -210,13 +207,18 @@ class AoWLogic:
             min_row, max_row = min(current_row, next_row), max(current_row, next_row)
             min_col, max_col = min(current_col, next_col), max(current_col, next_col)
 
-            for r in range(min_row + 1, max_row):
-                if self.aow_board.is_piece(1 - turn, Cell(7 - r, current_col), Pawn()):
-                    self.aow_board.set_piece(1 - turn, Cell(7 - r, current_col), Empty())
+            self.capture_pawn_in_rows(min_row, max_row, current_col, turn)
+            self.capture_pawn_in_cols(min_col, max_col, current_row, turn)
 
-            for c in range(min_col + 1, max_col):
-                if self.aow_board.is_piece(1 - turn, Cell(7 - current_row, c), Pawn()):
-                    self.aow_board.set_piece(1 - turn, Cell(7 - current_row, c), Empty())
+    def capture_pawn_in_rows(self, min_row: int, max_row: int, current_col: int, turn: int):
+        for r in range(min_row + 1, max_row):
+            if self.aow_board.is_piece(1 - turn, Cell(7 - r, current_col), Pawn()):
+                self.aow_board.set_piece(1 - turn, Cell(7 - r, current_col), Empty())
+
+    def capture_pawn_in_cols(self, min_col: int, max_col: int, current_row: int, turn: int):
+        for c in range(min_col + 1, max_col):
+            if self.aow_board.is_piece(1 - turn, Cell(7 - current_row, c), Pawn()):
+                self.aow_board.set_piece(1 - turn, Cell(7 - current_row, c), Empty())
 
     def is_game_done(self):
         return self.done or (self.steps >= self.max_steps)
@@ -243,27 +245,10 @@ class AoWLogic:
         if not piece_to_upgrade.is_upgradable():
             assert False, f"Piece {piece_to_upgrade} is not upgradable"
 
-        rewards = [0, 0]
-        rewards[turn] = Rewards.UPGRADE_PIECE
-        rewards[1 - turn] = 0
+        rewards = self.initialize_rewards(turn)
+        new_piece = self.select_new_piece(piece_to_upgrade, upgrade_to)
+        piece_name = self.get_piece_name_from_position(pos, turn)
 
-        new_piece = piece_to_upgrade.get_upgrade_options()[0]
-
-        if upgrade_to is not None:
-            for option in piece_to_upgrade.get_upgrade_options():
-                if option.get_name().lower() == upgrade_to.get_name().lower():
-                    new_piece = option
-                    break
-
-        # get piece_name from position
-        piece_name = None
-        for key, value in self.aow_board.pieces[turn].items():
-            if value == (pos.row, pos.col):
-                piece_name = key
-                break
-
-        # return rewards if the piece is empty (This happens because of Dutch waterline,
-        # which can be activated on an empty space)
         if isinstance(new_piece, Empty) or piece_name is None:
             return [0, 0], [set(), set()]
 
@@ -274,13 +259,41 @@ class AoWLogic:
 
         new_piece_name = f"{new_piece.get_name().lower()}_{split_piece_name[1]}"
 
-        # update the piece
+        self.update_piece_in_board(new_piece, piece_name, turn, pos)
+        self.remove_resources(turn, new_piece)
+        return rewards, [set(), set()]
+
+    @staticmethod
+    def initialize_rewards(turn: int):
+        rewards = [0, 0]
+        rewards[turn] = Rewards.UPGRADE_PIECE
+        rewards[1 - turn] = 0
+        return rewards
+
+    @staticmethod
+    def select_new_piece(piece_to_upgrade: Piece, upgrade_to: Piece = None):
+        new_piece = piece_to_upgrade.get_upgrade_options()[0]
+
+        if upgrade_to is not None:
+            for option in piece_to_upgrade.get_upgrade_options():
+                if option.get_name().lower() == upgrade_to.get_name().lower():
+                    new_piece = option
+                    break
+        return new_piece
+
+    def get_piece_name_from_position(self, pos: Cell, turn: int):
+        piece_name = None
+        for key, value in self.aow_board.pieces[turn].items():
+            if value == (pos.row, pos.col):
+                piece_name = key
+                break
+        return piece_name
+
+    def update_piece_in_board(self, new_piece, piece_name, turn, pos):
         self.aow_board.pieces[turn][f"{new_piece.get_name().lower()}_{piece_name.split('_')[1]}"] = \
             self.aow_board.pieces[turn].pop(piece_name)
         new_piece.set_has_moved(True)
         self.aow_board.set_piece(turn, pos, new_piece)
-        self.remove_resources(turn, new_piece)
-        return rewards, [set(), set()]
 
     def remove_resources(self, turn: int, selected_piece: Piece):
         match selected_piece.get_piece_number():

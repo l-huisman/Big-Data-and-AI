@@ -1,31 +1,40 @@
+import os
 import sys
-from aow.game.aow import ArtOfWar
 
 import numpy as np
 import pygame
+from dotenv import load_dotenv
 
 from agents import PlayAgent
+from aow.game.aow import ArtOfWar
 from buffer.episode import Episode
 from learnings.ppo import PPO
 
-sys.setrecursionlimit(300)
-env = ArtOfWar(window_size=800, max_steps=256)
+load_dotenv()
+
+sys.setrecursionlimit(int(os.getenv("RECURSION_LIMIT")))
+env = ArtOfWar(window_size=int(os.getenv("AOW_WINDOW_SIZE")), max_steps=int(os.getenv("AOW_MAX_STEPS")))
 
 # Paths to your trained api
-white_ppo_path = 'results/DoubleAgentsPPO/white_dict.pt'
-black_ppo_path = 'results/DoubleAgentsPPO/black_dict.pt'
+white_ppo_path = os.getenv("PPO_RESULT_FOLDER") + '/white_dict.pt'
+black_ppo_path = os.getenv("PPO_RESULT_FOLDER") + '/black_dict.pt'
 
 ppo = PPO(
     env,
-    hidden_layers=(2048,) * 4,
-    epochs=100,
-    buffer_size=32 * 2,
-    batch_size=256,
+    hidden_layers=(int(os.getenv("PPO_HIDDEN_LAYERS_SIZE")),) * int(os.getenv("PPO_HIDDEN_LAYERS_COUNT")),
+    epochs=int(os.getenv("PPO_EPOCHS")),
+    buffer_size=int(os.getenv("BUFFER_SIZE")) * 2,
+    batch_size=int(os.getenv("BATCH_SIZE")),
+    gamma=float(os.getenv("PPO_GAMMA")),
+    gae_lambda=float(os.getenv("PPO_GAE_LAMBDA")),
+    policy_clip=float(os.getenv("PPO_POLICY_CLIP")),
+    learning_rate=float(os.getenv("PPO_LEARNING_RATE")),
 )
 
 # Create an instance of PlayAgent
 try:
-    ppo_aow = PlayAgent(env, ppo, 1, 32, "", white_ppo_path, black_ppo_path)
+    ppo_aow = PlayAgent(env, ppo, episodes=int(os.getenv("EPISODES")), train_on=int(os.getenv("BUFFER_SIZE")),
+                        result_folder="", white_ppo_path=white_ppo_path, black_ppo_path=black_ppo_path)
 except FileNotFoundError:
     print("Could not find model on specified location, make sure the location is correct."
           " If you have not trained a model yet, train one first.")

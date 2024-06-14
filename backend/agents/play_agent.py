@@ -1,13 +1,12 @@
 import torch
-from agents import SingleAgent
-from learnings.ppo import PPO
-from aow.constants import info_keys as InfoKeys
 
+from agents import SingleAgent
+from aow.constants import info_keys as InfoKeys
 from buffer.episode import Episode
 
 
 class PlayAgent(SingleAgent):
-    def __init__(self, env, learner, episodes, train_on, result_folder, white_ppo_path, black_ppo_path):
+    def __init__(self, env, learner, episodes, train_on, result_folder, white_ppo_path: str, black_ppo_path: str):
         super().__init__(env, learner, episodes, train_on, result_folder)
         self.white_learner = learner
         self.black_learner = learner

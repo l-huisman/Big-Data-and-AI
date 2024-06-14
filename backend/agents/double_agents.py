@@ -1,8 +1,9 @@
+import os
 from copy import deepcopy
 
 import torch
-from aow.game.aow import ArtOfWar
 
+from aow.game.aow import ArtOfWar
 from buffer.episode import Episode
 from learnings.base import Learning
 from .base import BaseAgent
@@ -30,6 +31,9 @@ class DoubleAgents(BaseAgent):
         self.black_agent.learn()
 
     def save_learners(self):
+        if not os.path.exists(self.result_folder):
+            os.makedirs(self.result_folder)
+
         self.white_agent.save(self.result_folder, "white")
         self.black_agent.save(self.result_folder, "black")
         torch.save(self.white_agent.state_dict(), f"{self.result_folder}/white_dict.pt")

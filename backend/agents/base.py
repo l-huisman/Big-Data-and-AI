@@ -1,12 +1,12 @@
 import os
 from abc import ABC, abstractmethod
-from aow.game.aow import ArtOfWar
 
 import numpy as np
 from tqdm import tqdm
 
 import aow.constants.info_keys as InfoKeys
 import aow.pieces as Pieces
+from aow.game.aow import ArtOfWar
 from buffer.episode import Episode
 from learnings.base import Learning
 from utils import save_to_video
@@ -137,6 +137,9 @@ class BaseAgent(ABC):
                     self.save()
 
     def save(self):
+        if not os.path.exists(self.result_folder):
+            os.makedirs(self.result_folder, exist_ok=True)
+
         folder = self.result_folder
         np.save(os.path.join(folder, "moves.npy"), self.moves)
         np.save(os.path.join(folder, "rewards.npy"), self.rewards)

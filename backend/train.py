@@ -1,13 +1,13 @@
 import sys
 
-from agents import DoubleAgents
+from agents import DoubleAgents, SingleAgent
 from aow.game.aow import ArtOfWar
 from learnings.dqn import DQNLearner
 from learnings.ppo import PPO
 from learnings.a2c import A2C
 
 args = dict({
-    "episodes": 10,
+    "episodes": 1,
     "render_each": 20,
     "save_on_learn": True,
     "aow": dict({
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         print(ppo.device)
         print(ppo)
 
-        agent = DoubleAgents(
+        agent = SingleAgent(
             env=aow,
             learner=ppo,
             episodes=args["episodes"],
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         print(dqn.device)
         print(dqn)
 
-        agent = DoubleAgents(
+        agent = SingleAgent(
             env=aow,
             learner=dqn,
             episodes=args["episodes"],
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         print(a2c.device)
         print(a2c)
 
-        agent = DoubleAgents(
+        agent = SingleAgent(
             env=aow,
             learner=a2c,
             episodes=args["episodes"],

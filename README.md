@@ -1,9 +1,9 @@
 ## Art of War: Big Data & AI School Project
 
 This repository contains a Python project implementing a variant of the game "Art of War" with special moves and trained
-using Proximal Policy Optimization (PPO) and Deep Q-learning (DQN) algorithms.
+using Proximal Policy Optimization (PPO), Advantage Actor Critic (A2C) and Deep Q-learning (DQN) algorithms.
 
-The project was created for the Big Data & AI school project at InHolland, Minot.
+The project was created for the Big Data & AI school Minor at InHolland.
 
 ### Gameplay
 
@@ -15,10 +15,6 @@ This version of Art of War includes:
     * War Elephant
     * Winged Knight
     * Dutch Waterline
-
-It's not advisable to include every single Windows and Linux command in the README file as it would be overwhelming and
-irrelevant to the project's specific needs. However, we can enhance the existing instructions to be more user-friendly
-across both operating systems:
 
 ### Running the Project
 
@@ -57,7 +53,7 @@ across both operating systems:
 **Training the Models:**
 
 * Open a terminal or command prompt and navigate to the project directory.
-* Train the PPO model (replace `<model_name>` with `dqn` or `ppo` to train their respective models):
+* Train the PPO model (replace `<model_name>` with `dqn`, `a2c` or `ppo` to train their respective models):
     * **Linux/macOS:**
 
      ```bash
@@ -72,12 +68,6 @@ across both operating systems:
 
 * Training parameters can be adjusted in the `args` dictionary within `train.py`.
 
-**Plotting Training Results:**
-
-* Run the following to generate graphs for each training run in a separate directory.
-    ```bash 
-    python3 plot.py
-    ```
 
 **Playing Against the AI:**
 
@@ -85,12 +75,12 @@ across both operating systems:
     ```bash 
     python3 play.py
     ```
+**Ai vs. AI:**
 
-**AI vs. AI Match:**
-
-* Run `python3 modeltest.py <model_name>`where `<model_name>` is either `ppo` or `dqn` to observe the models compete
-  against each other.
-
+* Run the following to run a local environment where 2 ppo alchoritms play agains eacother.
+    ```bash 
+    python3 aivsai.py
+    ```
 
 ## FastAPI Integration
 
@@ -119,17 +109,18 @@ All api router can be found in the Swagger UI at [`http://127.0.0.1:8000/docs`](
 
 ### Starting the Front-end
 * Open a terminal or command prompt and navigate to the project directory.
-* First install npm by running the command:
+* First navigate to the frontend directory and install all packages by running the command:
 
     ```bash
+    cd frontend
     npm install
     ```
 
-* Then run it by using the command:
+* Then you can run it in dev mode by using the following command:
 
     ```bash
     npm run dev
     ```
 
-* It will generate a link similar to the following: [http://localhost:3000]
+* It will generate a link which is, if not already taken: [`http://127.0.0.1:3000`](http://127.0.0.1:3000/)
 

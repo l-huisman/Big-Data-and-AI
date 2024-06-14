@@ -57,7 +57,7 @@ across both operating systems:
 **Training the Models:**
 
 * Open a terminal or command prompt and navigate to the project directory.
-* Train the PPO model (replace `<model_name>` with `dqn` or `ppo` to train their respective models):
+* Train the PPO model (replace `<model_name>` with `dqn` or `ppo` or `a2c` to train their respective models):
     * **Linux/macOS:**
 
      ```bash
@@ -72,13 +72,6 @@ across both operating systems:
 
 * Training parameters can be adjusted in the `args` dictionary within `train.py`.
 
-**Plotting Training Results:**
-
-* Run the following to generate graphs for each training run in a separate directory.
-    ```bash 
-    python3 plot.py
-    ```
-
 **Playing Against the AI:**
 
 * Run the following to challenge the trained AI model. Moves can be made from the console.
@@ -88,7 +81,7 @@ across both operating systems:
 
 **AI vs. AI Match:**
 
-* Run `python3 modeltest.py <model_name>`where `<model_name>` is either `ppo` or `dqn` to observe the models compete
+* Run `python3 test.py <model_name>`where `<model_name>` is either `ppo` or `dqn` or `a2c` to observe the models compete
   against each other.
 
 ## FastAPI Integration

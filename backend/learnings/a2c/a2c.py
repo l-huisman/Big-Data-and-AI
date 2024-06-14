@@ -21,9 +21,9 @@ class A2C(Learning):
             epochs: int,
             buffer_size: int,
             batch_size: int,
-            gamma: float = 0.99,
-            gae_lambda: float = 0.95,
-            learning_rate: float = 0.003,
+            gamma: float,
+            gae_lambda: float,
+            learning_rate: float,
     ) -> None:
         super().__init__(environment, epochs, gamma, learning_rate)
 

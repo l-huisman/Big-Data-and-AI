@@ -1,55 +1,21 @@
+import os
 import sys
 
-from agents import DoubleAgents, SingleAgent
+from dotenv import load_dotenv
+
+from agents import DoubleAgents
 from aow.game.aow import ArtOfWar
+from learnings.a2c import A2C
 from learnings.dqn import DQNLearner
 from learnings.ppo import PPO
-from learnings.a2c import A2C
 
-args = dict({
-    "episodes": 1,
-    "render_each": 20,
-    "save_on_learn": True,
-    "aow": dict({
-        "window_size": 512,
-        "max_steps": 256,
-        "render_mode": "rgb_array",
-    }),
-    "ppo": dict({
-        "hidden_layers": (2048,) * 4,
-        "epochs": 100,
-        "buffer_size": 32,
-        "batch_size": 256,
-        "result_folder": "results/DoubleAgentsPPO",
-    }),
-    "a2c": dict({
-        "hidden_layers": (2048,) * 4,
-        "epochs": 100,
-        "buffer_size": 32,
-        "batch_size": 128,
-        "result_folder": "results/DoubleAgentsA2C",
-    }),
-    "dqn": dict({
-        "epochs": 100,
-        "gamma": 0.99,
-        "learning_rate": 0.003,
-        "hidden_layers": (2048,) * 4,
-        "buffer_size": 32,
-        "batch_size": 128,
-        "epsilon": 0.1,
-        "epsilon_decay": 0.995,
-        "epsilon_min": 0.01,
-        "tau": 0.99,
-        "update_every": 4,
-        "result_folder": "results/DoubleAgentsDQN",
-    }),
-})
+load_dotenv()
 
 if __name__ == "__main__":
     aow = ArtOfWar(
-        window_size=args["aow"]["window_size"],
-        max_steps=args["aow"]["max_steps"],
-        render_mode=args["aow"]["render_mode"]
+        window_size=int(os.getenv("AOW_WINDOW_SIZE")),
+        max_steps=int(os.getenv("AOW_MAX_STEPS")),
+        render_mode=os.getenv("AOW_RENDER_MODE"),
     )
     aow.reset()
 
@@ -63,68 +29,75 @@ if __name__ == "__main__":
     if sys_args[1] == "ppo":
         ppo = PPO(
             aow,
-            hidden_layers=args["ppo"]["hidden_layers"],
-            epochs=args["ppo"]["epochs"],
-            buffer_size=args["ppo"]["buffer_size"] * 2,
-            batch_size=args["ppo"]["batch_size"],
+            hidden_layers=(int(os.getenv("PPO_HIDDEN_LAYERS_SIZE")),) * int(os.getenv("PPO_HIDDEN_LAYERS_COUNT")),
+            epochs=int(os.getenv("PPO_EPOCHS")),
+            buffer_size=int(os.getenv("BUFFER_SIZE")) * 2,
+            batch_size=int(os.getenv("BATCH_SIZE")),
+            gamma=float(os.getenv("PPO_GAMMA")),
+            gae_lambda=float(os.getenv("PPO_GAE_LAMBDA")),
+            policy_clip=float(os.getenv("PPO_POLICY_CLIP")),
+            learning_rate=float(os.getenv("PPO_LEARNING_RATE")),
         )
 
         print(ppo.device)
         print(ppo)
 
-        agent = SingleAgent(
+        agent = DoubleAgents(
             env=aow,
             learner=ppo,
-            episodes=args["episodes"],
-            train_on=args["ppo"]["buffer_size"],
-            result_folder=args["ppo"]["result_folder"],
+            episodes=int(os.getenv("EPISODES")),
+            train_on=int(os.getenv("BUFFER_SIZE")),
+            result_folder=os.getenv("PPO_RESULT_FOLDER"),
         )
-
     elif sys_args[1] == "dqn":
         dqn = DQNLearner(
             environment=aow,
-            epochs=args["dqn"]["epochs"],
-            gamma=args["dqn"]["gamma"],
-            learning_rate=args["dqn"]["learning_rate"],
-            hidden_layers=args["dqn"]["hidden_layers"],
-            buffer_size=args["dqn"]["buffer_size"],
-            batch_size=args["dqn"]["batch_size"],
-            epsilon=args["dqn"]["epsilon"],
-            epsilon_decay=args["dqn"]["epsilon_decay"],
-            epsilon_min=args["dqn"]["epsilon_min"],
-            tau=args["dqn"]["tau"],
-            update_every=args["dqn"]["update_every"],
+            epochs=int(os.getenv("DQN_EPOCHS")),
+            gamma=float(os.getenv("DQN_GAMMA")),
+            learning_rate=float(os.getenv("DQN_LEARNING_RATE")),
+            hidden_layers=(int(os.getenv("DQN_HIDDEN_LAYERS_SIZE")),) * int(os.getenv("DQN_HIDDEN_LAYERS_COUNT")),
+            buffer_size=int(os.getenv("BUFFER_SIZE")),
+            batch_size=int(os.getenv("BATCH_SIZE")),
+            epsilon=float(os.getenv("DQN_EPSILON")),
+            epsilon_decay=float(os.getenv("DQN_EPSILON_DECAY")),
+            epsilon_min=float(os.getenv("DQN_EPSILON_MIN")),
+            tau=float(os.getenv("DQN_TAU")),
+            update_every=int(os.getenv("DQN_UPDATE_EVERY")),
         )
         print(dqn.device)
         print(dqn)
 
-        agent = SingleAgent(
+        agent = DoubleAgents(
             env=aow,
             learner=dqn,
-            episodes=args["episodes"],
-            train_on=args["dqn"]["buffer_size"],
-            result_folder=args["dqn"]["result_folder"],
+            episodes=int(os.getenv("EPISODES")),
+            train_on=int(os.getenv("BUFFER_SIZE")),
+            result_folder=os.getenv("DQN_RESULT_FOLDER"),
         )
 
     elif sys_args[1] == "a2c":
         a2c = A2C(
             environment=aow,
-            epochs=args["a2c"]["epochs"],
-            hidden_layers=args["a2c"]["hidden_layers"],
-            buffer_size=args["a2c"]["buffer_size"],
-            batch_size=args["a2c"]["batch_size"],
+            epochs=int(os.getenv("A2C_EPOCHS")),
+            hidden_layers=(int(os.getenv("A2C_HIDDEN_LAYERS_SIZE")),) * int(os.getenv("A2C_HIDDEN_LAYERS_COUNT")),
+            buffer_size=int(os.getenv("BUFFER_SIZE")),
+            batch_size=int(os.getenv("BATCH_SIZE")),
+            gamma=float(os.getenv("A2C_GAMMA")),
+            gae_lambda=float(os.getenv("A2C_GAE_LAMBDA")),
+            learning_rate=float(os.getenv("A2C_LEARNING_RATE"))
         )
+
         print(a2c.device)
         print(a2c)
 
-        agent = SingleAgent(
+        agent = DoubleAgents(
             env=aow,
             learner=a2c,
-            episodes=args["episodes"],
-            train_on=args["a2c"]["buffer_size"],
-            result_folder=args["a2c"]["result_folder"],
+            episodes=int(os.getenv("EPISODES")),
+            train_on=int(os.getenv("BUFFER_SIZE")),
+            result_folder=os.getenv("A2C_RESULT_FOLDER"),
         )
 
-    agent.train(render_each=args["render_each"], save_on_learn=args["save_on_learn"])
+    agent.train(render_each=int(os.getenv("RENDER_EACH")), save_on_learn=bool(os.getenv("SAVE_ON_LEARN")))
     agent.save()
     aow.close()

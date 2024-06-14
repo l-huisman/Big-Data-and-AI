@@ -16,7 +16,7 @@ class DQNLearner(Learning):
             epochs: int,
             gamma: float,
             learning_rate: float,
-            hidden_layers: tuple[int],
+            hidden_layers: tuple[int, ...],
             buffer_size: int,
             batch_size: int,
             epsilon: float,

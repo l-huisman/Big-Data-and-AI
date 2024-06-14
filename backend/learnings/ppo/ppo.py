@@ -21,10 +21,10 @@ class PPO(Learning):
         epochs: int,
         buffer_size: int,
         batch_size: int,
-        gamma: float = 0.99,
-        gae_lambda: float = 0.95,
-        policy_clip: float = 0.2,
-        learning_rate: float = 0.003,
+        gamma: float,
+        gae_lambda: float,
+        policy_clip: float,
+        learning_rate: float,
     ) -> None:
         super().__init__(environment, epochs, gamma, learning_rate)
 

@@ -4,6 +4,9 @@ import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import os
+from dotenv import load_dotenv
+
 from agents import PlayAgent
 from api.models.requests import MoveRequest, AIGameRequest, ActionRequest
 from api.models.responses import AIGameResponse, InitializeResponse, MoveResponse, ActionResponse
@@ -12,10 +15,12 @@ from buffer.episode import Episode
 from aow.game.aow import ArtOfWar
 from learnings.ppo import PPO
 
-WHITE_PPO_PATH = 'results/DoubleAgentsPPO/white_dict.pt'
-BLACK_PPO_PATH = 'results/DoubleAgentsPPO/black_dict.pt'
-WHITE_DQN_PATH = 'results/DoubleAgentsDQN/white_dict.pt'
-BLACK_DQN_PATH = 'results/DoubleAgentsDQN/black_dict.pt'
+load_dotenv()
+
+WHITE_PPO_PATH = os.getenv("PPO_RESULT_FOLDER") + '/white_dict.pt'
+BLACK_PPO_PATH = os.getenv("PPO_RESULT_FOLDER") + '/black_dict.pt'
+WHITE_DQN_PATH = os.getenv("DQN_RESULT_FOLDER") + '/white_dict.pt'
+BLACK_DQN_PATH = os.getenv("DQN_RESULT_FOLDER") + '/black_dict.pt'
 
 app = FastAPI()
 
@@ -43,16 +48,21 @@ env = ArtOfWar(window_size=800, max_steps=256)
 
 ppo = PPO(
     env,
-    hidden_layers=(2048,) * 4,
-    epochs=100,
-    buffer_size=32 * 2,
-    batch_size=256,
+    hidden_layers=(int(os.getenv("PPO_HIDDEN_LAYERS_SIZE")),) * int(os.getenv("PPO_HIDDEN_LAYERS_COUNT")),
+    epochs=int(os.getenv("PPO_EPOCHS")),
+    buffer_size=int(os.getenv("BUFFER_SIZE")) * 2,
+    batch_size=int(os.getenv("BATCH_SIZE")),
+    gamma=float(os.getenv("PPO_GAMMA")),
+    gae_lambda=float(os.getenv("PPO_GAE_LAMBDA")),
+    policy_clip=float(os.getenv("PPO_POLICY_CLIP")),
+    learning_rate=float(os.getenv("PPO_LEARNING_RATE")),
 )
 
 episode = Episode()
 ppo_aow = None
 try:
-    ppo_aow = PlayAgent(env, ppo, 1, 32, "", WHITE_PPO_PATH, BLACK_PPO_PATH)
+    ppo_aow = PlayAgent(env, ppo, episodes=int(os.getenv("EPISODES")), train_on=int(os.getenv("BUFFER_SIZE")),
+                        result_folder="", white_ppo_path=WHITE_PPO_PATH, black_ppo_path=BLACK_PPO_PATH)
 except Exception as e:
     logger.error(e)
     raise Exception("Failed to initialize aow agent. Try training (or retraining) the model.")

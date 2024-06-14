@@ -20,7 +20,7 @@ class Check:
         diagonal_pieces = (Bishop, Queen)
         straight_pieces = (Rook, Queen, Warelephant)
 
-        if self.is_check_diagonal(king_pos, diagonal_pieces, turn):
+        if self.is_check_diagonals(king_pos, diagonal_pieces, turn):
             return True
 
         if self.is_check_horizontal(king_pos, straight_pieces, turn):

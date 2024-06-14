@@ -64,7 +64,8 @@ class BaseAgent(ABC):
 
         return done, [state, rewards, action, goal, prob, value, mask]
 
-    def update_enemy(self, prev: list, episode: Episode, reward: int):
+    @staticmethod
+    def update_enemy(prev: list, episode: Episode, reward: int):
         if prev is None:
             return
         prev[1] = reward

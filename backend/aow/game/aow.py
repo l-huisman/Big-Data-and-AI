@@ -7,7 +7,6 @@ import aow.constants.rewards as Rewards
 from aow.game.aow_logic import AoWLogic
 from aow.models.board import AoWBoard
 from aow.models.cards import DutchWaterline
-from aow.models.pieces import King
 from aow.models.types import Cell
 from aow.utils.pygame import PyGameUtils
 
@@ -21,11 +20,6 @@ class ArtOfWar(gym.Env):
         self.console_render = console_render
 
     def step(self, action: int) -> tuple[list[int], bool, list[set]]:
-        """
-        Take a step in the environment
-        :param action: int: The action to take
-        :return: tuple[list[int], bool, list[set]]: The rewards, if the game is done, and the info
-        """
         assert not self.aow_logic.is_game_done(), "the game is finished reset"
         assert action < self.aow_logic.action_space_length, f"action number must be less than {self.aow_logic.action_space_length}."
 
@@ -39,42 +33,54 @@ class ArtOfWar(gym.Env):
             print(self.aow_board.get_numeric_board())
             print(f"Action = {action}, {from_pos} -> {next_pos}")
 
-        if (self.aow_board.is_piece(self.aow_logic.turn, next_pos, King()) or
-                self.aow_board.is_piece(1 - self.aow_logic.turn, Cell(7 - next_pos.row, next_pos.col), King())):
-            print(f"King not removed at {7 - next_pos.row}, {next_pos.col}"
-                  f" or {from_pos.row}, {from_pos.col},"
-                  f" turn: {self.aow_logic.turn}")
+        rewards, infos, end_turn = self.handle_moves(from_pos, next_pos)
 
-        if from_pos == next_pos and self.aow_board.get_piece(from_pos, self.aow_logic.turn).is_upgradable():
-            source_pos_piece = self.aow_board.get_piece(Cell(from_pos[0], from_pos[1]), self.aow_logic.turn)
-            rewards, infos = self.aow_logic.upgrade_piece(from_pos, self.aow_logic.turn, source_pos_piece)
-            end_turn = False
-        elif ((from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0))
-              and next_pos == Cell(0, 7)):
-            # Get Dutch waterline card from array
-            card: DutchWaterline | None = self.aow_board.get_card(turn=self.aow_logic.turn, card=DutchWaterline())
-            assert card is not None, "Dutch Waterline card not found"
-            card.play(from_pos, self.aow_board, self.aow_logic.turn)
-
-            rewards = self.aow_logic.add_reward(reward=Rewards.DUTCH_WATERLINE, turn=self.aow_logic.turn)
-            infos = [set(), set()]
-            end_turn = False
-        else:
-            rewards, infos = self.aow_logic.move_piece(from_pos, next_pos, self.aow_logic.turn, temp=False)
-            end_turn = True
-
-        rewards, infos = self.aow_logic.update_checks(rewards, infos)
-        rewards, infos = self.aow_logic.update_check_mates(rewards, infos)
-        rewards, infos = self.aow_logic.update_draw(rewards, infos)
+        rewards, infos = self.update_game_state(rewards, infos)
 
         if from_pos != next_pos or end_turn:
-            if end_turn == False:
+            if not end_turn:
                 self.aow_logic.turn = self.aow_logic.turn
             else:
                 self.aow_board.add_resources(self.aow_logic.turn, 1)
                 self.aow_logic.turn = 1 - self.aow_logic.turn
         self.aow_logic.steps += 1
         return rewards, self.aow_logic.is_game_done(), infos
+
+    def handle_moves(self, from_pos: Cell, next_pos: Cell) -> tuple[list[int], list[set], bool]:
+        if from_pos == next_pos and self.aow_board.get_piece(from_pos, self.aow_logic.turn).is_upgradable():
+            return self.handle_same_position(from_pos)
+        elif ((from_pos == (2, 0) or from_pos == (3, 0) or from_pos == (4, 0) or from_pos == (5, 0))
+              and next_pos == Cell(0, 7)):
+            return self.handle_dutch_waterline(from_pos)
+        else:
+            return self.handle_move_piece(from_pos, next_pos)
+
+    def handle_same_position(self, from_pos: Cell) -> tuple[list[int], list[set], bool]:
+        source_pos_piece = self.aow_board.get_piece(Cell(from_pos[0], from_pos[1]), self.aow_logic.turn)
+        rewards, infos = self.aow_logic.upgrade_piece(from_pos, self.aow_logic.turn, source_pos_piece)
+        end_turn = False
+        return rewards, infos, end_turn
+
+    def handle_dutch_waterline(self, from_pos: Cell) -> tuple[list[int], list[set], bool]:
+        card: DutchWaterline | None = self.aow_board.get_card(turn=self.aow_logic.turn, card=DutchWaterline())
+        assert card is not None, "Dutch Waterline card not found"
+        card.play(from_pos, self.aow_board, self.aow_logic.turn)
+
+        rewards = self.aow_logic.add_reward(reward=Rewards.DUTCH_WATERLINE, turn=self.aow_logic.turn)
+        infos = [set(), set()]
+        end_turn = False
+        return rewards, infos, end_turn
+
+    def handle_move_piece(self, from_pos: Cell, next_pos: Cell) -> tuple[list[int], list[set], bool]:
+        rewards, infos = self.aow_logic.move_piece(from_pos, next_pos, self.aow_logic.turn, temp=False)
+        end_turn = True
+        return rewards, infos, end_turn
+
+    def update_game_state(self, rewards: list[int], infos: list[set]) -> tuple[list[int], list[set]]:
+        rewards, infos = self.aow_logic.update_checks(rewards, infos)
+        rewards, infos = self.aow_logic.update_check_mates(rewards, infos)
+        rewards, infos = self.aow_logic.update_draw(rewards, infos)
+        return rewards, infos
 
     def render(self) -> Optional[Union[RenderFrame, List[RenderFrame]]]:
         """

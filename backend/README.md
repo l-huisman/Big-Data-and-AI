@@ -1,9 +1,9 @@
 ## Art of War: Big Data & AI School Project
 
 This repository contains a Python project implementing a variant of the game "Art of War" with special moves and trained
-using Proximal Policy Optimization (PPO), Advantage Actor Critic (A2C) and Deep Q-learning (DQN) algorithms.
+using Proximal Policy Optimization (PPO) and Deep Q-learning (DQN) algorithms.
 
-The project was created for the Big Data & AI school Minor at InHolland.
+The project was created for the Big Data & AI school project at InHolland, Minot.
 
 ### Gameplay
 
@@ -15,6 +15,10 @@ This version of Art of War includes:
     * War Elephant
     * Winged Knight
     * Dutch Waterline
+
+It's not advisable to include every single Windows and Linux command in the README file as it would be overwhelming and
+irrelevant to the project's specific needs. However, we can enhance the existing instructions to be more user-friendly
+across both operating systems:
 
 ### Running the Project
 
@@ -46,14 +50,14 @@ This version of Art of War includes:
       cd Big-Data-and-AI/backend  # Navigate to project directory
       pip install -r requirements.txt
       ```
-      
-    **Note:** Make sure to first start the virtual environment if you are using one. For more info on venv, see [here](https://docs.python.org/3/library/venv.html).
 
+   **Note:** Make sure to first start the virtual environment if you are using one. For more info on venv,
+   see [here](https://docs.python.org/3/library/venv.html).
 
 **Training the Models:**
 
 * Open a terminal or command prompt and navigate to the project directory.
-* Train the PPO model (replace `<model_name>` with `dqn`, `a2c` or `ppo` to train their respective models):
+* Train the PPO model (replace `<model_name>` with `dqn` or `ppo` or `a2c` to train their respective models):
     * **Linux/macOS:**
 
      ```bash
@@ -68,27 +72,25 @@ This version of Art of War includes:
 
 * Training parameters can be adjusted in the `args` dictionary within `train.py`.
 
-
 **Playing Against the AI:**
 
 * Run the following to challenge the trained AI model. Moves can be made from the console.
     ```bash 
     python3 play.py
     ```
-**Ai vs. AI:**
 
-* Run the following to run a local environment where 2 ppo alchoritms play agains eacother.
-    ```bash 
-    python3 aivsai.py
-    ```
+**AI vs. AI Match:**
+
+* Run `python3 test.py <model_name>`where `<model_name>` is either `ppo` or `dqn` or `a2c` to observe the models compete
+  against each other.
 
 ## FastAPI Integration
 
-This project includes a FastAPI to interact with the trained AI models. 
+This project includes a FastAPI to interact with the trained AI models.
 
 ### Starting the API
 
-1. **Make sure you have trained a model.** 
+1. **Make sure you have trained a model.**
 2. Open a terminal or command prompt and navigate to the project directory.
 3. Start the API using Uvicorn:
 
@@ -106,21 +108,4 @@ This project includes a FastAPI to interact with the trained AI models.
 ### API Routes
 
 All api router can be found in the Swagger UI at [`http://127.0.0.1:8000/docs`](http://127.0.0.1:8000/docs).
-
-### Starting the Front-end
-* Open a terminal or command prompt and navigate to the project directory.
-* First navigate to the frontend directory and install all packages by running the command:
-
-    ```bash
-    cd frontend
-    npm install
-    ```
-
-* Then you can run it in dev mode by using the following command:
-
-    ```bash
-    npm run dev
-    ```
-
-* It will generate a link which is, if not already taken: [`http://127.0.0.1:3000`](http://127.0.0.1:3000/)
 
